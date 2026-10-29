@@ -38,6 +38,16 @@ Cinco snapshots publicados en el release
 | [bentoml/BentoML](https://github.com/bentoml/BentoML/commit/0aa1aea52b63b82100ff93675eff25f6428fb841) | `0aa1aea52b63b82100ff93675eff25f6428fb841` | 211 | 1287 | 5 | 78, 4, 3, 3, 2 | 4 | `public_graph_bentoml_0aa1aea5.json` |
 | [run-llama/llama_index](https://github.com/run-llama/llama_index/commit/619d74664e8404612038bc15a1a40c686037277c) | `619d74664e8404612038bc15a1a40c686037277c` | 480 | 4024 | 4 | 334, 3, 2, 2 | 4 | `public_graph_llamaindex_619d7466.json` |
 
+### Segunda cohorte · en preparación
+
+Estos tres espacios están reservados para los JSON de Pestaña 6. No son auditorías publicadas: commit-pin, métricas y asset quedan pendientes de recibir y verificar los artefactos.
+
+| repositorio | commit-pin | métricas | asset del release |
+|---|---|---|---|
+| [apache/airflow](https://github.com/apache/airflow) | `PENDIENTE` | `PENDIENTE` | `PENDIENTE` |
+| [pytorch/pytorch](https://github.com/pytorch/pytorch) | `PENDIENTE` | `PENDIENTE` | `PENDIENTE` |
+| [vllm-project/vllm](https://github.com/vllm-project/vllm) | `PENDIENTE` | `PENDIENTE` | `PENDIENTE` |
+
 Los cinco llevan `source_bytes_verified: false`: el grafo es estático, no se re-verificaron los
 bytes de cada archivo contra el checkout al proyectarlo. Se declara, no se esconde.
 
