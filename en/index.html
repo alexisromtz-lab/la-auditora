@@ -148,82 +148,83 @@
 
       <section class="section" id="data-room" aria-labelledby="data-room-title">
         <h2 id="data-room-title">Data Room · the data, with its commit</h2>
-        <p class="intro">Ten import snapshots as JSON, each pinned to a commit, are published in the <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/tag/arch-index-20261029-batch2"><code>public Data Room · arch-index-20261029-batch2</code></a>. Five carry computed graph analysis; the other five are <code>ingesta_ast/v2</code> snapshots with no published SCC metrics. The five analyses reproduce with <code>calculate_arch_index.py</code> and the sensitivity results of the <a href="https://github.com/alexisromtz-lab/la-auditora/releases/tag/arch-index-20261028-v2">tool release</a>.</p>
+        <p class="intro">Ten import snapshots as JSON, each pinned to a commit, are published in the <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/tag/arch-index-20261029-batch2"><code>public Data Room · arch-index-20261029-batch2</code></a>. All ten carry the canonical SCC layer (<code>graph-input/1+scc/2</code>): iterative Tarjan and Kahn condensation over each commit's import graph. The five analyses reproduce with <code>calculate_arch_index.py</code> and the sensitivity results of the <a href="https://github.com/alexisromtz-lab/la-auditora/releases/tag/arch-index-20261028-v2">tool release</a>.</p>
         <div class="grid">
           <article>
             <span class="tag">LangChain · import graph · sensitivity</span>
             <h3>Two cycles that depend on how packages are expanded</h3>
-            <p class="metric">40 modules · 2 SCC (19, 3) · 0 without ancestor <code>__init__</code> expansion</p>
+            <p class="metric">40 modules · 2 cycles (19, 3) · 0 without ancestor <code>__init__</code> expansion</p>
             <p>The declared graph closes two cyclic components; removing only ancestor initializer expansion leaves none. The number is not robust to the method, so both are published.</p>
             <p class="source"><a href="https://github.com/langchain-ai/langchain/commit/facf2788ae1f60c62f2397d15698237c405a5f05" target="_blank" rel="noopener noreferrer">langchain-ai/langchain · facf2788</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_langchain_facf2788.json">JSON</a></p>
           </article>
           <article>
             <span class="tag">Transformers · import graph</span>
             <h3>Eight cyclic components across 3139 modules</h3>
-            <p class="metric">3139 modules · 26078 edges · 8 SCC (176 largest)</p>
+            <p class="metric">3,139 modules · 26,078 edges · 8 cycles (176 largest) · 2,929 SCC</p>
             <p>With initializer expansion there are eight; without it, six. The largest holds 176 modules.</p>
             <p class="source"><a href="https://github.com/huggingface/transformers/commit/95bafdcccfffe17ec383999fc39273867b11385e" target="_blank" rel="noopener noreferrer">huggingface/transformers · 95bafdcc</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_transformers_95bafdcc.json">JSON</a></p>
           </article>
           <article>
             <span class="tag">vLLM · import graph</span>
             <h3>A 1648-module component out of 3003</h3>
-            <p class="metric">3003 modules · 34061 edges · 23 SCC (1648 largest)</p>
+            <p class="metric">3,003 modules · 34,061 edges · 23 cycles (1,648 largest) · 1,225 SCC</p>
             <p>Over half of the graph belongs to a single strongly connected component; without initializer expansion the count drops to eight.</p>
             <p class="source"><a href="https://github.com/vllm-project/vllm/commit/7e3e3f6ab652550fdefecd8e9823394fd8e51950" target="_blank" rel="noopener noreferrer">vllm-project/vllm · 7e3e3f6a</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_vllm_7e3e3f6a.json">JSON</a></p>
           </article>
           <article>
             <span class="tag">BentoML · import graph</span>
             <h3>Five components in a 211-module graph</h3>
-            <p class="metric">211 modules · 1287 edges · 5 SCC (78 largest)</p>
+            <p class="metric">211 modules · 1,287 edges · 5 cycles (78 largest) · 126 SCC</p>
             <p>Without initializer expansion four remain: the fifth depended on the expander.</p>
             <p class="source"><a href="https://github.com/bentoml/BentoML/commit/0aa1aea52b63b82100ff93675eff25f6428fb841" target="_blank" rel="noopener noreferrer">bentoml/BentoML · 0aa1aea5</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_bentoml_0aa1aea5.json">JSON</a></p>
           </article>
           <article>
             <span class="tag">LlamaIndex · import graph</span>
             <h3>Four components, none sensitive to the expander</h3>
-            <p class="metric">480 modules · 4024 edges · 4 SCC (334 largest)</p>
+            <p class="metric">480 modules · 4,024 edges · 4 cycles (334 largest) · 143 SCC</p>
             <p>The count does not change when initializer expansion is removed: in this graph the method does not alter the result.</p>
             <p class="source"><a href="https://github.com/run-llama/llama_index/commit/619d74664e8404612038bc15a1a40c686037277c" target="_blank" rel="noopener noreferrer">run-llama/llama_index · 619d7466</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_llamaindex_619d7466.json">JSON</a></p>
           </article>
           <article>
-            <span class="tag">Stripe · import snapshot · ingesta_ast/v2</span>
-            <h3>21,137 import records</h3>
-            <p class="metric">21,137 imports · 4,298,407 bytes</p>
-            <p>AST snapshot pinned to the commit; no derived SCC metrics are published for this asset.</p>
+            <span class="tag">Stripe · canonical SCC graph · ingesta_ast/v2</span>
+            <h3>One cycle of 33 modules in 1,651</h3>
+            <p class="metric">1,651 modules · 5,130 edges · SCC 1,619 · cycles 1 · largest SCC 33</p>
+            <p>Cleanest architecture in the sample by cycle count: a single one, 33 modules. Even so, 1,368 modules (82.9 %) reach it through the condensation DAG.</p>
             <p class="source"><a href="https://github.com/stripe/stripe-python/commit/b01f7c15196e729171fedb80a79b63146f3825ab" target="_blank" rel="noopener noreferrer">stripe/stripe-python · b01f7c15</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_stripe_b01f7c15.json">JSON</a></p>
           </article>
           <article>
-            <span class="tag">Ray · import snapshot · ingesta_ast/v2</span>
-            <h3>58,928 import records</h3>
-            <p class="metric">58,928 imports · 10,856,937 bytes</p>
-            <p>AST snapshot pinned to the commit; no derived SCC metrics are published for this asset.</p>
+            <span class="tag">Ray · canonical SCC graph · ingesta_ast/v2</span>
+            <h3>2,787 SCC and one cycle of 960 modules</h3>
+            <p class="metric">4,108 modules · 35,426 edges · SCC 2,787 · cycles 23 · largest SCC 960</p>
+            <p>The largest cycle holds 960 modules (23.4 % of the graph) and 2,266 modules reach some cycle through condensation.</p>
             <p class="source"><a href="https://github.com/ray-project/ray/commit/096fce7ccc6a51984e6dec9d527f85f6eeae2705" target="_blank" rel="noopener noreferrer">ray-project/ray · 096fce7c</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_ray_096fce7c.json">JSON</a></p>
           </article>
           <article>
-            <span class="tag">Hugging Face Hub · import snapshot · ingesta_ast/v2</span>
-            <h3>3,496 import records</h3>
-            <p class="metric">3,496 imports · 551,473 bytes</p>
-            <p>AST snapshot pinned to the commit; no derived SCC metrics are published for this asset.</p>
+            <span class="tag">Hugging Face Hub · canonical SCC graph · ingesta_ast/v2</span>
+            <h3>117 SCC with four cycles, the largest 35 modules</h3>
+            <p class="metric">182 modules · 996 edges · SCC 117 · cycles 4 · largest SCC 35</p>
+            <p>69 of the 182 modules (37.9 %) sit inside a cycle, and 36 reach one without belonging to it.</p>
             <p class="source"><a href="https://github.com/huggingface/huggingface_hub/commit/1725fefe88119095d3d01a384b68dc85a5e58270" target="_blank" rel="noopener noreferrer">huggingface/huggingface_hub · 1725fefe</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_huggingface_hub_1725fefe.json">JSON</a></p>
           </article>
           <article>
-            <span class="tag">Airflow · import snapshot · ingesta_ast/v2</span>
-            <h3>11,651 import records</h3>
-            <p class="metric">11,651 imports · 769 files · 2.0 MB</p>
-            <p>AST snapshot pinned to the commit; no derived SCC metrics are published for this asset.</p>
+            <span class="tag">Airflow · canonical SCC graph · ingesta_ast/v2</span>
+            <h3>404 SCC and one cycle of 363 modules</h3>
+            <p class="metric">769 modules · 5,296 edges · SCC 404 · cycles 2 · largest SCC 363</p>
+            <p>Two cycles, and the largest covers 363 of the 769 modules (47.2 %): almost half the graph in a single strongly connected component.</p>
             <p class="source"><a href="https://github.com/apache/airflow/commit/37b6b04e7233ec47c193915d6cff04dac742d5fd" target="_blank" rel="noopener noreferrer">apache/airflow · 37b6b04e</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_airflow_37b6b04e.json">JSON</a></p>
           </article>
           <article>
-            <span class="tag">PyTorch · import snapshot · ingesta_ast/v2</span>
-            <h3>42,083 import records</h3>
-            <p class="metric">42,083 imports · 2527 files · 7.0 MB</p>
-            <p>AST snapshot pinned to the commit; no derived SCC metrics are published for this asset. The prose audit above measures something else, at another commit (<code>210bb7ca</code>).</p>
+            <span class="tag">PyTorch · canonical SCC graph · ingesta_ast/v2</span>
+            <h3>1,660 modules inside a single cycle</h3>
+            <p class="metric">2,527 modules · 19,353 edges · SCC 831 · cycles 14 · largest SCC 1,660</p>
+            <p>67.7 % of the modules (1,710 of 2,527) sit inside a cycle, and the largest drags in 1,660. The prose audit above measures something else, at another commit (<code>210bb7ca</code>).</p>
             <p class="source"><a href="https://github.com/pytorch/pytorch/commit/611154b3f03d63acac16cac8e8deb53a4deaed80" target="_blank" rel="noopener noreferrer">pytorch/pytorch · 611154b3</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_pytorch_611154b3.json">JSON</a></p>
           </article>
         </div>
-        <p class="notice" style="margin-top:1.2rem"><strong>Ten public snapshots; separate scopes.</strong> The Data Room offers five entries with computed graph results and five <code>ingesta_ast/v2</code> AST snapshots without derived SCC metrics. All five sensitivity results declare <code>source_bytes_verified: false</code>. This page also summarizes six prose audits; <code>huggingface/transformers</code> and <code>pytorch/pytorch</code> appear in both cohorts but at different commits: <code>b4a5b4b2</code> and <code>210bb7ca</code> above, <code>95bafdcc</code> and <code>611154b3</code> here. Full table and method: <a href="https://github.com/alexisromtz-lab/la-auditora#readme">repository README</a>.</p>
+        <p class="notice" style="margin-top:1.2rem"><strong>Ten public snapshots, two layers.</strong> The Data Room offers ten snapshots with the canonical SCC layer (<code>graph-input/1+scc/2</code>); five of them also carry a sensitivity analysis of the method, and those five declare <code>source_bytes_verified: false</code>. This page also summarizes six prose audits; <code>huggingface/transformers</code> and <code>pytorch/pytorch</code> appear in both cohorts but at different commits: <code>b4a5b4b2</code> and <code>210bb7ca</code> above, <code>95bafdcc</code> and <code>611154b3</code> here. Full table and method: <a href="https://github.com/alexisromtz-lab/la-auditora#readme">repository README</a>.</p>
         <!-- HUELLA-DATAROOM-LA-AUDITORA-20261029 -->
         <!-- HUELLA-LA-AUDITORA-EN-HTML-10-PUBLICADOS-20261029 -->
+        <!-- HUELLA-LA-AUDITORA-EN-HTML-SCC-20261029 -->
       </section>
 
       <section class="section" id="method" aria-labelledby="method-title">
