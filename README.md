@@ -73,6 +73,7 @@ auditoría publicada hasta que aparezca en una de las dos tablas de arriba.
 |---|---|---|
 | `stripe/stripe-python` | pendiente | acta, grafo de imports y commit fijado |
 | `ray-project/ray` | pendiente | acta, grafo de imports y commit fijado |
+| `huggingface/huggingface_hub` | pendiente | acta, grafo de imports y commit fijado |
 
 ## Cómo se reproduce
 
@@ -151,3 +152,4 @@ Reutilizar los datos requiere atribución; reutilizar la herramienta, no.
 | 4 | correo de dominio o formulario en lugar del buzón actual | página y este archivo |
 
 <!-- HUELLA-README-LA-AUDITORA-20261029 -->
+<!-- HUELLA-README-HF-PENDIENTE-20261029 -->
