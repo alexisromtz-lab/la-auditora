@@ -21,7 +21,7 @@ resultado pertenece al commit que lo produjo, no a la rama móvil.
 |---|---|---|
 | `README.md` (este archivo) | índice completo, cohortes, comandos, licencia, contacto | **manda** |
 | `index.html` · `en/index.html` | seis resúmenes bilingües con commit-pin y un enlace al Data Room | resume este archivo |
-| Data Room (`platino-data-room`) | diez snapshots JSON de imports; cinco con análisis de grafo y cinco snapshots AST adicionales | es la evidencia pública; aquí solo se indexa |
+| Data Room (`platino-data-room`) | diez snapshots JSON de imports, los diez con capa SCC calculada (`graph-input/1+scc/2`) | es la evidencia pública; aquí solo se indexa |
 | metadatos del repo y del perfil | descripción, topics, `homepageUrl`, licencia, «Start here» | pendiente, ver [En progreso](#en-progreso) |
 
 ## Índice de auditorías publicadas con datos
@@ -29,7 +29,7 @@ resultado pertenece al commit que lo produjo, no a la rama móvil.
 Cinco resultados de análisis de grafo, reproducibles desde sus snapshots JSON fijados a commit.
 Los diez snapshots de imports están en el release público
 [`arch-index-20261029-batch2`](https://github.com/alexisromtz-lab/platino-data-room/releases/tag/arch-index-20261029-batch2);
-los cinco assets de entrada de esta tabla conservan el mismo SHA-256 que en el release anterior.
+el 29-oct-2026 los diez recibieron la capa SCC (`graph-input/1+scc/2`), así que todos los activos cambiaron de tamaño y de SHA-256 respecto de la primera carga.
 
 | repositorio | commit-pin | módulos | aristas internas | SCC cíclicas | tamaños | sin expansión de `__init__` | activo |
 |---|---|---|---|---|---|---|---|
@@ -39,21 +39,50 @@ los cinco assets de entrada de esta tabla conservan el mismo SHA-256 que en el r
 | [bentoml/BentoML](https://github.com/bentoml/BentoML/commit/0aa1aea52b63b82100ff93675eff25f6428fb841) | `0aa1aea52b63b82100ff93675eff25f6428fb841` | 211 | 1287 | 5 | 78, 4, 3, 3, 2 | 4 | [`public_graph_bentoml_0aa1aea5.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_bentoml_0aa1aea5.json) |
 | [run-llama/llama_index](https://github.com/run-llama/llama_index/commit/619d74664e8404612038bc15a1a40c686037277c) | `619d74664e8404612038bc15a1a40c686037277c` | 480 | 4024 | 4 | 334, 3, 2, 2 | 4 | [`public_graph_llamaindex_619d7466.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_llamaindex_619d7466.json) |
 
+### Capa SCC canónica · los diez assets
+
+El 29-oct-2026 los diez assets del release recibieron el bloque `scc` (`graph-input/1+scc/2`, huella
+`ARCH_GRAPH_SCC_LAYER_V1_20261029`): Tarjan iterativo y condensación de Kahn sobre el grafo de
+imports de cada commit. Los conteos de esta tabla se extrajeron de los bytes publicados, no de un
+reporte de terceros.
+
+| repositorio | commit-pin | módulos | aristas | SCC | ciclos | **mayor SCC** | fan-in mayor | bytes | activo |
+|---|---|---:|---:|---:|---:|---:|---|---:|---|
+| [pytorch/pytorch](https://github.com/pytorch/pytorch/commit/611154b3f03d63acac16cac8e8deb53a4deaed80) | `611154b3` | 2,527 | 19,353 | 831 | 14 | **1,660** | `torch` (2,203) | 7,468,906 | [`public_graph_pytorch_611154b3.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_pytorch_611154b3.json) |
+| [vllm-project/vllm](https://github.com/vllm-project/vllm/commit/7e3e3f6ab652550fdefecd8e9823394fd8e51950) | `7e3e3f6a` | 3,003 | 34,061 | 1,225 | 23 | **1,648** | `vllm` (2,505) | 9,970,465 | [`public_graph_vllm_7e3e3f6a.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_vllm_7e3e3f6a.json) |
+| [ray-project/ray](https://github.com/ray-project/ray/commit/096fce7ccc6a51984e6dec9d527f85f6eeae2705) | `096fce7c` | 4,108 | 35,426 | 2,787 | 23 | **960** | `ray` (3,610) | 10,975,888 | [`public_graph_ray_096fce7c.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_ray_096fce7c.json) |
+| [apache/airflow](https://github.com/apache/airflow/commit/37b6b04e7233ec47c193915d6cff04dac742d5fd) | `37b6b04e` | 769 | 5,296 | 404 | 2 | **363** | `airflow` (535) | 2,171,655 | [`public_graph_airflow_37b6b04e.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_airflow_37b6b04e.json) |
+| [run-llama/llama_index](https://github.com/run-llama/llama_index/commit/619d74664e8404612038bc15a1a40c686037277c) | `619d7466` | 480 | 4,024 | 143 | 4 | **334** | `llama_index.core` (395) | 1,219,946 | [`public_graph_llamaindex_619d7466.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_llamaindex_619d7466.json) |
+| [huggingface/transformers](https://github.com/huggingface/transformers/commit/95bafdcccfffe17ec383999fc39273867b11385e) | `95bafdcc` | 3,139 | 26,078 | 2,929 | 8 | **176** | `transformers` (3,103) | 8,883,386 | [`public_graph_transformers_95bafdcc.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_transformers_95bafdcc.json) |
+| [bentoml/BentoML](https://github.com/bentoml/BentoML/commit/0aa1aea52b63b82100ff93675eff25f6428fb841) | `0aa1aea5` | 211 | 1,287 | 126 | 5 | **78** | `bentoml` (159) | 563,547 | [`public_graph_bentoml_0aa1aea5.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_bentoml_0aa1aea5.json) |
+| [huggingface/huggingface_hub](https://github.com/huggingface/huggingface_hub/commit/1725fefe88119095d3d01a384b68dc85a5e58270) | `1725fefe` | 182 | 996 | 117 | 4 | **35** | `huggingface_hub` (158) | 559,997 | [`public_graph_huggingface_hub_1725fefe.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_huggingface_hub_1725fefe.json) |
+| [stripe/stripe-python](https://github.com/stripe/stripe-python/commit/b01f7c15196e729171fedb80a79b63146f3825ab) | `b01f7c15` | 1,651 | 5,130 | 1,619 | 1 | **33** | `stripe` (1,400) | 4,301,946 | [`public_graph_stripe_b01f7c15.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_stripe_b01f7c15.json) |
+| [langchain-ai/langchain](https://github.com/langchain-ai/langchain/commit/facf2788ae1f60c62f2397d15698237c405a5f05) | `facf2788` | 40 | 131 | 20 | 2 | **19** | `langchain` (25) | 143,450 | [`public_graph_langchain_facf2788.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_langchain_facf2788.json) |
+| **los diez** | — | **16,110** | **131,782** | **10,201** | **86** | **1,660** | `ray` (3,610) | **46,259,186** | 10 assets |
+
+«Mayor SCC» es el tamaño, en módulos, de la componente fuertemente conexa más grande de cada grafo.
+Los ciclos son las SCC con más de un módulo o con un auto-lazo: 86 en total, contra 10,201
+componentes contadas. Ningún grafo es acíclico, y la proporción de módulos dentro de ciclos separa
+los repositorios mejor que el conteo absoluto: `pytorch` mete el 67,7 % (1,710 de 2,527) y `vllm` el
+60,0 % (1,801 de 3,003), mientras `langchain` no tiene ninguno expuesto (0 de 40).
+
+<!-- HUELLA-LA-AUDITORA-SCC-20261029 -->
+
 ### Snapshots AST publicados · release `arch-index-20261029-batch2`
 
-Estos cinco snapshots adicionales usan `ingesta_ast/v2`. La publicación reúne diez JSON en el [Data Room público](https://github.com/alexisromtz-lab/platino-data-room/releases/tag/arch-index-20261029-batch2); los cinco siguientes son entradas de imports, no resultados con SCC calculadas. Sus registros, tamaños y commit-pins se verificaron en los assets del release.
+Estos cinco snapshots adicionales usan `ingesta_ast/v2`. La publicación reúne diez JSON en el [Data Room público](https://github.com/alexisromtz-lab/platino-data-room/releases/tag/arch-index-20261029-batch2); los cinco siguientes no traen resultados de sensibilidad; su capa SCC canónica está en la tabla de arriba. Sus registros, tamaños y commit-pins se verificaron en los assets del release.
 
 | repositorio | commit-pin | esquema | registros `imports` | bytes | snapshot publicado |
 |---|---|---|---:|---:|---|
-| [stripe/stripe-python](https://github.com/stripe/stripe-python/commit/b01f7c15196e729171fedb80a79b63146f3825ab) | `b01f7c15196e729171fedb80a79b63146f3825ab` | `ingesta_ast/v2` | 21,137 | 4,298,407 | [`public_graph_stripe_b01f7c15.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_stripe_b01f7c15.json) |
-| [ray-project/ray](https://github.com/ray-project/ray/commit/096fce7ccc6a51984e6dec9d527f85f6eeae2705) | `096fce7ccc6a51984e6dec9d527f85f6eeae2705` | `ingesta_ast/v2` | 58,928 | 10,856,937 | [`public_graph_ray_096fce7c.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_ray_096fce7c.json) |
-| [huggingface/huggingface_hub](https://github.com/huggingface/huggingface_hub/commit/1725fefe88119095d3d01a384b68dc85a5e58270) | `1725fefe88119095d3d01a384b68dc85a5e58270` | `ingesta_ast/v2` | 3,496 | 551,473 | [`public_graph_huggingface_hub_1725fefe.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_huggingface_hub_1725fefe.json) |
-| [apache/airflow](https://github.com/apache/airflow/commit/37b6b04e7233ec47c193915d6cff04dac742d5fd) | `37b6b04e7233ec47c193915d6cff04dac742d5fd` | `ingesta_ast/v2` | 11,651 | 2,132,257 | [`public_graph_airflow_37b6b04e.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_airflow_37b6b04e.json) |
-| [pytorch/pytorch](https://github.com/pytorch/pytorch/commit/611154b3f03d63acac16cac8e8deb53a4deaed80) | `611154b3f03d63acac16cac8e8deb53a4deaed80` | `ingesta_ast/v2` | 42,083 | 7,312,137 | [`public_graph_pytorch_611154b3.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_pytorch_611154b3.json) |
+| [stripe/stripe-python](https://github.com/stripe/stripe-python/commit/b01f7c15196e729171fedb80a79b63146f3825ab) | `b01f7c15196e729171fedb80a79b63146f3825ab` | `ingesta_ast/v2` | 21,137 | 4,301,946 | [`public_graph_stripe_b01f7c15.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_stripe_b01f7c15.json) |
+| [ray-project/ray](https://github.com/ray-project/ray/commit/096fce7ccc6a51984e6dec9d527f85f6eeae2705) | `096fce7ccc6a51984e6dec9d527f85f6eeae2705` | `ingesta_ast/v2` | 58,928 | 10,975,888 | [`public_graph_ray_096fce7c.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_ray_096fce7c.json) |
+| [huggingface/huggingface_hub](https://github.com/huggingface/huggingface_hub/commit/1725fefe88119095d3d01a384b68dc85a5e58270) | `1725fefe88119095d3d01a384b68dc85a5e58270` | `ingesta_ast/v2` | 3,496 | 559,997 | [`public_graph_huggingface_hub_1725fefe.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_huggingface_hub_1725fefe.json) |
+| [apache/airflow](https://github.com/apache/airflow/commit/37b6b04e7233ec47c193915d6cff04dac742d5fd) | `37b6b04e7233ec47c193915d6cff04dac742d5fd` | `ingesta_ast/v2` | 11,651 | 2,171,655 | [`public_graph_airflow_37b6b04e.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_airflow_37b6b04e.json) |
+| [pytorch/pytorch](https://github.com/pytorch/pytorch/commit/611154b3f03d63acac16cac8e8deb53a4deaed80) | `611154b3f03d63acac16cac8e8deb53a4deaed80` | `ingesta_ast/v2` | 42,083 | 7,468,906 | [`public_graph_pytorch_611154b3.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_pytorch_611154b3.json) |
 
-`apache/airflow` y `pytorch/pytorch` fijan el checkpoint de ingesta, no un resultado de grafo: se
-publica el número de registros de `imports` y el tamaño del activo, y **no** un conteo de SCC que
-nadie calculó sobre este commit. `pytorch/pytorch` aparece además en la tabla de auditorías en
+`apache/airflow` y `pytorch/pytorch` entraron al Data Room como checkpoints de ingesta; la capa SCC
+se calculó después sobre esos mismos commits, y sus conteos viven en la tabla canónica de arriba.
+`pytorch/pytorch` aparece además en la tabla de auditorías en
 prosa con otro commit (`210bb7ca`), otro método y otro hallazgo.
 
 <!-- HUELLA-LA-AUDITORA-COHORTE-20261029 -->
@@ -64,27 +93,46 @@ prosa con otro commit (`210bb7ca`), otro método y otro hallazgo.
 
 Los cinco resultados `graph_sensitivity_*.json` declaran `source_bytes_verified: false`: los bytes
 fuente no se re-verificaron contra el checkout al proyectarlos. Los cinco snapshots AST adicionales
-publican imports, pero no resultados SCC. vLLM está incluido arriba, entre los cinco grafos.
+publican imports y desde el 29-oct-2026 también la capa SCC canónica; los `graph_sensitivity_*`
+siguen siendo otra medición, con su propio método y su propio límite declarado. vLLM está incluido
+arriba, entre los cinco grafos.
 
 Release anterior: [`arch-index-20261028-v1`](https://github.com/alexisromtz-lab/la-auditora/releases/tag/arch-index-20261028-v1)
 (28-oct-2026, seis activos: los mismos cinco grafos sin la capa de sensibilidad).
 
-## Valor: un grafo frente a un índice vectorial
+## Valor: el grafo frente al código que mapea
 
-El grafo AST de PyTorch pesa 7,3 MB. Un índice RAG equivalente necesitaría más de 614 MB solo para
-los vectores. Un ahorro del 98,81 % en almacenamiento, permitiendo auditorías de código masivo en
-hardware de consumo.
+El grafo AST de PyTorch pesa 7,47 MB y mapea 2.527 archivos `.py` del paquete `torch`. Los diez
+grafos del Data Room pesan 46,26 MB. Frente a los archivos `.py` que indexan, el ahorro medido es
+del 78,49 % en los ocho repositorios cuyo código se pesó archivo por archivo, y del 79,93 % sumando
+los dos restantes con los denominadores que declara la medición externa.
 
-La cifra es una proyección con parámetros declarados, no la medición de un índice existente:
-100.000 fragmentos × 1.536 dimensiones × 4 bytes (`float32`) = 614.400.000 B, que sobre los 2.527
-archivos del snapshot son ~40 fragmentos por archivo. Lo medido es el numerador —7.312.137 B, asset
-del release—; el denominador es un supuesto publicado para que cualquiera lo refute. El ahorro se
-sostiene en todo el rango de supuestos: con 50.000 vectores el índice pesa 307,2 MB (97,62 % de
-ahorro) y con 10.000 pesa 61,4 MB (88,10 %).
+| repositorio | `.py` mapeados | grafo | ahorro | denominador |
+|---|---:|---:|---:|---|
+| pytorch/pytorch | 53,82 MB | 7,47 MB | 86,12 % | declarado |
+| huggingface/transformers | 56,09 MB | 8,88 MB | 84,16 % | medido |
+| ray-project/ray | 48,58 MB | 10,98 MB | 77,41 % | medido |
+| vllm-project/vllm | 44,12 MB | 9,97 MB | 77,40 % | medido |
+| stripe/stripe-python | 13,19 MB | 4,30 MB | 67,39 % | medido |
+| apache/airflow | 6,42 MB | 2,17 MB | 66,16 % | declarado |
+| huggingface/huggingface_hub | 3,27 MB | 0,56 MB | 82,86 % | medido |
+| run-llama/llama_index | 2,67 MB | 1,22 MB | 54,30 % | medido |
+| bentoml/BentoML | 1,69 MB | 0,56 MB | 66,66 % | medido |
+| langchain-ai/langchain | 0,65 MB | 0,14 MB | 78,06 % | medido |
+| **los diez** | **230,50 MB** | **46,26 MB** | **79,93 %** | mixto |
 
-Verificación de la aritmética: `python3 -c "b=7312137; r=614400000; print(round((1-b/r)*100,2))"` → `98.81`.
+Cómo se mide, para que se pueda refutar:
+
+- **Numerador**: bytes de cada asset publicado, `stat -f%z`. Es el objeto que cualquiera descarga.
+- **Denominador medido**: suma de bytes de las rutas que el propio snapshot lista en `archivos[].rel`, resueltas contra el checkout del repositorio. En los ocho medidos se resolvieron todas las entradas (211/211, 182/182, 3,139/3,139, 40/40, 480/480, 4,108/4,108, 1,651/1,651, 3,003/3,003).
+- **Denominador declarado**: `apache/airflow` (6,42 MB) y `pytorch/pytorch` (53,82 MB, por diferencia sobre el total de 230,5 MB) no tienen checkout en esta máquina. Se publican como supuesto; un clon de cada uno los vuelve medibles.
+- Aquí se compara el **peso del índice frente a los archivos `.py` que mapea**. La versión anterior de este párrafo —98,81 % frente a un índice vectorial de 614,4 MB— era una proyección (100.000 fragmentos × 1.536 dimensiones × 4 bytes) y se retiró por teórica.
+
+Con los tamaños previos a la capa SCC (45,668,259 B) el mismo cociente da 80,19 %, que es la cifra
+que circuló; añadir la capa mueve el total a 46,259,186 B y el ahorro a 79,93 %.
 
 <!-- HUELLA-LA-AUDITORA-VALOR-20261029 -->
+<!-- HUELLA-LA-AUDITORA-VALOR-EMPIRICO-20261029 -->
 
 ## Auditorías publicadas en el sitio
 
@@ -116,9 +164,9 @@ tablas separadas.
 
 ## En progreso
 
-Cinco de los diez snapshots publicados son entradas de ingesta: tienen conteo de `imports` y tamaño
-de activo, pero **no** tienen resultados de grafo calculados sobre ese commit. Calcular y publicar
-esa capa es trabajo pendiente; publicarla antes de calcularla sería publicar un número sin sujeto.
+La capa SCC ya está publicada para los diez. Lo que sigue pendiente es la segunda capa: la
+sensibilidad al método —con y sin expansión de `__init__`— existe solo para cinco activos, así que
+los otros cinco publican hoy un único número, sin contraste contra su propio defecto declarado.
 
 ## Cómo se reproduce
 
