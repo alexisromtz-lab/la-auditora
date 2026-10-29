@@ -76,6 +76,7 @@
       <nav aria-label="Navegación principal">
         <a href="#auditorias">Auditorías</a>
         <a href="#metodo">Método</a>
+        <a href="#data-room">Data Room</a>
         <a href="https://arquitectocuantico.com/">Libros</a>
         <a href="/la-auditora/en/" lang="en" hreflang="en">English</a>
       </nav>
@@ -143,6 +144,50 @@
             <p class="source"><a href="https://github.com/pallets/flask/commit/d086db856be187255b8ec61ef409357393020f32" target="_blank" rel="noopener noreferrer">pallets/flask · d086db85</a></p>
           </article>
         </div>
+      </section>
+
+      <section class="section" id="data-room" aria-labelledby="data-room-titulo">
+        <h2 id="data-room-titulo">Data Room · los datos, con su commit</h2>
+        <p class="intro">Cinco grafos de imports en JSON, cada uno fijado a un commit. Se descargan del release <a href="https://github.com/alexisromtz-lab/la-auditora/releases/tag/arch-index-20261028-v2"><code>arch-index-20261028-v2</code></a> junto con <code>calculate_arch_index.py</code>, y ese script recalcula exactamente los números publicados sobre la entrada publicada.</p>
+        <div class="grid">
+          <article>
+            <span class="tag">LangChain · grafo de imports · sensibilidad</span>
+            <h3>Dos ciclos que dependen de cómo se expanden los paquetes</h3>
+            <p class="metric">40 módulos · 2 SCC (19, 3) · 0 sin expansión de <code>__init__</code></p>
+            <p>El grafo declarado cierra dos componentes cíclicas; al retirar sólo la expansión de inicializadores ancestrales, no queda ninguna. El número no es robusto al método, así que se publican los dos.</p>
+            <p class="source"><a href="https://github.com/langchain-ai/langchain/commit/facf2788ae1f60c62f2397d15698237c405a5f05" target="_blank" rel="noopener noreferrer">langchain-ai/langchain · facf2788</a> · <a href="https://github.com/alexisromtz-lab/la-auditora/releases/download/arch-index-20261028-v2/public_graph_langchain_facf2788.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">Transformers · grafo de imports</span>
+            <h3>Ocho componentes cíclicas en 3139 módulos</h3>
+            <p class="metric">3139 módulos · 26078 aristas · 8 SCC (176 la mayor)</p>
+            <p>Con expansión de inicializadores son ocho; sin ella quedan seis. La mayor concentra 176 módulos.</p>
+            <p class="source"><a href="https://github.com/huggingface/transformers/commit/95bafdcccfffe17ec383999fc39273867b11385e" target="_blank" rel="noopener noreferrer">huggingface/transformers · 95bafdcc</a> · <a href="https://github.com/alexisromtz-lab/la-auditora/releases/download/arch-index-20261028-v2/public_graph_transformers_95bafdcc.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">vLLM · grafo de imports</span>
+            <h3>Una componente de 1648 módulos sobre 3003</h3>
+            <p class="metric">3003 módulos · 34061 aristas · 23 SCC (1648 la mayor)</p>
+            <p>Más de la mitad del grafo pertenece a una sola componente fuertemente conexa; sin expansión de inicializadores el conteo baja a ocho.</p>
+            <p class="source"><a href="https://github.com/vllm-project/vllm/commit/7e3e3f6ab652550fdefecd8e9823394fd8e51950" target="_blank" rel="noopener noreferrer">vllm-project/vllm · 7e3e3f6a</a> · <a href="https://github.com/alexisromtz-lab/la-auditora/releases/download/arch-index-20261028-v2/public_graph_vllm_7e3e3f6a.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">BentoML · grafo de imports</span>
+            <h3>Cinco componentes en un grafo de 211 módulos</h3>
+            <p class="metric">211 módulos · 1287 aristas · 5 SCC (78 la mayor)</p>
+            <p>Sin expansión de inicializadores quedan cuatro: la quinta dependía del expansor.</p>
+            <p class="source"><a href="https://github.com/bentoml/BentoML/commit/0aa1aea52b63b82100ff93675eff25f6428fb841" target="_blank" rel="noopener noreferrer">bentoml/BentoML · 0aa1aea5</a> · <a href="https://github.com/alexisromtz-lab/la-auditora/releases/download/arch-index-20261028-v2/public_graph_bentoml_0aa1aea5.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">LlamaIndex · grafo de imports</span>
+            <h3>Cuatro componentes, ninguna sensible al expansor</h3>
+            <p class="metric">480 módulos · 4024 aristas · 4 SCC (334 la mayor)</p>
+            <p>El conteo no cambia al retirar la expansión de inicializadores: en este grafo el método no altera el resultado.</p>
+            <p class="source"><a href="https://github.com/run-llama/llama_index/commit/619d74664e8404612038bc15a1a40c686037277c" target="_blank" rel="noopener noreferrer">run-llama/llama_index · 619d7466</a> · <a href="https://github.com/alexisromtz-lab/la-auditora/releases/download/arch-index-20261028-v2/public_graph_llamaindex_619d7466.json">JSON</a></p>
+          </article>
+        </div>
+        <p class="notice" style="margin-top:1.2rem"><strong>Dos cohortes, no una.</strong> Esta página resume seis auditorías; el Data Room publica cinco snapshots de grafos. El único repositorio en las dos listas es <code>huggingface/transformers</code>, y en commits distintos: <code>b4a5b4b2</code> arriba, <code>95bafdcc</code> aquí. Los cinco snapshots declaran <code>source_bytes_verified: false</code>. Tabla completa, comandos de reproducción y licencia: <a href="https://github.com/alexisromtz-lab/la-auditora#readme">README del repositorio</a>.</p>
+        <!-- HUELLA-DATAROOM-LA-AUDITORA-20261029 -->
       </section>
 
       <section class="section" id="metodo" aria-labelledby="metodo-titulo">

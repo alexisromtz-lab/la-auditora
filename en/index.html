@@ -76,6 +76,7 @@
       <nav aria-label="Main navigation">
         <a href="#audits">Audits</a>
         <a href="#method">Method</a>
+        <a href="#data-room">Data Room</a>
         <a href="https://arquitectocuantico.com/">Books</a>
         <a href="/la-auditora/" lang="es" hreflang="es">Español</a>
       </nav>
@@ -143,6 +144,50 @@
             <p class="source"><a href="https://github.com/pallets/flask/commit/d086db856be187255b8ec61ef409357393020f32" target="_blank" rel="noopener noreferrer">pallets/flask · d086db85</a></p>
           </article>
         </div>
+      </section>
+
+      <section class="section" id="data-room" aria-labelledby="data-room-title">
+        <h2 id="data-room-title">Data Room · the data, with its commit</h2>
+        <p class="intro">Five import graphs as JSON, each pinned to a commit. Download them from the <a href="https://github.com/alexisromtz-lab/la-auditora/releases/tag/arch-index-20261028-v2"><code>arch-index-20261028-v2</code></a> release together with <code>calculate_arch_index.py</code>; that script recomputes exactly the published numbers from the published input.</p>
+        <div class="grid">
+          <article>
+            <span class="tag">LangChain · import graph · sensitivity</span>
+            <h3>Two cycles that depend on how packages are expanded</h3>
+            <p class="metric">40 modules · 2 SCC (19, 3) · 0 without ancestor <code>__init__</code> expansion</p>
+            <p>The declared graph closes two cyclic components; removing only ancestor initializer expansion leaves none. The number is not robust to the method, so both are published.</p>
+            <p class="source"><a href="https://github.com/langchain-ai/langchain/commit/facf2788ae1f60c62f2397d15698237c405a5f05" target="_blank" rel="noopener noreferrer">langchain-ai/langchain · facf2788</a> · <a href="https://github.com/alexisromtz-lab/la-auditora/releases/download/arch-index-20261028-v2/public_graph_langchain_facf2788.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">Transformers · import graph</span>
+            <h3>Eight cyclic components across 3139 modules</h3>
+            <p class="metric">3139 modules · 26078 edges · 8 SCC (176 largest)</p>
+            <p>With initializer expansion there are eight; without it, six. The largest holds 176 modules.</p>
+            <p class="source"><a href="https://github.com/huggingface/transformers/commit/95bafdcccfffe17ec383999fc39273867b11385e" target="_blank" rel="noopener noreferrer">huggingface/transformers · 95bafdcc</a> · <a href="https://github.com/alexisromtz-lab/la-auditora/releases/download/arch-index-20261028-v2/public_graph_transformers_95bafdcc.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">vLLM · import graph</span>
+            <h3>A 1648-module component out of 3003</h3>
+            <p class="metric">3003 modules · 34061 edges · 23 SCC (1648 largest)</p>
+            <p>Over half of the graph belongs to a single strongly connected component; without initializer expansion the count drops to eight.</p>
+            <p class="source"><a href="https://github.com/vllm-project/vllm/commit/7e3e3f6ab652550fdefecd8e9823394fd8e51950" target="_blank" rel="noopener noreferrer">vllm-project/vllm · 7e3e3f6a</a> · <a href="https://github.com/alexisromtz-lab/la-auditora/releases/download/arch-index-20261028-v2/public_graph_vllm_7e3e3f6a.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">BentoML · import graph</span>
+            <h3>Five components in a 211-module graph</h3>
+            <p class="metric">211 modules · 1287 edges · 5 SCC (78 largest)</p>
+            <p>Without initializer expansion four remain: the fifth depended on the expander.</p>
+            <p class="source"><a href="https://github.com/bentoml/BentoML/commit/0aa1aea52b63b82100ff93675eff25f6428fb841" target="_blank" rel="noopener noreferrer">bentoml/BentoML · 0aa1aea5</a> · <a href="https://github.com/alexisromtz-lab/la-auditora/releases/download/arch-index-20261028-v2/public_graph_bentoml_0aa1aea5.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">LlamaIndex · import graph</span>
+            <h3>Four components, none sensitive to the expander</h3>
+            <p class="metric">480 modules · 4024 edges · 4 SCC (334 largest)</p>
+            <p>The count does not change when initializer expansion is removed: in this graph the method does not alter the result.</p>
+            <p class="source"><a href="https://github.com/run-llama/llama_index/commit/619d74664e8404612038bc15a1a40c686037277c" target="_blank" rel="noopener noreferrer">run-llama/llama_index · 619d7466</a> · <a href="https://github.com/alexisromtz-lab/la-auditora/releases/download/arch-index-20261028-v2/public_graph_llamaindex_619d7466.json">JSON</a></p>
+          </article>
+        </div>
+        <p class="notice" style="margin-top:1.2rem"><strong>Two cohorts, not one.</strong> This page summarizes six audits; the Data Room publishes five graph snapshots. The only repository in both lists is <code>huggingface/transformers</code>, and at different commits: <code>b4a5b4b2</code> above, <code>95bafdcc</code> here. All five snapshots declare <code>source_bytes_verified: false</code>. Full table, reproduction commands and license: <a href="https://github.com/alexisromtz-lab/la-auditora#readme">repository README</a>.</p>
+        <!-- HUELLA-DATAROOM-LA-AUDITORA-20261029 -->
       </section>
 
       <section class="section" id="method" aria-labelledby="method-title">

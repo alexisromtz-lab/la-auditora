@@ -1,0 +1,35 @@
+Datos y texto de auditoría — CC BY 4.0
+======================================
+
+Los datos publicados en el Data Room de este repositorio (`public_graph_*.json`,
+`graph_sensitivity_*.json`, `calculate_arch_index.py` excluido) y los resúmenes de
+auditoría de `index.html` y `en/index.html` se distribuyen bajo la licencia
+
+    Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+El texto legal completo y canónico vive en
+
+    https://creativecommons.org/licenses/by/4.0/legalcode.es
+    https://creativecommons.org/licenses/by/4.0/legalcode
+
+Este archivo no reproduce el texto legal: lo nombra y enlaza. La versión que
+manda es la publicada por Creative Commons, no esta nota.
+
+Atribución requerida
+--------------------
+
+    Jose Alexis Román Martínez · Platino Labs · La Auditora
+    https://alexisromtz-lab.github.io/la-auditora/
+    commit y activo de origen (el commit-pin viaja dentro de cada JSON)
+
+Al reutilizar un grafo, se cita el repositorio auditado y el commit auditado,
+no solo este repositorio: el resultado pertenece a ese objeto.
+
+Qué NO cubre esta licencia
+--------------------------
+
+- El código (`calculate_arch_index.py`): licencia MIT, ver `LICENSE`.
+- Los repositorios auditados: cada uno conserva su propia licencia. Aquí solo se
+  publican grafos derivados de sus imports; las obras originales no se relicencian.
+
+<!-- HUELLA-LICENCIA-LA-AUDITORA-20261029 -->
