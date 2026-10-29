@@ -69,6 +69,23 @@ publican imports, pero no resultados SCC. vLLM está incluido arriba, entre los 
 Release anterior: [`arch-index-20261028-v1`](https://github.com/alexisromtz-lab/la-auditora/releases/tag/arch-index-20261028-v1)
 (28-oct-2026, seis activos: los mismos cinco grafos sin la capa de sensibilidad).
 
+## Valor: un grafo frente a un índice vectorial
+
+El grafo AST de PyTorch pesa 7,3 MB. Un índice RAG equivalente necesitaría más de 614 MB solo para
+los vectores. Un ahorro del 98,81 % en almacenamiento, permitiendo auditorías de código masivo en
+hardware de consumo.
+
+La cifra es una proyección con parámetros declarados, no la medición de un índice existente:
+100.000 fragmentos × 1.536 dimensiones × 4 bytes (`float32`) = 614.400.000 B, que sobre los 2.527
+archivos del snapshot son ~40 fragmentos por archivo. Lo medido es el numerador —7.312.137 B, asset
+del release—; el denominador es un supuesto publicado para que cualquiera lo refute. El ahorro se
+sostiene en todo el rango de supuestos: con 50.000 vectores el índice pesa 307,2 MB (97,62 % de
+ahorro) y con 10.000 pesa 61,4 MB (88,10 %).
+
+Verificación de la aritmética: `python3 -c "b=7312137; r=614400000; print(round((1-b/r)*100,2))"` → `98.81`.
+
+<!-- HUELLA-LA-AUDITORA-VALOR-20261029 -->
+
 ## Auditorías publicadas en el sitio
 
 Seis resúmenes en prosa con commit-pin, verificables en la página. **Ninguna de estas seis filas
