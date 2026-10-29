@@ -148,7 +148,7 @@
 
       <section class="section" id="data-room" aria-labelledby="data-room-titulo">
         <h2 id="data-room-titulo">Data Room · los datos, con su commit</h2>
-        <p class="intro">Ocho snapshots JSON de imports, cada uno fijado a un commit, están publicados en el <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/tag/arch-index-20261029-batch2"><code>Data Room público · arch-index-20261029-batch2</code></a>. Cinco tienen análisis de grafo calculados; los otros tres son snapshots <code>ingesta_ast/v2</code> sin métricas SCC publicadas. Los cinco análisis se reproducen con <code>calculate_arch_index.py</code> y los resultados de sensibilidad del <a href="https://github.com/alexisromtz-lab/la-auditora/releases/tag/arch-index-20261028-v2">release de la herramienta</a>.</p>
+        <p class="intro">Diez snapshots JSON de imports, cada uno fijado a un commit, están publicados en el <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/tag/arch-index-20261029-batch2"><code>Data Room público · arch-index-20261029-batch2</code></a>. Cinco tienen análisis de grafo calculados; los otros cinco son snapshots <code>ingesta_ast/v2</code> sin métricas SCC publicadas. Los cinco análisis se reproducen con <code>calculate_arch_index.py</code> y los resultados de sensibilidad del <a href="https://github.com/alexisromtz-lab/la-auditora/releases/tag/arch-index-20261028-v2">release de la herramienta</a>.</p>
         <div class="grid">
           <article>
             <span class="tag">LangChain · grafo de imports · sensibilidad</span>
@@ -206,10 +206,25 @@
             <p>Snapshot AST fijado al commit; no se publican métricas SCC derivadas para este activo.</p>
             <p class="source"><a href="https://github.com/huggingface/huggingface_hub/commit/1725fefe88119095d3d01a384b68dc85a5e58270" target="_blank" rel="noopener noreferrer">huggingface/huggingface_hub · 1725fefe</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_huggingface_hub_1725fefe.json">JSON</a></p>
           </article>
+          <article>
+            <span class="tag">Airflow · snapshot de imports · ingesta_ast/v2</span>
+            <h3>11,651 registros de imports</h3>
+            <p class="metric">11,651 imports · 769 archivos · 2.0 MB</p>
+            <p>Snapshot AST fijado al commit; no se publican métricas SCC derivadas para este activo.</p>
+            <p class="source"><a href="https://github.com/apache/airflow/commit/37b6b04e7233ec47c193915d6cff04dac742d5fd" target="_blank" rel="noopener noreferrer">apache/airflow · 37b6b04e</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_airflow_37b6b04e.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">PyTorch · snapshot de imports · ingesta_ast/v2</span>
+            <h3>42,083 registros de imports</h3>
+            <p class="metric">42,083 imports · 2527 archivos · 7.0 MB</p>
+            <p>Snapshot AST fijado al commit; no se publican métricas SCC derivadas para este activo. La auditoría en prosa de arriba mide otra cosa, en otro commit (<code>210bb7ca</code>).</p>
+            <p class="source"><a href="https://github.com/pytorch/pytorch/commit/611154b3f03d63acac16cac8e8deb53a4deaed80" target="_blank" rel="noopener noreferrer">pytorch/pytorch · 611154b3</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_pytorch_611154b3.json">JSON</a></p>
+          </article>
         </div>
-        <p class="notice" style="margin-top:1.2rem"><strong>Ocho snapshots públicos; alcances separados.</strong> El Data Room ofrece cinco entradas con resultados de grafo calculados y tres snapshots AST <code>ingesta_ast/v2</code> sin métricas SCC derivadas. Los cinco resultados de sensibilidad declaran <code>source_bytes_verified: false</code>. Esta página también resume seis auditorías en prosa; la única coincidencia con el Data Room es <code>huggingface/transformers</code>, en commits distintos: <code>b4a5b4b2</code> arriba y <code>95bafdcc</code> aquí. Tabla completa y método: <a href="https://github.com/alexisromtz-lab/la-auditora#readme">README del repositorio</a>.</p>
+        <p class="notice" style="margin-top:1.2rem"><strong>Diez snapshots públicos; alcances separados.</strong> El Data Room ofrece cinco entradas con resultados de grafo calculados y cinco snapshots AST <code>ingesta_ast/v2</code> sin métricas SCC derivadas. Los cinco resultados de sensibilidad declaran <code>source_bytes_verified: false</code>. Esta página también resume seis auditorías en prosa; <code>huggingface/transformers</code> y <code>pytorch/pytorch</code> aparecen en las dos cohortes pero en commits distintos: <code>b4a5b4b2</code> y <code>210bb7ca</code> arriba, <code>95bafdcc</code> y <code>611154b3</code> aquí. Tabla completa y método: <a href="https://github.com/alexisromtz-lab/la-auditora#readme">README del repositorio</a>.</p>
         <!-- HUELLA-DATAROOM-LA-AUDITORA-20261029 -->
         <!-- HUELLA-LA-AUDITORA-HTML-8-PUBLICADOS-20261029 -->
+        <!-- HUELLA-LA-AUDITORA-HTML-10-PUBLICADOS-20261029 -->
       </section>
 
       <section class="section" id="metodo" aria-labelledby="metodo-titulo">

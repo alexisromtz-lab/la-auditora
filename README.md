@@ -21,13 +21,13 @@ resultado pertenece al commit que lo produjo, no a la rama móvil.
 |---|---|---|
 | `README.md` (este archivo) | índice completo, cohortes, comandos, licencia, contacto | **manda** |
 | `index.html` · `en/index.html` | seis resúmenes bilingües con commit-pin y un enlace al Data Room | resume este archivo |
-| Data Room (`platino-data-room`) | ocho snapshots JSON de imports; cinco con análisis de grafo y tres snapshots AST adicionales | es la evidencia pública; aquí solo se indexa |
+| Data Room (`platino-data-room`) | diez snapshots JSON de imports; cinco con análisis de grafo y cinco snapshots AST adicionales | es la evidencia pública; aquí solo se indexa |
 | metadatos del repo y del perfil | descripción, topics, `homepageUrl`, licencia, «Start here» | pendiente, ver [En progreso](#en-progreso) |
 
 ## Índice de auditorías publicadas con datos
 
 Cinco resultados de análisis de grafo, reproducibles desde sus snapshots JSON fijados a commit.
-Los ocho snapshots de imports están en el release público
+Los diez snapshots de imports están en el release público
 [`arch-index-20261029-batch2`](https://github.com/alexisromtz-lab/platino-data-room/releases/tag/arch-index-20261029-batch2);
 los cinco assets de entrada de esta tabla conservan el mismo SHA-256 que en el release anterior.
 
@@ -41,30 +41,40 @@ los cinco assets de entrada de esta tabla conservan el mismo SHA-256 que en el r
 
 ### Snapshots AST publicados · release `arch-index-20261029-batch2`
 
-Estos tres snapshots adicionales usan `ingesta_ast/v2`. La publicación reúne ocho JSON en el [Data Room público](https://github.com/alexisromtz-lab/platino-data-room/releases/tag/arch-index-20261029-batch2); los tres siguientes son entradas de imports, no resultados con SCC calculadas. Sus registros, tamaños y commit-pins se verificaron en los assets del release.
+Estos cinco snapshots adicionales usan `ingesta_ast/v2`. La publicación reúne diez JSON en el [Data Room público](https://github.com/alexisromtz-lab/platino-data-room/releases/tag/arch-index-20261029-batch2); los cinco siguientes son entradas de imports, no resultados con SCC calculadas. Sus registros, tamaños y commit-pins se verificaron en los assets del release.
 
 | repositorio | commit-pin | esquema | registros `imports` | bytes | snapshot publicado |
 |---|---|---|---:|---:|---|
 | [stripe/stripe-python](https://github.com/stripe/stripe-python/commit/b01f7c15196e729171fedb80a79b63146f3825ab) | `b01f7c15196e729171fedb80a79b63146f3825ab` | `ingesta_ast/v2` | 21,137 | 4,298,407 | [`public_graph_stripe_b01f7c15.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_stripe_b01f7c15.json) |
 | [ray-project/ray](https://github.com/ray-project/ray/commit/096fce7ccc6a51984e6dec9d527f85f6eeae2705) | `096fce7ccc6a51984e6dec9d527f85f6eeae2705` | `ingesta_ast/v2` | 58,928 | 10,856,937 | [`public_graph_ray_096fce7c.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_ray_096fce7c.json) |
 | [huggingface/huggingface_hub](https://github.com/huggingface/huggingface_hub/commit/1725fefe88119095d3d01a384b68dc85a5e58270) | `1725fefe88119095d3d01a384b68dc85a5e58270` | `ingesta_ast/v2` | 3,496 | 551,473 | [`public_graph_huggingface_hub_1725fefe.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_huggingface_hub_1725fefe.json) |
+| [apache/airflow](https://github.com/apache/airflow/commit/37b6b04e7233ec47c193915d6cff04dac742d5fd) | `37b6b04e7233ec47c193915d6cff04dac742d5fd` | `ingesta_ast/v2` | 11,651 | 2,132,257 | [`public_graph_airflow_37b6b04e.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_airflow_37b6b04e.json) |
+| [pytorch/pytorch](https://github.com/pytorch/pytorch/commit/611154b3f03d63acac16cac8e8deb53a4deaed80) | `611154b3f03d63acac16cac8e8deb53a4deaed80` | `ingesta_ast/v2` | 42,083 | 7,312,137 | [`public_graph_pytorch_611154b3.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_pytorch_611154b3.json) |
+
+`apache/airflow` y `pytorch/pytorch` fijan el checkpoint de ingesta, no un resultado de grafo: se
+publica el número de registros de `imports` y el tamaño del activo, y **no** un conteo de SCC que
+nadie calculó sobre este commit. `pytorch/pytorch` aparece además en la tabla de auditorías en
+prosa con otro commit (`210bb7ca`), otro método y otro hallazgo.
 
 <!-- HUELLA-LA-AUDITORA-COHORTE-20261029 -->
 
 <!-- HUELLA-LA-AUDITORA-8-PUBLICADOS-20261029 -->
 
+<!-- HUELLA-LA-AUDITORA-10-PUBLICADOS-20261029 -->
+
 Los cinco resultados `graph_sensitivity_*.json` declaran `source_bytes_verified: false`: los bytes
-fuente no se re-verificaron contra el checkout al proyectarlos. Los tres snapshots AST adicionales
-publican imports, pero no resultados SCC. Airflow y PyTorch no forman parte de este release; vLLM
-está incluido arriba.
+fuente no se re-verificaron contra el checkout al proyectarlos. Los cinco snapshots AST adicionales
+publican imports, pero no resultados SCC. vLLM está incluido arriba, entre los cinco grafos.
 
 Release anterior: [`arch-index-20261028-v1`](https://github.com/alexisromtz-lab/la-auditora/releases/tag/arch-index-20261028-v1)
 (28-oct-2026, seis activos: los mismos cinco grafos sin la capa de sensibilidad).
 
 ## Auditorías publicadas en el sitio
 
-Seis resúmenes en prosa con commit-pin, verificables en la página. **No tienen snapshot en el
-Data Room**: son otra cohorte, medida con otro método.
+Seis resúmenes en prosa con commit-pin, verificables en la página. **Ninguna de estas seis filas
+tiene snapshot en el Data Room para su commit-pin**: son otra cohorte, medida con otro método. Dos
+repositorios de esta tabla sí tienen snapshot en el Data Room, pero **en otro commit y para otro
+hallazgo** (ver la nota de cohortes al final de la tabla).
 
 | repositorio | commit-pin | hallazgo |
 |---|---|---|
@@ -75,15 +85,23 @@ Data Room**: son otra cohorte, medida con otro método.
 | [vllm-project/vllm-omni](https://github.com/vllm-project/vllm-omni/commit/9573acc90213cb473c30d64115ab0e1dd1a32d9a) | `9573acc90213cb473c30d64115ab0e1dd1a32d9a` | 0 ciclos eager en `vllm_omni/platforms/`; cinco componentes con ciclos diferidos |
 | [pallets/flask](https://github.com/pallets/flask/commit/d086db856be187255b8ec61ef409357393020f32) | `d086db856be187255b8ec61ef409357393020f32` | 1 SCC mixta de 18 módulos, 0 ciclos eager |
 
-**Las dos cohortes no coinciden, y se declara a propósito.** El único repositorio que aparece en
-las dos listas es `huggingface/transformers`, y **en commits distintos**: `b4a5b4b2` en el sitio,
-`95bafdcc` en el Data Room. Quien siga el commit-pin de la página hasta el Data Room encontrará
-cinco grafos que miden otra cosa sobre otro objeto. Eso no es un fallo de medición: son dos
-productos con el mismo nombre genérico, y por eso están en dos tablas separadas.
+**Las dos cohortes no coinciden, y se declara a propósito.** Dos repositorios aparecen en las dos
+listas, y **en commits distintos**:
+
+| repositorio | commit en el sitio | commit en el Data Room |
+|---|---|---|
+| `huggingface/transformers` | `b4a5b4b2` (0 ciclos eager) | `95bafdcc` (8 SCC) |
+| `pytorch/pytorch` | `210bb7ca` (45 archivos de tests sin ruta en CI) | `611154b3` (ingesta AST, 42,083 imports) |
+
+Quien siga el commit-pin de la página hasta el Data Room encontrará otro objeto y otra medida. Eso
+no es un fallo de medición: son dos productos con el mismo nombre genérico, y por eso están en dos
+tablas separadas.
 
 ## En progreso
 
-Airflow y PyTorch se omiten de esta publicación: no hay snapshots públicos de esos repositorios en el release. vLLM ya figura entre los repositorios publicados.
+Cinco de los diez snapshots publicados son entradas de ingesta: tienen conteo de `imports` y tamaño
+de activo, pero **no** tienen resultados de grafo calculados sobre ese commit. Calcular y publicar
+esa capa es trabajo pendiente; publicarla antes de calcularla sería publicar un número sin sujeto.
 
 ## Cómo se reproduce
 
@@ -122,7 +140,7 @@ JSON publicado es la entrada, no la salida del programa.
   (`type_checking_imports_excluded: 95`), y con ellos cualquier ciclo que solo exista ahí.
 - **Sensibilidad al expansor.** Con y sin expansión de `__init__.py` ancestrales, LangChain pasa
   de 2 componentes cíclicas a 0. El número no es robusto al método, y por eso se publican los dos.
-- **`source_bytes_verified: false`** en los cinco resultados de `graph_sensitivity_*.json`; los tres snapshots AST adicionales no publican métricas SCC.
+- **`source_bytes_verified: false`** en los cinco resultados de `graph_sensitivity_*.json`; los cinco snapshots AST adicionales no publican métricas SCC.
 
 ## Falsabilidad y negativos publicables
 
