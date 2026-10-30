@@ -21,15 +21,14 @@ resultado pertenece al commit que lo produjo, no a la rama móvil.
 |---|---|---|
 | `README.md` (este archivo) | índice completo, cohortes, comandos, licencia, contacto | **manda** |
 | `index.html` · `en/index.html` | seis resúmenes bilingües con commit-pin y un enlace al Data Room | resume este archivo |
-| Data Room (`platino-data-room`) | diez snapshots JSON de imports, los diez con capa SCC calculada (`graph-input/1+scc/2`) | es la evidencia pública; aquí solo se indexa |
+| Data Room (`platino-data-room`) | 23 snapshots JSON de imports: 10 con capa SCC canónica (`graph-input/1+scc/2`) y 13 adicionales sin capa SCC | es la evidencia pública; aquí solo se indexa |
 | metadatos del repo y del perfil | descripción, topics, `homepageUrl`, licencia, «Start here» | pendiente, ver [En progreso](#en-progreso) |
 
 ## Índice de auditorías publicadas con datos
 
 Cinco resultados de análisis de grafo, reproducibles desde sus snapshots JSON fijados a commit.
-Los diez snapshots de imports están en el release público
-[`arch-index-20261029-batch2`](https://github.com/alexisromtz-lab/platino-data-room/releases/tag/arch-index-20261029-batch2);
-el 29-oct-2026 los diez recibieron la capa SCC (`graph-input/1+scc/2`), así que todos los activos cambiaron de tamaño y de SHA-256 respecto de la primera carga.
+Los 23 snapshots de imports están en el release público
+[`arch-index-20261029-batch2`](https://github.com/alexisromtz-lab/platino-data-room/releases/tag/arch-index-20261029-batch2): diez llevan la capa SCC canónica (`graph-input/1+scc/2`) y trece adicionales publican imports sin resultados SCC. El 29-oct-2026 los diez primeros recibieron la capa SCC, así que esos diez activos cambiaron de tamaño y de SHA-256 respecto de la primera carga.
 
 | repositorio | commit-pin | módulos | aristas internas | SCC cíclicas | tamaños | sin expansión de `__init__` | activo |
 |---|---|---|---|---|---|---|---|
@@ -70,7 +69,7 @@ los repositorios mejor que el conteo absoluto: `pytorch` mete el 67,7 % (1,710 d
 
 ### Snapshots AST publicados · release `arch-index-20261029-batch2`
 
-Estos cinco snapshots adicionales usan `ingesta_ast/v2`. La publicación reúne diez JSON en el [Data Room público](https://github.com/alexisromtz-lab/platino-data-room/releases/tag/arch-index-20261029-batch2); los cinco siguientes no traen resultados de sensibilidad; su capa SCC canónica está en la tabla de arriba. Sus registros, tamaños y commit-pins se verificaron en los assets del release.
+Estos cinco snapshots pertenecen a la cohorte inicial de diez y usan `ingesta_ast/v2`; todos tienen la capa SCC canónica listada arriba, aunque solo cinco incluyen sensibilidad al método. Sus registros, tamaños y commit-pins se verificaron en los assets del release.
 
 | repositorio | commit-pin | esquema | registros `imports` | bytes | snapshot publicado |
 |---|---|---|---:|---:|---|
@@ -79,6 +78,28 @@ Estos cinco snapshots adicionales usan `ingesta_ast/v2`. La publicación reúne 
 | [huggingface/huggingface_hub](https://github.com/huggingface/huggingface_hub/commit/1725fefe88119095d3d01a384b68dc85a5e58270) | `1725fefe88119095d3d01a384b68dc85a5e58270` | `ingesta_ast/v2` | 3,496 | 559,997 | [`public_graph_huggingface_hub_1725fefe.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_huggingface_hub_1725fefe.json) |
 | [apache/airflow](https://github.com/apache/airflow/commit/37b6b04e7233ec47c193915d6cff04dac742d5fd) | `37b6b04e7233ec47c193915d6cff04dac742d5fd` | `ingesta_ast/v2` | 11,651 | 2,171,655 | [`public_graph_airflow_37b6b04e.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_airflow_37b6b04e.json) |
 | [pytorch/pytorch](https://github.com/pytorch/pytorch/commit/611154b3f03d63acac16cac8e8deb53a4deaed80) | `611154b3f03d63acac16cac8e8deb53a4deaed80` | `ingesta_ast/v2` | 42,083 | 7,468,906 | [`public_graph_pytorch_611154b3.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_pytorch_611154b3.json) |
+
+### Trece snapshots adicionales · imports AST sin capa SCC
+
+Estos activos amplían el Data Room de diez a 23 snapshots. Son instantáneas de imports (`ingesta_ast/v2`), no resultados SCC; sus cifras no amplían la cohorte SCC ni sus comparaciones.
+
+| repositorio | commit-pin | archivos Python | registros `imports` | bytes | snapshot publicado |
+|---|---|---:|---:|---:|---|
+| [apache/superset](https://github.com/apache/superset/commit/22f768c3a55a508d09aef90798a1a7cfff001a31) | `22f768c3a55a508d09aef90798a1a7cfff001a31` | 3,070 | 45,145 | 8,624,859 | [`ingesta_ast_v2_apache_superset_22f768c3a55a.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_apache_superset_22f768c3a55a.json) |
+| [celery/celery](https://github.com/celery/celery/commit/2ef8265b0a1dd977abdbcb087d3208b6575842c1) | `2ef8265b0a1dd977abdbcb087d3208b6575842c1` | 450 | 5,041 | 814,798 | [`ingesta_ast_v2_celery_celery_2ef8265b0a1d.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_celery_celery_2ef8265b0a1d.json) |
+| [gradio-app/gradio](https://github.com/gradio-app/gradio/commit/211e8027c74e24429ddf91949c6371cbe69aee09) | `211e8027c74e24429ddf91949c6371cbe69aee09` | 784 | 5,466 | 904,303 | [`ingesta_ast_v2_gradio-app_gradio_211e8027c74e.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_gradio-app_gradio_211e8027c74e.json) |
+| [matplotlib/matplotlib](https://github.com/matplotlib/matplotlib/commit/f318e28550a32e7a1b086303d6d2507a5a8585bf) | `f318e28550a32e7a1b086303d6d2507a5a8585bf` | 914 | 6,165 | 1,124,543 | [`ingesta_ast_v2_matplotlib_matplotlib_f318e28550a3.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_matplotlib_matplotlib_f318e28550a3.json) |
+| [mlflow/mlflow](https://github.com/mlflow/mlflow/commit/cd1597e989e8667dad4603b9413fd4ea63b6237e) | `cd1597e989e8667dad4603b9413fd4ea63b6237e` | 2,882 | 41,301 | 7,507,603 | [`ingesta_ast_v2_mlflow_mlflow_cd1597e989e8.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_mlflow_mlflow_cd1597e989e8.json) |
+| [numpy/numpy](https://github.com/numpy/numpy/commit/fe8c5053e5f5a0d7c7c6835a9f690b9a42124747) | `fe8c5053e5f5a0d7c7c6835a9f690b9a42124747` | 495 | 5,235 | 846,866 | [`ingesta_ast_v2_numpy_numpy_fe8c5053e5f5.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_numpy_numpy_fe8c5053e5f5.json) |
+| [pandas-dev/pandas](https://github.com/pandas-dev/pandas/commit/0988929a21cdcc933b380871a622138eb18cc207) | `0988929a21cdcc933b380871a622138eb18cc207` | 1,546 | 17,509 | 2,987,025 | [`ingesta_ast_v2_pandas-dev_pandas_0988929a21cd.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_pandas-dev_pandas_0988929a21cd.json) |
+| [pydantic/pydantic](https://github.com/pydantic/pydantic/commit/dd0c36a4be235522e34659ba372c59b43b55f33e) | `dd0c36a4be235522e34659ba372c59b43b55f33e` | 465 | 6,808 | 1,100,906 | [`ingesta_ast_v2_pydantic_pydantic_dd0c36a4be23.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_pydantic_pydantic_dd0c36a4be23.json) |
+| [pytest-dev/pytest](https://github.com/pytest-dev/pytest/commit/a7b2446ee41a7298d3a0bc22c52f3b8bacae1566) | `a7b2446ee41a7298d3a0bc22c52f3b8bacae1566` | 274 | 3,278 | 523,722 | [`ingesta_ast_v2_pytest-dev_pytest_a7b2446ee41a.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_pytest-dev_pytest_a7b2446ee41a.json) |
+| [python-poetry/poetry](https://github.com/python-poetry/poetry/commit/d59ff3b47c5d70b5e4934db874e94ea78b98feb8) | `d59ff3b47c5d70b5e4934db874e94ea78b98feb8` | 451 | 4,341 | 776,354 | [`ingesta_ast_v2_python-poetry_poetry_d59ff3b47c5d.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_python-poetry_poetry_d59ff3b47c5d.json) |
+| [saleor/saleor](https://github.com/saleor/saleor/commit/cc4aea76e397b1dead74363c266c579ae808770f) | `cc4aea76e397b1dead74363c266c579ae808770f` | 4,371 | 36,543 | 7,340,685 | [`ingesta_ast_v2_saleor_saleor_cc4aea76e397.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_saleor_saleor_cc4aea76e397.json) |
+| [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn/commit/d685424bec8f8585d8017c1aab1db7535d3fa03d) | `d685424bec8f8585d8017c1aab1db7535d3fa03d` | 1,033 | 14,780 | 2,662,667 | [`ingesta_ast_v2_scikit-learn_scikit-learn_d685424bec8f.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_scikit-learn_scikit-learn_d685424bec8f.json) |
+| [wagtail/wagtail](https://github.com/wagtail/wagtail/commit/49c8767eab954e5e027c806c4833398b1aa297a8) | `49c8767eab954e5e027c806c4833398b1aa297a8` | 1,338 | 11,082 | 2,061,453 | [`ingesta_ast_v2_wagtail_wagtail_49c8767eab95.json`](https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_wagtail_wagtail_49c8767eab95.json) |
+
+<!-- HUELLA-LA-AUDITORA-23-README-20261029 -->
 
 `apache/airflow` y `pytorch/pytorch` entraron al Data Room como checkpoints de ingesta; la capa SCC
 se calculó después sobre esos mismos commits, y sus conteos viven en la tabla canónica de arriba.
@@ -92,10 +113,10 @@ prosa con otro commit (`210bb7ca`), otro método y otro hallazgo.
 <!-- HUELLA-LA-AUDITORA-10-PUBLICADOS-20261029 -->
 
 Los cinco resultados `graph_sensitivity_*.json` declaran `source_bytes_verified: false`: los bytes
-fuente no se re-verificaron contra el checkout al proyectarlos. Los cinco snapshots AST adicionales
-publican imports y desde el 29-oct-2026 también la capa SCC canónica; los `graph_sensitivity_*`
-siguen siendo otra medición, con su propio método y su propio límite declarado. vLLM está incluido
-arriba, entre los cinco grafos.
+fuente no se re-verificaron contra el checkout al proyectarlos. Los cinco snapshots AST de la cohorte
+inicial publican imports y la capa SCC canónica; los trece snapshots añadidos al ampliar el Data Room
+son solo de imports y no publican métricas SCC. Los `graph_sensitivity_*` siguen siendo otra medición,
+con su propio método y su propio límite declarado. vLLM está incluido arriba, entre los cinco grafos.
 
 Release anterior: [`arch-index-20261028-v1`](https://github.com/alexisromtz-lab/la-auditora/releases/tag/arch-index-20261028-v1)
 (28-oct-2026, seis activos: los mismos cinco grafos sin la capa de sensibilidad).
@@ -164,9 +185,10 @@ tablas separadas.
 
 ## En progreso
 
-La capa SCC ya está publicada para los diez. Lo que sigue pendiente es la segunda capa: la
-sensibilidad al método —con y sin expansión de `__init__`— existe solo para cinco activos, así que
-los otros cinco publican hoy un único número, sin contraste contra su propio defecto declarado.
+La capa SCC está publicada para los diez snapshots de la cohorte inicial; los trece añadidos después
+son snapshots de imports sin SCC y no amplían esa muestra. La sensibilidad al método —con y sin
+expansión de `__init__`— existe solo para cinco de los diez activos SCC; los otros cinco publican un
+único número, sin contraste contra su propio defecto declarado.
 
 ## Cómo se reproduce
 
@@ -205,7 +227,7 @@ JSON publicado es la entrada, no la salida del programa.
   (`type_checking_imports_excluded: 95`), y con ellos cualquier ciclo que solo exista ahí.
 - **Sensibilidad al expansor.** Con y sin expansión de `__init__.py` ancestrales, LangChain pasa
   de 2 componentes cíclicas a 0. El número no es robusto al método, y por eso se publican los dos.
-- **`source_bytes_verified: false`** en los cinco resultados de `graph_sensitivity_*.json`; los cinco snapshots AST adicionales no publican métricas SCC.
+- **`source_bytes_verified: false`** en los cinco resultados de `graph_sensitivity_*.json`; los trece snapshots añadidos al Data Room después de la cohorte SCC no publican métricas SCC.
 
 ## Falsabilidad y negativos publicables
 

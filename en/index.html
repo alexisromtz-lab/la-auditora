@@ -148,7 +148,7 @@
 
       <section class="section" id="data-room" aria-labelledby="data-room-title">
         <h2 id="data-room-title">Data Room · the data, with its commit</h2>
-        <p class="intro">Ten import snapshots as JSON, each pinned to a commit, are published in the <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/tag/arch-index-20261029-batch2"><code>public Data Room · arch-index-20261029-batch2</code></a>. All ten carry the canonical SCC layer (<code>graph-input/1+scc/2</code>): iterative Tarjan and Kahn condensation over each commit's import graph. The five analyses reproduce with <code>calculate_arch_index.py</code> and the sensitivity results of the <a href="https://github.com/alexisromtz-lab/la-auditora/releases/tag/arch-index-20261028-v2">tool release</a>.</p>
+        <p class="intro">23 import snapshots as JSON, each pinned to a commit, are published in the <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/tag/arch-index-20261029-batch2"><code>public Data Room · arch-index-20261029-batch2</code></a>: ten carry the canonical SCC layer (<code>graph-input/1+scc/2</code>), and thirteen additional AST snapshots do not include SCC results. The five analyses reproduce with <code>calculate_arch_index.py</code> and the sensitivity results of the <a href="https://github.com/alexisromtz-lab/la-auditora/releases/tag/arch-index-20261028-v2">tool release</a>.</p>
         <div class="grid">
           <article>
             <span class="tag">LangChain · import graph · sensitivity</span>
@@ -220,8 +220,87 @@
             <p>67.7 % of the modules (1,710 of 2,527) sit inside a cycle, and the largest drags in 1,660. The prose audit above measures something else, at another commit (<code>210bb7ca</code>).</p>
             <p class="source"><a href="https://github.com/pytorch/pytorch/commit/611154b3f03d63acac16cac8e8deb53a4deaed80" target="_blank" rel="noopener noreferrer">pytorch/pytorch · 611154b3</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/public_graph_pytorch_611154b3.json">JSON</a></p>
           </article>
+          <article>
+            <span class="tag">Apache Superset · import snapshot · no SCC layer</span>
+            <h3>Apache Superset · AST ingestion</h3>
+            <p class="metric">3,070 Python files · 45,145 import records · 8,624,859 bytes</p>
+            <p class="source"><a href="https://github.com/apache/superset/commit/22f768c3a55a508d09aef90798a1a7cfff001a31" target="_blank" rel="noopener noreferrer">apache/superset · 22f768c3a55a</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_apache_superset_22f768c3a55a.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">Celery · import snapshot · no SCC layer</span>
+            <h3>Celery · AST ingestion</h3>
+            <p class="metric">450 Python files · 5,041 import records · 814,798 bytes</p>
+            <p class="source"><a href="https://github.com/celery/celery/commit/2ef8265b0a1dd977abdbcb087d3208b6575842c1" target="_blank" rel="noopener noreferrer">celery/celery · 2ef8265b0a1d</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_celery_celery_2ef8265b0a1d.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">Gradio · import snapshot · no SCC layer</span>
+            <h3>Gradio · AST ingestion</h3>
+            <p class="metric">784 Python files · 5,466 import records · 904,303 bytes</p>
+            <p class="source"><a href="https://github.com/gradio-app/gradio/commit/211e8027c74e24429ddf91949c6371cbe69aee09" target="_blank" rel="noopener noreferrer">gradio-app/gradio · 211e8027c74e</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_gradio-app_gradio_211e8027c74e.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">Matplotlib · import snapshot · no SCC layer</span>
+            <h3>Matplotlib · AST ingestion</h3>
+            <p class="metric">914 Python files · 6,165 import records · 1,124,543 bytes</p>
+            <p class="source"><a href="https://github.com/matplotlib/matplotlib/commit/f318e28550a32e7a1b086303d6d2507a5a8585bf" target="_blank" rel="noopener noreferrer">matplotlib/matplotlib · f318e28550a3</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_matplotlib_matplotlib_f318e28550a3.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">MLflow · import snapshot · no SCC layer</span>
+            <h3>MLflow · AST ingestion</h3>
+            <p class="metric">2,882 Python files · 41,301 import records · 7,507,603 bytes</p>
+            <p class="source"><a href="https://github.com/mlflow/mlflow/commit/cd1597e989e8667dad4603b9413fd4ea63b6237e" target="_blank" rel="noopener noreferrer">mlflow/mlflow · cd1597e989e8</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_mlflow_mlflow_cd1597e989e8.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">NumPy · import snapshot · no SCC layer</span>
+            <h3>NumPy · AST ingestion</h3>
+            <p class="metric">495 Python files · 5,235 import records · 846,866 bytes</p>
+            <p class="source"><a href="https://github.com/numpy/numpy/commit/fe8c5053e5f5a0d7c7c6835a9f690b9a42124747" target="_blank" rel="noopener noreferrer">numpy/numpy · fe8c5053e5f5</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_numpy_numpy_fe8c5053e5f5.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">Pandas · import snapshot · no SCC layer</span>
+            <h3>Pandas · AST ingestion</h3>
+            <p class="metric">1,546 Python files · 17,509 import records · 2,987,025 bytes</p>
+            <p class="source"><a href="https://github.com/pandas-dev/pandas/commit/0988929a21cdcc933b380871a622138eb18cc207" target="_blank" rel="noopener noreferrer">pandas-dev/pandas · 0988929a21cd</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_pandas-dev_pandas_0988929a21cd.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">Pydantic · import snapshot · no SCC layer</span>
+            <h3>Pydantic · AST ingestion</h3>
+            <p class="metric">465 Python files · 6,808 import records · 1,100,906 bytes</p>
+            <p class="source"><a href="https://github.com/pydantic/pydantic/commit/dd0c36a4be235522e34659ba372c59b43b55f33e" target="_blank" rel="noopener noreferrer">pydantic/pydantic · dd0c36a4be23</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_pydantic_pydantic_dd0c36a4be23.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">pytest · import snapshot · no SCC layer</span>
+            <h3>pytest · AST ingestion</h3>
+            <p class="metric">274 Python files · 3,278 import records · 523,722 bytes</p>
+            <p class="source"><a href="https://github.com/pytest-dev/pytest/commit/a7b2446ee41a7298d3a0bc22c52f3b8bacae1566" target="_blank" rel="noopener noreferrer">pytest-dev/pytest · a7b2446ee41a</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_pytest-dev_pytest_a7b2446ee41a.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">Poetry · import snapshot · no SCC layer</span>
+            <h3>Poetry · AST ingestion</h3>
+            <p class="metric">451 Python files · 4,341 import records · 776,354 bytes</p>
+            <p class="source"><a href="https://github.com/python-poetry/poetry/commit/d59ff3b47c5d70b5e4934db874e94ea78b98feb8" target="_blank" rel="noopener noreferrer">python-poetry/poetry · d59ff3b47c5d</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_python-poetry_poetry_d59ff3b47c5d.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">Saleor · import snapshot · no SCC layer</span>
+            <h3>Saleor · AST ingestion</h3>
+            <p class="metric">4,371 Python files · 36,543 import records · 7,340,685 bytes</p>
+            <p class="source"><a href="https://github.com/saleor/saleor/commit/cc4aea76e397b1dead74363c266c579ae808770f" target="_blank" rel="noopener noreferrer">saleor/saleor · cc4aea76e397</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_saleor_saleor_cc4aea76e397.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">scikit-learn · import snapshot · no SCC layer</span>
+            <h3>scikit-learn · AST ingestion</h3>
+            <p class="metric">1,033 Python files · 14,780 import records · 2,662,667 bytes</p>
+            <p class="source"><a href="https://github.com/scikit-learn/scikit-learn/commit/d685424bec8f8585d8017c1aab1db7535d3fa03d" target="_blank" rel="noopener noreferrer">scikit-learn/scikit-learn · d685424bec8f</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_scikit-learn_scikit-learn_d685424bec8f.json">JSON</a></p>
+          </article>
+          <article>
+            <span class="tag">Wagtail · import snapshot · no SCC layer</span>
+            <h3>Wagtail · AST ingestion</h3>
+            <p class="metric">1,338 Python files · 11,082 import records · 2,061,453 bytes</p>
+            <p class="source"><a href="https://github.com/wagtail/wagtail/commit/49c8767eab954e5e027c806c4833398b1aa297a8" target="_blank" rel="noopener noreferrer">wagtail/wagtail · 49c8767eab95</a> · <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/arch-index-20261029-batch2/ingesta_ast_v2_wagtail_wagtail_49c8767eab95.json">JSON</a></p>
+          </article>
         </div>
-        <p class="notice" style="margin-top:1.2rem"><strong>Ten public snapshots, two layers.</strong> The Data Room offers ten snapshots with the canonical SCC layer (<code>graph-input/1+scc/2</code>); five of them also carry a sensitivity analysis of the method, and those five declare <code>source_bytes_verified: false</code>. This page also summarizes six prose audits; <code>huggingface/transformers</code> and <code>pytorch/pytorch</code> appear in both cohorts but at different commits: <code>b4a5b4b2</code> and <code>210bb7ca</code> above, <code>95bafdcc</code> and <code>611154b3</code> here. Full table and method: <a href="https://github.com/alexisromtz-lab/la-auditora#readme">repository README</a>.</p>
+        <p class="notice" style="margin-top:1.2rem"><strong>23 public snapshots, two cohorts.</strong> Ten include the canonical SCC layer (<code>graph-input/1+scc/2</code>); the other thirteen are import-only AST snapshots with no SCC metrics. Five of the ten SCC snapshots also carry sensitivity analyses and declare <code>source_bytes_verified: false</code>. This page also summarizes six prose audits; <code>huggingface/transformers</code> and <code>pytorch/pytorch</code> appear in both cohorts at different commits: <code>b4a5b4b2</code> and <code>210bb7ca</code> above, <code>95bafdcc</code> and <code>611154b3</code> here. Full table and method: <a href="https://github.com/alexisromtz-lab/la-auditora#readme">repository README</a>.</p>
+        <!-- HUELLA-LA-AUDITORA-23-EN-HTML-20261029 -->
         <!-- HUELLA-DATAROOM-LA-AUDITORA-20261029 -->
         <!-- HUELLA-LA-AUDITORA-EN-HTML-10-PUBLICADOS-20261029 -->
         <!-- HUELLA-LA-AUDITORA-EN-HTML-SCC-20261029 -->
