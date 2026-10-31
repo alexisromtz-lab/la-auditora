@@ -28,9 +28,9 @@
 
 ## Current checks
 
-`main` requires pull requests, resolved conversations, and the `validate_html` status check; it does not require approvals. The `Pull request checks` workflow runs two separate jobs for pull requests to `main`: `validate_html` checks the local pages and is required for merging; `smoke_test_live` checks the published pages and is not required, so a Pages or network outage does not block a merge when the deterministic check passes.
+`main` requires pull requests, resolved conversations, and the `validate_html` status check; it does not require approvals. The `Pull request checks` workflow runs two separate jobs for pull requests to `main`: required `validate_html` runs the monitor regression tests and checks local pages; `smoke_test_live` checks published pages and is not required, so a Pages or network outage does not block a merge when deterministic checks pass.
 
-Running `./setup.sh` and passing the local `pre-push` hook remain project requirements, but the hook is local and can be bypassed; GitHub enforces `validate_html` through branch protection. A green `validate_html` check certifies only the local contact checks, not live availability.
+Running `./setup.sh` and passing the local `pre-push` hook remain project requirements, but the hook is local and can be bypassed; GitHub enforces `validate_html` through branch protection. A green `validate_html` check certifies the monitor's deterministic regression tests and local contact checks, not live availability. The `Daily availability monitor` workflow runs at 08:00 UTC and can also be dispatched manually; it records HTTP status, response time, and WhatsApp-link presence in a per-run CSV artifact retained for 30 days. A failed live probe fails that run, but the CSV upload still runs.
 
 ## If the contact check fails
 
@@ -41,5 +41,6 @@ Running `./setup.sh` and passing the local `pre-push` hook remain project requir
 <!-- CONTRIB-CI-STATE-20261031 -->
 <!-- HUELLA-CONTRIBUTING-CI-ENFORCED-20261031 -->
 <!-- HUELLA-CONTRIB-CTA-POLICY-20261031 -->
+<!-- HUELLA-CONTRIBUTING-MONITOR-20261031 -->
 <!-- HUELLA-CONTRIB-ALL-CTA-PAGES-20261031 -->
 <!-- HUELLA-CONTRIB-CI-SYNC-20261031 -->
