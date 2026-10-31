@@ -1,0 +1,130 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+# HUELLA-PLATINO-AUDIT-ROLE-CFN-20261023
+# Rol de auditoria FinOps de SOLO LECTURA. Un despliegue, un rol, una huella.
+#
+# Por que NO se usa la politica administrada `SecurityAudit`: medido en
+# sonda_finops.py, no concede NI UNA accion `ce:*` ni
+# `cloudwatch:GetMetricStatistics` (con ella la factura sale `null`, sin
+# denominador) y, a la vez, regala cientos de Describe que esta auditoria no
+# usa. La lista cerrada de abajo es a la vez suficiente y minima.
+#
+# Por que el Deny con NotAction: el rol podria quedar bien hoy y recibir un
+# `Allow` manana por otra via. Aqui todo lo que no este en la lista se niega
+# explicitamente, de modo que "no tocamos nada" se puede verificar con
+# `aws iam simulate-principal-policy` y no queda como frase del contrato.
+
+Description: >-
+  Platino Labs - Diagnostico FinOps: rol cross-account de solo lectura.
+  Sin escritura, sin borrado, sin cambio de recursos. ExternalId obligatorio.
+
+Parameters:
+  ExternalId:
+    Type: String
+    MinLength: 16
+    MaxLength: 128
+    AllowedPattern: "^[A-Za-z0-9_+=,.@:/-]+$"
+    Description: >-
+      ExternalId unico generado por Platino Labs para ESTA cuenta. Se compara
+      exacto con sts:ExternalId; sin el, el rol no se puede asumir (defensa
+      contra el ataque de diputado confundido).
+
+  PrincipalPlatinoArn:
+    Type: String
+    MinLength: 20
+    MaxLength: 2048
+    AllowedPattern: '^(arn:aws|arn:aws-us-gov|arn:aws-cn):iam::[0-9]{12}:role/[A-Za-z0-9+=,.@_/-]+$'
+    Description: ARN del rol IAM dedicado de Platino Labs autorizado a asumir el rol; no se acepta la raiz de la cuenta.
+
+  RegionAuditoria:
+    Type: String
+    Default: us-east-1
+    Description: Región única para las lecturas de EC2, RDS y CloudWatch.
+
+  NombreRol:
+    Type: String
+    Default: PlatinoAuditRole
+    MinLength: 1
+    MaxLength: 64
+    AllowedPattern: "^[A-Za-z0-9+=,.@_-]+$"
+    Description: Nombre del rol. Si ya existe uno con este nombre, el despliegue falla en vez de reemplazarlo.
+
+Resources:
+  PlatinoAuditRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref NombreRol
+      Description: Solo lectura para diagnostico FinOps (Platino Labs)
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: SoloPlatinoConExternalId
+            Effect: Allow
+            Principal:
+              AWS: !Ref PrincipalPlatinoArn
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Ref ExternalId
+      Policies:
+        - PolicyName: PlatinoFinopsLecturaEstricta
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: CostExplorerReadOnly
+                Effect: Allow
+                Action:
+                  - ce:GetCostAndUsage
+                  - ce:GetSavingsPlansCoverage
+                  - ce:GetReservationCoverage
+                Resource: "*"
+              - Sid: RegionalInventoryReadOnly
+                Effect: Allow
+                Action:
+                  - cloudwatch:GetMetricStatistics
+                  - ec2:DescribeAddresses
+                  - ec2:DescribeInstances
+                  - ec2:DescribeVolumes
+                  - rds:DescribeDBInstances
+                Resource: "*"
+                Condition:
+                  StringEquals:
+                    aws:RequestedRegion: !Ref RegionAuditoria
+              # La denegacion explicita neutraliza permisos ajenos que intenten
+              # habilitar acciones fuera de esta lista cerrada.
+              - Sid: DenyAllOtherActions
+                Effect: Deny
+                NotAction:
+                  - ce:GetCostAndUsage
+                  - ce:GetSavingsPlansCoverage
+                  - ce:GetReservationCoverage
+                  - cloudwatch:GetMetricStatistics
+                  - ec2:DescribeAddresses
+                  - ec2:DescribeInstances
+                  - ec2:DescribeVolumes
+                  - rds:DescribeDBInstances
+                  - sts:GetCallerIdentity
+                Resource: "*"
+              - Sid: DenyRegionalReadsOutsideScope
+                Effect: Deny
+                Action:
+                  - cloudwatch:GetMetricStatistics
+                  - ec2:DescribeAddresses
+                  - ec2:DescribeInstances
+                  - ec2:DescribeVolumes
+                  - rds:DescribeDBInstances
+                Resource: "*"
+                Condition:
+                  StringNotEquals:
+                    aws:RequestedRegion: !Ref RegionAuditoria
+
+Outputs:
+  RoleArn:
+    Description: ARN del rol; compartirlo solo por el canal privado acordado
+    Value: !GetAtt PlatinoAuditRole.Arn
+
+# El ExternalId ya fue entregado por Platino Labs; no se replica en outputs.
+# HUELLA-CFN-IAM-LEAST-PRIVILEGE-20261031
+# HUELLA-CFN-TRUSTED-PRINCIPAL-20261031
+# HUELLA-CFN-OUTPUT-MINIMIZATION-20261031
