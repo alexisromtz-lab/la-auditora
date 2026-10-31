@@ -25,7 +25,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
       - name: Check published portfolio contact
-        run: bash tests/test_portafolio_contacto.sh published
+        run: CHECK_PUBLISHED=1 bash tests/test_portafolio_contacto.sh
 
 # HUELLA-CI-PORTAFOLIO-20261031
 # HUELLA-CI-DECOUPLED-20261031
+# HUELLA-CI-PUBLISHED-ENV-20261031
