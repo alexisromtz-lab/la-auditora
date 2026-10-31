@@ -23,9 +23,9 @@
 
 ## Current checks
 
-`main` requires pull requests and resolved conversations; it does not require an approval or a status check. This repository has an active GitHub Pages deployment workflow, but no CI workflow that tests pull requests. The billing block measured in the private `platino-labs` repository does not establish that Actions are disabled here.
+`main` requires pull requests, resolved conversations, and the `Portfolio contact regression` status check; it does not require approvals. The `Pull request checks` workflow runs `bash ./setup.sh` and `bash tests/test_portafolio_contacto.sh` for pull requests to `main`. The regression checks local pages and the published GitHub Pages URLs, so it needs network access and a reachable site.
 
-Running `./setup.sh` and passing the local `pre-push` hook are project requirements, but the hook is local and can be bypassed; GitHub does not enforce it server-side. Do not treat a green pull request as proof that the contact regression ran.
+Running `./setup.sh` and passing the local `pre-push` hook remain project requirements, but the hook is local and can be bypassed; GitHub enforces the regression separately through the required status check. A green check certifies only the checks and URLs tested by that workflow.
 
 ## If the hook blocks a push
 
@@ -34,3 +34,4 @@ Running `./setup.sh` and passing the local `pre-push` hook are project requireme
 - For a local or published contact mismatch, do not change the expected email on your own; ask the maintainers to confirm the approved contact value.
 
 <!-- CONTRIB-CI-STATE-20261031 -->
+<!-- HUELLA-CONTRIBUTING-CI-ENFORCED-20261031 -->
