@@ -1,0 +1,23 @@
+name: Pull request checks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  portfolio-contact:
+    name: Portfolio contact regression
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Configure repository hooks
+        run: bash ./setup.sh
+      - name: Test portfolio contact
+        run: bash tests/test_portafolio_contacto.sh
+
+# HUELLA-CI-PORTAFOLIO-20261031
