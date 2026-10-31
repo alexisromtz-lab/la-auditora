@@ -10,16 +10,21 @@
    ```
 
    This changes only this clone's local Git configuration. Confirm with `git config --local --get core.hooksPath` (`.githooks`).
-3. Before opening a pull request, run:
+3. Before opening a pull request, run the local contact check:
 
    ```sh
    bash tests/test_portafolio_contacto.sh
    ```
 
-   It checks the local portfolio pages and the deployed pages, so it needs network access and a reachable GitHub Pages site.
+   It checks both local language pages for the approved WhatsApp and GitHub Issues links and rejects `mailto:`. It does not need network access.
 4. Push the topic branch and open a pull request to `main`. Resolve review conversations before merging.
-5. After merging a portfolio change, verify:
-   `https://alexisromtz-lab.github.io/la-auditora/portafolio/`.
+5. After merging and the Pages deployment completes, verify the published contact links:
+
+   ```sh
+   CHECK_PUBLISHED=1 bash tests/test_portafolio_contacto.sh
+   ```
+
+   This checks both deployed language pages and requires network access.
 
 ## Current checks
 
@@ -27,10 +32,11 @@
 
 Running `./setup.sh` and passing the local `pre-push` hook are project requirements, but the hook is local and can be bypassed; GitHub does not enforce it server-side. Do not treat a green pull request as proof that the contact regression ran.
 
-## If the hook blocks a push
+## If the contact check fails
 
-- Keep the exact `FAIL:` message and run `bash tests/test_portafolio_contacto.sh` to reproduce it.
-- For a network or HTTP failure, check connectivity and the published Pages URL, then retry.
-- For a local or published contact mismatch, do not change the expected email on your own; ask the maintainers to confirm the approved contact value.
+- Keep the exact `FAIL:` message and run `bash tests/test_portafolio_contacto.sh` to reproduce a local failure.
+- For a published-page failure, confirm the Pages deployment completed, then run `CHECK_PUBLISHED=1 bash tests/test_portafolio_contacto.sh` again.
+- Do not change the approved WhatsApp or GitHub Issues destinations without maintainer confirmation.
 
 <!-- CONTRIB-CI-STATE-20261031 -->
+<!-- HUELLA-CONTRIB-CTA-POLICY-20261031 -->
