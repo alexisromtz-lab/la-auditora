@@ -244,6 +244,12 @@ JSON publicado es la entrada, no la salida del programa.
 - **Controles:** el instrumento trae `--self-test` con un control mínimo de Tarjan; un instrumento
   sin control negativo no se publica.
 
+## Piloto FinOps · materiales de evaluación
+
+El piloto ofrece un diagnóstico read-only de una cuenta AWS, sujeto a alcance y convenio firmados. El [informe de ejemplo](./finops-ejemplo-sintetico.pdf) usa exclusivamente datos sintéticos: no es una auditoría de cliente, no acredita ahorros reales ni demuestra demanda. La [guía del piloto](./PILOTO_AWS.md) explica el alcance, los límites y el onboarding; la [plantilla CloudFormation](./PLANTILLA_CFN_PLATINO_AUDIT_ROLE.yaml) publica los permisos para revisión antes del despliegue. La cotización final se confirma por escrito antes de crear el rol.
+
+<!-- HUELLA-FINOPS-PUBLIC-MUESTRA-20261031 -->
+
 ## Contacto
 
 - Propuestas y preguntas: sección **Contacto** del sitio —
