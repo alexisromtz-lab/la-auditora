@@ -16,7 +16,7 @@
    bash tests/test_portafolio_contacto.sh
    ```
 
-   It checks both local language pages for the approved WhatsApp and GitHub Issues links and rejects `mailto:`. It does not need network access.
+   It checks the Spanish and English home and portfolio pages for actual WhatsApp and GitHub Issues links, rejects `mailto:` links, and does not need network access.
 4. Push the topic branch and open a pull request to `main`. Resolve review conversations before merging.
 5. After merging and the Pages deployment completes, verify the published contact links:
 
@@ -24,7 +24,7 @@
    CHECK_PUBLISHED=1 bash tests/test_portafolio_contacto.sh
    ```
 
-   This checks both deployed language pages and requires network access.
+   This checks the deployed Spanish and English home and portfolio pages and requires network access.
 
 ## Current checks
 
@@ -41,3 +41,4 @@ Running `./setup.sh` and passing the local `pre-push` hook remain project requir
 <!-- CONTRIB-CI-STATE-20261031 -->
 <!-- HUELLA-CONTRIBUTING-CI-ENFORCED-20261031 -->
 <!-- HUELLA-CONTRIB-CTA-POLICY-20261031 -->
+<!-- HUELLA-CONTRIB-ALL-CTA-PAGES-20261031 -->
