@@ -10,28 +10,33 @@
    ```
 
    The setup preserves an effective `.githooks` path, stops rather than replacing a custom path, or sets `.githooks` locally if no hook path is configured. Confirm the effective value with `git config --get core.hooksPath` (`.githooks`).
-3. Before opening a pull request, run:
+3. Before opening a pull request, run the deterministic local check:
 
    ```sh
    bash tests/test_portafolio_contacto.sh
    ```
 
-   It checks the local portfolio pages and the deployed pages, so it needs network access and a reachable GitHub Pages site.
+   This checks both local portfolio pages and does not need network access.
 4. Push the topic branch and open a pull request to `main`. Resolve review conversations before merging.
-5. After merging a portfolio change, verify:
-   `https://alexisromtz-lab.github.io/la-auditora/portafolio/`.
+5. After a portfolio deployment, check the published pages separately:
+
+   ```sh
+   bash tests/test_portafolio_contacto.sh published
+   ```
+
+   This smoke test needs network access and a reachable GitHub Pages site.
 
 ## Current checks
 
-`main` requires pull requests, resolved conversations, and the `Portfolio contact regression` status check; it does not require approvals. The `Pull request checks` workflow runs `bash ./setup.sh` and `bash tests/test_portafolio_contacto.sh` for pull requests to `main`. The regression checks local pages and the published GitHub Pages URLs, so it needs network access and a reachable site.
+`main` requires pull requests, resolved conversations, and the `validate_html` status check; it does not require approvals. The `Pull request checks` workflow runs two separate jobs for pull requests to `main`: `validate_html` checks local HTML and is required for merging; `smoke_test_live` checks the published pages and is not required, so a Pages or network outage does not block a merge when the deterministic check passes.
 
-Running `./setup.sh` and passing the local `pre-push` hook remain project requirements, but the hook is local and can be bypassed; GitHub enforces the regression separately through the required status check. A green check certifies only the checks and URLs tested by that workflow.
+Running `./setup.sh` and passing the local `pre-push` hook remain project requirements, but the hook is local and can be bypassed; GitHub enforces `validate_html` through branch protection. A green `validate_html` check certifies only the local contact checks, not live availability.
 
-## If the hook blocks a push
+## If a check fails
 
-- Keep the exact `FAIL:` message and run `bash tests/test_portafolio_contacto.sh` to reproduce it.
-- For a network or HTTP failure, check connectivity and the published Pages URL, then retry.
-- For a local or published contact mismatch, do not change the expected email on your own; ask the maintainers to confirm the approved contact value.
+- For a local contact mismatch, run `bash tests/test_portafolio_contacto.sh` to reproduce it. Do not change the approved email without maintainer confirmation.
+- For a failed `smoke_test_live`, check connectivity and the published Pages URLs, then retry; this check is informational and does not block merges.
 
 <!-- CONTRIB-CI-STATE-20261031 -->
 <!-- HUELLA-CONTRIBUTING-CI-ENFORCED-20261031 -->
+<!-- HUELLA-CONTRIBUTING-CI-DECOUPLED-20261031 -->
