@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<title>Diagnostico FinOps — Muestra FinOps - datos sinteticos — 2026-09</title>
+<style>
+@page { size: A4; margin: 16mm 14mm 16mm 14mm; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+       color: #14181d; font-size: 9.6pt; line-height: 1.45; margin: 0; }
+header { border-bottom: 2px solid #14181d; padding-bottom: 8px; margin-bottom: 14px; }
+.membrete { display: flex; justify-content: space-between; align-items: baseline; }
+.marca { font-size: 8pt; letter-spacing: .18em; text-transform: uppercase; color: #5a6572; }
+h1 { font-size: 19pt; margin: 6px 0 2px; letter-spacing: -.01em; }
+.sub { color: #5a6572; font-size: 9pt; margin: 0; }
+h2 { font-size: 11.5pt; margin: 18px 0 6px; padding-bottom: 3px; border-bottom: 1px solid #d7dde3; }
+h3 { font-size: 9.8pt; margin: 12px 0 4px; }
+p { margin: 0 0 6px; }
+.cards { display: flex; gap: 8px; margin: 10px 0 4px; }
+.card { flex: 1; border: 1px solid #d7dde3; border-radius: 5px; padding: 7px 9px; }
+.card .k { font-size: 7.4pt; text-transform: uppercase; letter-spacing: .07em; color: #5a6572; }
+.card .v { font-size: 13.5pt; font-weight: 600; margin-top: 2px; }
+.card .n { font-size: 7.6pt; color: #5a6572; }
+table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 8.4pt; }
+th { text-align: left; background: #eef1f4; padding: 4px 5px; border-bottom: 1px solid #c9d1d9;
+     font-size: 7.6pt; text-transform: uppercase; letter-spacing: .04em; color: #38424e; }
+td { padding: 4px 5px; border-bottom: 1px solid #e4e8ec; vertical-align: top; }
+td.num { text-align: right; white-space: nowrap; }
+.mono { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 7.8pt; overflow-wrap: anywhere; }
+.tag { color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 7.4pt; }
+.aviso { display: block; color: #a35a00; font-size: 7.2pt; }
+.veredicto { border: 2px solid #14181d; border-radius: 5px; padding: 9px 11px; margin-top: 8px; }
+.veredicto .r { font-size: 14pt; font-weight: 700; letter-spacing: .02em; }
+.veredicto .d { font-size: 8.6pt; color: #38424e; margin-top: 3px; }
+.nota { font-size: 7.8pt; color: #5a6572; margin-top: 5px; }
+ul { margin: 3px 0 6px 16px; padding: 0; }
+li { margin-bottom: 2px; }
+.anexo { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 6.6pt; line-height: 1.32;
+         background: #f5f7f9; border: 1px solid #e4e8ec; padding: 7px; white-space: pre-wrap;
+         word-break: break-all; }
+footer { margin-top: 16px; border-top: 1px solid #d7dde3; padding-top: 6px;
+         font-size: 7.4pt; color: #5a6572; }
+.marca-agua { position: fixed; top: 42%; left: 4%; transform: rotate(-28deg); font-size: 58pt;
+              font-weight: 800; color: rgba(190, 30, 30, .13); letter-spacing: .06em; z-index: 0; }
+.banda { background: #be1e1e; color: #fff; padding: 5px 9px; font-size: 8.6pt; font-weight: 600;
+         border-radius: 4px; margin-bottom: 10px; }
+</style></head>
+<body>
+<div class="marca-agua">MUESTRA</div>
+<div class="banda">MUESTRA CON DATOS SINTETICOS — NO CORRESPONDE A UN CLIENTE REAL. El documento se genera con el mismo motor y el mismo contrato que un informe real.</div>
+<header>
+  <div class="membrete">
+    <span class="marca">Platino Labs · Diagnostico FinOps</span>
+    <span class="marca">Confidencial</span>
+  </div>
+  <h1>Reporte Ejecutivo de Fugas de Costo</h1>
+  <p class="sub">Muestra FinOps - datos sinteticos · Cuenta AWS <span class="mono">000000000000</span>
+     · Periodo <span class="mono">2026-09</span></p>
+</header>
+
+<h2>1. Resumen</h2>
+<div class="cards">
+  <div class="card"><div class="k">Factura del periodo</div>
+    <div class="v">8,420.55 USD</div>
+    <div class="n">UnblendedCost de Cost Explorer</div></div>
+  <div class="card"><div class="k">Costo de recursos ociosos</div>
+    <div class="v">264.38 USD</div>
+    <div class="n">base mes</div></div>
+  <div class="card"><div class="k">Fuga evitable / mes</div>
+    <div class="v">241.38 USD</div>
+    <div class="n">deja de cobrarse al actuar</div></div>
+  <div class="card"><div class="k">Desperdicio sobre factura</div>
+    <div class="v">2.93%</div>
+    <div class="n">base ventana</div></div>
+</div>
+<p class="nota">Cobertura de compromisos medida: 61.0% ·
+   objetivo declarado: 80.0%. El informe mide la cobertura;
+   no recomienda comprar compromisos (esa decision es consultoria, no diagnostico).</p>
+
+<h2>2. Hallazgos tipados</h2>
+<table>
+<colgroup><col style="width:22%"><col style="width:15%"><col style="width:11%"><col style="width:14%"><col style="width:11%"><col style="width:27%"></colgroup>
+<thead><tr><th>Recurso</th><th>Clase</th><th>Tipo</th><th>Costo / mes</th><th>Ventana de AWS</th><th>Accion</th></tr></thead>
+<tbody><tr><td class="mono">i-0demo0000000000a1</td><td>ec2_oversized</td><td><span class="tag" style="background:#0a7d3f">avoidable</span></td><td class="num">140.16 USD</td><td>indefinida</td><td class="mono">rightsize_to_m5_xlarge</td></tr><tr><td class="mono">vol-0demo00000000001</td><td>ebs_available</td><td><span class="tag" style="background:#0a7d3f">avoidable</span></td><td class="num">51.20 USD</td><td>indefinida</td><td class="mono">delete</td></tr><tr><td class="mono">i-0demo0000000000a2</td><td>ec2_oversized</td><td><span class="tag" style="background:#0a7d3f">avoidable</span></td><td class="num">30.37 USD</td><td>indefinida</td><td class="mono">rightsize_to_t3_medium</td></tr><tr><td class="mono">db-analitica-legacy</td><td>rds_stopped</td><td><span class="tag" style="background:#a35a00">billed</span></td><td class="num">23.00 USD</td><td>7 dias</td><td class="mono">snapshot_and_delete</td></tr><tr><td class="mono">vol-0demo00000000002</td><td>ebs_available</td><td><span class="tag" style="background:#0a7d3f">avoidable</span></td><td class="num">16.00 USD</td><td>indefinida</td><td class="mono">delete</td></tr><tr><td class="mono">eipalloc-0demo0000000001</td><td>eip_unattached</td><td><span class="tag" style="background:#0a7d3f">avoidable</span></td><td class="num">3.65 USD</td><td>indefinida</td><td class="mono">release</td></tr></tbody>
+</table>
+<p class="nota">Clases auditadas: volumen EBS sin adjuntar, instancia EC2 sobredimensionada
+   (CPU p95 &lt; 10%), RDS detenida y direccion elastica sin asociar. `ventana` = dias antes
+   de que AWS actue por su cuenta; para volumenes y EIP no existe: nadie las borra por ti.</p>
+
+<h2>3. Proyeccion anual</h2>
+<p>Fuga anual proyectada sobre la base mensual medida:
+   <strong>241.38 USD × 12 = 2,896.56 USD</strong>.</p>
+<p class="nota">Proyeccion aritmetica declarada: supone que el recurso sigue existiendo y que
+   el precio no cambia. No es una medicion futura ni una garantia de facturacion.</p>
+<p>Costo que <em>no</em> desaparece solo por apagar (tipo `billed`): 23.00 USD / mes.
+   Se requiere accion explicita (snapshot y baja) para extinguirlo.</p>
+
+<h2>4. Garantia inversa (ROI 2×)</h2>
+<div class="veredicto">
+  <div class="r">CUMPLE</div>
+  <div class="d">Honorario 500.00 USD · umbral 1,000.00 USD de fuga anual evitable.
+  La fuga anual proyectada (2,896.56 USD) supera el umbral de 1,000.00 USD (2 × honorario). El diagnostico se cobra y el ahorro neto del primer año es 2,396.56 USD.</div>
+</div>
+
+<h2>5. Alcance y limites de este informe</h2>
+<ul>
+  <li><strong>No se modifico nada.</strong> El acceso fue de solo lectura (rol con Deny explicito
+      sobre escritura). Ningun cambio derivado de este documento lo ejecuto Platino Labs.</li>
+  <li><strong>No hay recomendacion de compra</strong> de Savings Plans ni Reserved Instances: solo
+      se reporta la cobertura medida.</li>
+  <li><strong>No se evalua calidad</strong> de arquitectura, seguridad ni rendimiento.</li>
+  <li><strong>Evidencia = JSON del anexo</strong>, con sha256. Una captura de pantalla no es
+      verificable; el crudo si.</li>
+</ul>
+
+<h2>6. Procedencia</h2>
+<table>
+<tbody>
+<tr><td>audit_id</td><td class="mono">aud_finops_000000000000_2026-09</td></tr>
+<tr><td>contract_version</td><td class="mono">v1-finops</td></tr>
+<tr><td>sha256 del JSON</td><td class="mono">97f7810d6a329e654d357f91aefbb34c66a2cc39e23c613dceb9fac7984b8d6f</td></tr>
+<tr><td>Generado (UTC)</td><td class="mono">2026-10-31T18:15:51Z</td></tr>
+</tbody>
+</table>
+<p class="nota">Retencion de metadatos: 30 dias despues de emitido el dictamen.
+   Revocar el acceso es borrar el stack del rol: no requiere coordinacion con Platino Labs.</p>
+
+<h2>Anexo · JSON firmado (contrato v1-finops)</h2>
+<div class="anexo">{
+  &quot;audit_id&quot;: &quot;aud_finops_000000000000_2026-09&quot;,
+  &quot;camino_a_seguir&quot;: null,
+  &quot;contract_version&quot;: &quot;v1-finops&quot;,
+  &quot;evidence&quot;: {
+    &quot;causa&quot;: &quot;orphan_resources_detected&quot;,
+    &quot;top_orphans&quot;: [
+      {
+        &quot;action&quot;: &quot;rightsize_to_m5_xlarge&quot;,
+        &quot;cost_usd_month&quot;: 140.16,
+        &quot;cost_usd_ventana&quot;: 140.16,
+        &quot;orphan_type&quot;: &quot;avoidable&quot;,
+        &quot;resource_id&quot;: &quot;i-0demo0000000000a1&quot;,
+        &quot;type&quot;: &quot;ec2_oversized&quot;,
+        &quot;ventana_dias&quot;: null
+      },
+      {
+        &quot;action&quot;: &quot;delete&quot;,
+        &quot;cost_usd_month&quot;: 51.2,
+        &quot;cost_usd_ventana&quot;: 51.2,
+        &quot;orphan_type&quot;: &quot;avoidable&quot;,
+        &quot;resource_id&quot;: &quot;vol-0demo00000000001&quot;,
+        &quot;type&quot;: &quot;ebs_available&quot;,
+        &quot;ventana_dias&quot;: null
+      },
+      {
+        &quot;action&quot;: &quot;rightsize_to_t3_medium&quot;,
+        &quot;cost_usd_month&quot;: 30.37,
+        &quot;cost_usd_ventana&quot;: 30.37,
+        &quot;orphan_type&quot;: &quot;avoidable&quot;,
+        &quot;resource_id&quot;: &quot;i-0demo0000000000a2&quot;,
+        &quot;type&quot;: &quot;ec2_oversized&quot;,
+        &quot;ventana_dias&quot;: null
+      },
+      {
+        &quot;action&quot;: &quot;snapshot_and_delete&quot;,
+        &quot;cost_usd_month&quot;: 23.0,
+        &quot;cost_usd_ventana&quot;: 5.37,
+        &quot;orphan_type&quot;: &quot;billed&quot;,
+        &quot;resource_id&quot;: &quot;db-analitica-legacy&quot;,
+        &quot;type&quot;: &quot;rds_stopped&quot;,
+        &quot;ventana_dias&quot;: 7
+      },
+      {
+        &quot;action&quot;: &quot;delete&quot;,
+        &quot;cost_usd_month&quot;: 16.0,
+        &quot;cost_usd_ventana&quot;: 16.0,
+        &quot;orphan_type&quot;: &quot;avoidable&quot;,
+        &quot;resource_id&quot;: &quot;vol-0demo00000000002&quot;,
+        &quot;type&quot;: &quot;ebs_available&quot;,
+        &quot;ventana_dias&quot;: null
+      },
+      {
+        &quot;action&quot;: &quot;release&quot;,
+        &quot;cost_usd_month&quot;: 3.65,
+        &quot;cost_usd_ventana&quot;: 3.65,
+        &quot;orphan_type&quot;: &quot;avoidable&quot;,
+        &quot;resource_id&quot;: &quot;eipalloc-0demo0000000001&quot;,
+        &quot;type&quot;: &quot;eip_unattached&quot;,
+        &quot;ventana_dias&quot;: null
+      }
+    ]
+  },
+  &quot;metrics&quot;: {
+    &quot;orphan_avoidable_usd&quot;: 241.38,
+    &quot;orphan_billed_usd&quot;: 23.0,
+    &quot;orphan_cost_usd&quot;: 264.38,
+    &quot;orphan_cost_ventana_usd&quot;: 246.75,
+    &quot;savings_plan_coverage&quot;: 0.61,
+    &quot;target_coverage&quot;: 0.8,
+    &quot;total_bill_usd&quot;: 8420.55,
+    &quot;waste_ratio&quot;: 0.029303,
+    &quot;waste_ratio_month&quot;: 0.031397
+  },
+  &quot;status&quot;: &quot;completed&quot;,
+  &quot;subject&quot;: {
+    &quot;account_id&quot;: &quot;000000000000&quot;,
+    &quot;billing_period&quot;: &quot;2026-09&quot;,
+    &quot;provider&quot;: &quot;aws&quot;
+  }
+}</div>
+
+<footer>Platino Labs · Diagnostico FinOps · Documento confidencial preparado para
+Muestra FinOps - datos sinteticos · Los montos son mediciones del periodo auditado salvo donde se
+rotulan como proyeccion.</footer>
+</body></html>
