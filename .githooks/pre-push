@@ -2,5 +2,7 @@
 set -euo pipefail
 
 # HUELLA-PORTAFOLIO-CONTACTO-HOOK-20261031
+# HUELLA-PRE-PUSH-CONTACTO-LOCAL-20261031
+# HUELLA-PORTAFOLIO-PREPUSH-LOCAL-ONLY-20261031
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-exec bash "$ROOT/tests/test_portafolio_contacto.sh"
+exec env CHECK_PUBLISHED=0 bash "$ROOT/tests/test_portafolio_contacto.sh"

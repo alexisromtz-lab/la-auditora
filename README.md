@@ -15,6 +15,9 @@ eager en el ámbito»— se publican igual que los positivos, porque un cero med
 evidencia. Lo que no se publica es una opinión sobre el estado actual de un proyecto: un
 resultado pertenece al commit que lo produjo, no a la rama móvil.
 
+La [muestra de diagnóstico FinOps](./portafolio/DIAGNOSTICO_FINOPS_EJECUTIVO.pdf) usa datos sintéticos. Sus cifras y su veredicto ilustran el formato: no corresponden a una cuenta real, no prueban ahorros y no validan el precio ni el coste operativo del servicio.
+<!-- HUELLA-LA-AUDITORA-FINOPS-LEADMAGNET-README-20261031 -->
+
 ## Las cuatro superficies, y cuál manda
 
 | superficie | qué contiene | relación |
