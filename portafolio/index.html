@@ -1,0 +1,179 @@
+<!doctype html>
+<!-- HUELLA-PORTAFOLIO-LA-AUDITORA-ES-20261027 -->
+<!-- HUELLA-PORTAFOLIO-SEO-ES-20261031 -->
+<!-- HUELLA-PORTAFOLIO-CTA-ES-20261031 -->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Auditoría de software reproducible | La Auditora</title>
+  <meta name="description" content="Auditorías técnicas reproducibles de Python, ciclos de importación, alcanzabilidad de tests y CI. Resultados fijados a commits y con límites declarados.">
+  <meta name="robots" content="index,follow">
+  <meta name="keywords" content="auditoría de software Python, ciclos de importación Django, PyTorch test reachability, Pytest CI audit, grafo de dependencias Python">
+  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/">
+  <link rel="alternate" hreflang="es" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/">
+  <link rel="alternate" hreflang="en" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/en/">
+  <link rel="alternate" hreflang="x-default" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="La Auditora | Auditorías técnicas reproducibles">
+  <meta property="og:description" content="Python, grafos de importación y CI: resultados acotados a un commit, con evidencia y límites explícitos.">
+  <meta property="og:url" content="https://alexisromtz-lab.github.io/la-auditora/portafolio/">
+  <meta name="twitter:card" content="summary">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Jose Alexis Román Martínez",
+    "url": "https://alexisromtz-lab.github.io/la-auditora/portafolio/",
+    "sameAs": ["https://arquitectocuantico.com/", "https://github.com/alexisromtz-lab"],
+    "knowsAbout": ["Python import graphs", "software architecture analysis", "CI test reachability"]
+  }
+  </script>
+  <style>
+    :root { color-scheme: dark; --bg:#101317; --panel:#171c22; --ink:#f3f1eb; --muted:#b2bac4; --line:#303943; --accent:#78e0c3; --warm:#f0bd76; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; background:radial-gradient(ellipse at 14% 0%,#1e2a2d 0,transparent 34rem),var(--bg); color:var(--ink); font:16px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    a { color:var(--accent); text-underline-offset:.2em; }
+    a:hover { color:#b4f4e4; }
+    .skip { position:absolute; left:-9999px; top:auto; }
+    .skip:focus { left:1rem; top:1rem; z-index:5; background:var(--panel); padding:.7rem; }
+    .wrap { width:min(1100px,calc(100% - 2rem)); margin:auto; }
+    header { display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:1.2rem 0; border-bottom:1px solid var(--line); }
+    .brand { color:var(--ink); font-weight:750; letter-spacing:.08em; text-decoration:none; text-transform:uppercase; font-size:.85rem; }
+    nav { display:flex; flex-wrap:wrap; gap:1rem; font-size:.9rem; }
+    nav a { text-decoration:none; }
+    .hero { padding:clamp(3.5rem,9vw,7rem) 0 4rem; max-width:850px; }
+    .eyebrow { color:var(--accent); font-size:.78rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; }
+    h1 { max-width:780px; margin:.7rem 0 1rem; font-size:clamp(2.5rem,7vw,5.5rem); line-height:1.03; letter-spacing:-.055em; }
+    .lede { max-width:690px; color:var(--muted); font-size:clamp(1.08rem,2vw,1.3rem); }
+    .proof { display:flex; flex-wrap:wrap; gap:.65rem; margin:1.7rem 0 0; }
+    .proof span,.tag { border:1px solid var(--line); border-radius:999px; padding:.35rem .75rem; color:var(--muted); font-size:.82rem; }
+    h2 { margin:0 0 1.2rem; font-size:clamp(1.65rem,4vw,2.4rem); letter-spacing:-.03em; }
+    .section { padding:2.2rem 0 4rem; }
+    .intro { max-width:720px; color:var(--muted); margin:-.45rem 0 1.7rem; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr)); gap:1rem; }
+    article { display:flex; flex-direction:column; gap:.55rem; padding:1.25rem; border:1px solid var(--line); border-radius:14px; background:linear-gradient(145deg,#1a2026,var(--panel)); }
+    article h3 { margin:.1rem 0; font-size:1.25rem; line-height:1.3; }
+    article p { margin:.2rem 0; color:var(--muted); }
+    .metric { color:var(--warm); font-size:1.05rem; font-weight:750; }
+    .source { margin-top:auto; padding-top:.8rem; font-size:.9rem; }
+    .method { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:1rem; }
+    .method div { border-left:2px solid var(--accent); padding:.2rem .9rem; }
+    .method h3 { margin:0 0 .35rem; font-size:1rem; }
+    .method p,.notice { color:var(--muted); margin:.2rem 0; }
+    .notice { border:1px solid #57452f; border-radius:12px; padding:1rem 1.1rem; background:#211b14; }
+    .contact { display:flex; flex-wrap:wrap; gap:1rem; align-items:center; padding:1.3rem; border:1px solid var(--line); border-radius:14px; background:#151b20; }
+    .button { display:inline-block; padding:.7rem 1rem; border-radius:8px; background:var(--accent); color:#10201c; font-weight:750; text-decoration:none; }
+    footer { padding:1.5rem 0 2.5rem; border-top:1px solid var(--line); color:var(--muted); font-size:.88rem; }
+    footer p { margin:.35rem 0; }
+    @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#contenido">Saltar al contenido</a>
+  <div class="wrap">
+    <header>
+      <a class="brand" href="/la-auditora/portafolio/">Platino Labs · La Auditora</a>
+      <nav aria-label="Navegación principal">
+        <a href="#auditorias">Auditorías</a>
+        <a href="#metodo">Método</a>
+        <a href="https://arquitectocuantico.com/">Libros</a>
+        <a href="/la-auditora/portafolio/en/" lang="en" hreflang="en">English</a>
+      </nav>
+    </header>
+    <main id="contenido">
+      <section class="hero" aria-labelledby="titulo">
+        <div class="eyebrow">Evidencia técnica · commit fijado · límites explícitos</div>
+        <h1 id="titulo">La Auditora</h1>
+        <p class="lede">Auditorías reproducibles de software: grafos de importación en Python, ciclos eager, descubrimiento de tests y señales de CI. Cada resultado queda atado a un objeto y a un alcance concreto.</p>
+        <div class="proof" aria-label="Principios de trabajo">
+          <span>Sin claims fuera del alcance</span><span>Controles negativos</span><span>Resultados positivos y nulos</span>
+        </div>
+      </section>
+
+      <section class="section" id="auditorias" aria-labelledby="auditorias-titulo">
+        <h2 id="auditorias-titulo">Auditorías seleccionadas</h2>
+        <p class="intro">Muestras verificables sobre repositorios públicos. Los resúmenes no sustituyen las actas completas: indican el commit, el resultado medido y lo que quedó sin medir.</p>
+        <div class="grid">
+          <article>
+            <span class="tag">PyTorch · tests · análisis estático</span>
+            <h3>Tests reconocidos que ningún camino del CI convoca</h3>
+            <p class="metric">45 archivos · 459 funciones de test · 3,35 % del corpus</p>
+            <p>En el commit auditado, la reconstrucción de shards, agregadores y llamadas directas dejó 45 archivos sin camino de ejecución: 33 omitidos por un agregador y 12 en una exclusión declarada. Se descartaron 25 candidatos antes del veredicto.</p>
+            <p><strong>Límite:</strong> es alcanzabilidad estática en un commit fijado; no mide ejecución de tests ni atribuye negligencia.</p>
+            <p class="source"><a href="https://github.com/pytorch/pytorch/commit/210bb7ca5c4e08c40513c389c14b1adbf4a82f8c" target="_blank" rel="noopener noreferrer">pytorch/pytorch · 210bb7ca</a></p>
+          </article>
+          <article>
+            <span class="tag">Django · dependencias · runtime</span>
+            <h3>Ciclos eager en los backends de base de datos</h3>
+            <p class="metric">3 ciclos · 5 entradas fallidas · 3 controles en verde</p>
+            <p>La matriz de importación reprodujo fallos cuando ciertos módulos de SQLite, PostgreSQL y Oracle se cargaban primero; las entradas de control funcionaron. El síntoma depende del orden de carga.</p>
+            <p><strong>Límite:</strong> no se evaluaron SQL, migraciones, motores reales ni explotabilidad. El acta declara expresamente que no es una vulnerabilidad.</p>
+            <p class="source"><a href="https://github.com/django/django/commit/641e9368105e07237e4d09cf951f3038cde4d973" target="_blank" rel="noopener noreferrer">django/django · 641e9368</a></p>
+          </article>
+          <article>
+            <span class="tag">Tenstorrent · pytest · CI</span>
+            <h3>Un job verde no mostraba todos los nodos afectados</h3>
+            <p class="metric">12 de 13 nodos omitidos tras abortar con <code>-x</code></p>
+            <p>El caso reconstruyó una falla de setup <code>TT_FATAL</code>, distinguió los skips de hardware esperados y siguió la reparación aguas arriba. El conteo bruto de skips no se presenta como tasa de tests huérfanos.</p>
+            <p><strong>Límite:</strong> resultado histórico de una ventana y commits concretos; no describe el estado actual del repositorio.</p>
+            <p class="source"><a href="https://github.com/tenstorrent/tt-metal/pull/59955" target="_blank" rel="noopener noreferrer">Rotura · tenstorrent/tt-metal#59955</a> (<a href="https://github.com/tenstorrent/tt-metal/commit/7d399796b4770ca95e15c7877e157872dc87ba82" target="_blank" rel="noopener noreferrer"><code>7d399796</code></a>) · <a href="https://github.com/tenstorrent/tt-metal/pull/61470" target="_blank" rel="noopener noreferrer">Reparación · tenstorrent/tt-metal#61470</a> (<a href="https://github.com/tenstorrent/tt-metal/commit/78957cf011ab40db8e4f6283a61ce4839c51b896" target="_blank" rel="noopener noreferrer"><code>78957cf0</code></a>)</p>
+          </article>
+          <article>
+            <span class="tag">Hugging Face Transformers · resultado nulo</span>
+            <h3>Sin ciclos eager en el ámbito de las rutas modificadas</h3>
+            <p class="metric">0 ciclos eager · 0 de 8 rutas del PR intersectadas</p>
+            <p>El grafo completo tuvo seis componentes fuertemente conexas, pero ninguna fue eager y ninguna intersectó las ocho rutas fuente del cambio auditado.</p>
+            <p><strong>Límite:</strong> análisis estructural del commit; no se midieron runtime, seguridad, rendimiento ni pruebas del PR.</p>
+            <p class="source"><a href="https://github.com/huggingface/transformers/commit/b4a5b4b2c652615ef0c4dfa8adabad1756a6ec3f" target="_blank" rel="noopener noreferrer">huggingface/transformers · b4a5b4b2</a></p>
+          </article>
+          <article>
+            <span class="tag">vLLM Omni · arquitectura Python</span>
+            <h3>Componentes cíclicas diferidas; ninguna eager en el ámbito</h3>
+            <p class="metric">0 ciclos eager en <code>vllm_omni/platforms/</code></p>
+            <p>Se identificaron cinco componentes del ámbito cuyos ciclos incluyen imports diferidos. Un ciclo eager distinto quedó fuera del ámbito contratado y se reportó como tal.</p>
+            <p><strong>Límite:</strong> grafo estático del commit; runtime de aceleradores y dependencias no resueltas quedaron <code>NO_MEDIDO</code>.</p>
+            <p class="source"><a href="https://github.com/vllm-project/vllm-omni/commit/9573acc90213cb473c30d64115ab0e1dd1a32d9a" target="_blank" rel="noopener noreferrer">vllm-project/vllm-omni · 9573acc9</a></p>
+          </article>
+          <article>
+            <span class="tag">Flask · arquitectura Python · resultado nulo</span>
+            <h3>La componente mixta no cerraba un ciclo eager</h3>
+            <p class="metric">1 SCC mixta · 0 ciclos eager</p>
+            <p>La ruta modificada pertenece a una componente de 18 módulos del grafo total. La separación eager/diferida no encontró ciclo eager; el fan-in se trató como centralidad estática, no como fragilidad.</p>
+            <p><strong>Límite:</strong> no se completó la importación de runtime porque faltaba Werkzeug; comportamiento y seguridad quedaron <code>NO_MEDIDO</code>.</p>
+            <p class="source"><a href="https://github.com/pallets/flask/commit/d086db856be187255b8ec61ef409357393020f32" target="_blank" rel="noopener noreferrer">pallets/flask · d086db85</a></p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="metodo" aria-labelledby="metodo-titulo">
+        <h2 id="metodo-titulo">Cómo leer estos resultados</h2>
+        <p class="intro">Un número sin sujeto, denominador y alcance no es un hallazgo. Las fichas distinguen estructura estática, ejecución y límites en vez de colapsarlos en una sola etiqueta.</p>
+        <div class="method">
+          <div><h3>Objeto fijado</h3><p>Cada resumen identifica el repositorio y el commit observado; no se extrapola a la rama móvil.</p></div>
+          <div><h3>Alcance visible</h3><p>El resultado se limita a los archivos, tests o capas contratados para esa corrida.</p></div>
+          <div><h3>Falsabilidad</h3><p>Cuando aplica, se declaran controles y condiciones que harían cambiar el veredicto.</p></div>
+          <div><h3>Negativos publicables</h3><p>“Cero en el ámbito” es un resultado; no equivale a certificar que todo el sistema está libre de defectos.</p></div>
+        </div>
+        <p class="notice" style="margin-top:1.2rem"><strong>Frontera:</strong> estas muestras son análisis estructurales y de CI, no una certificación general de seguridad. El informe de PyTorch aquí es de alcanzabilidad de tests, no de ciclos de dependencias; aún no hay una auditoría publicada de Scrapy en esta selección.</p>
+      </section>
+
+      <section class="section" aria-labelledby="contacto-titulo">
+        <h2 id="contacto-titulo">¿Necesitas una revisión técnica?</h2>
+        <div class="contact">
+          <p>Propuestas de auditoría reproducible para repositorios públicos.</p>
+          <a class="button" href="https://wa.me/525649997759?text=Consulta%20de%20auditor%C3%ADa">Escribir por WhatsApp</a>
+          <a href="mailto:contacto@tiendasplatino.com.mx?subject=Consulta%20de%20auditor%C3%ADa">contacto@tiendasplatino.com.mx</a>
+          <a href="https://arquitectocuantico.com/">Proyecto editorial · El Arquitecto Cuántico</a>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <p><strong>La Auditora · Platino Labs</strong> · Jose Alexis Román Martínez</p>
+      <p>© 2026 · <a href="https://arquitectocuantico.com/">arquitectocuantico.com</a> conserva su sitio editorial; esta carpeta separa el portafolio técnico.</p>
+      <p>Resúmenes preparados a partir de registros de auditoría. Se publican conclusiones acotadas, no artefactos internos ni reportes crudos.</p>
+    </footer>
+  </div>
+</body>
+</html>
