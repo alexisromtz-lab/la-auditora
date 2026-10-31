@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+      - name: Test availability monitor
+        run: python3 -m unittest discover -s tests -p 'test_monitor_auditora.py' -v
       - name: Validate local portfolio contact
         run: bash tests/test_portafolio_contacto.sh
 
@@ -27,6 +29,7 @@ jobs:
       - name: Check published portfolio contact
         run: CHECK_PUBLISHED=1 bash tests/test_portafolio_contacto.sh
 
+# HUELLA-CI-MONITOR-TEST-20261031
 # HUELLA-CI-PORTAFOLIO-20261031
 # HUELLA-CI-DECOUPLED-20261031
 # HUELLA-CI-PUBLISHED-ENV-20261031
