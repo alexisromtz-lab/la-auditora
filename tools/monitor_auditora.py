@@ -2,6 +2,7 @@
 """Record a daily availability sample for the la-auditora public site."""
 
 # HUELLA-MONITOR-AUDITORA-20261031
+# HUELLA-MONITOR-HREF-VALIDACION-20261031
 
 import argparse
 import csv
@@ -48,12 +49,22 @@ class HrefParser(HTMLParser):
 def _has_approved_whatsapp_link(html: str) -> bool:
     parser = HrefParser()
     parser.feed(html)
-    return any(
-        (parts := urlsplit(href)).scheme == "https"
-        and parts.hostname == WHATSAPP_HOST
-        and parts.path == WHATSAPP_PATH
-        for href in parser.hrefs
-    )
+    for href in parser.hrefs:
+        try:
+            parts = urlsplit(href)
+            port = parts.port
+        except ValueError:
+            continue
+        if (
+            parts.scheme == "https"
+            and parts.hostname == WHATSAPP_HOST
+            and port in (None, 443)
+            and parts.username is None
+            and parts.password is None
+            and parts.path == WHATSAPP_PATH
+        ):
+            return True
+    return False
 
 
 def probe(url: str, timeout: float = 15.0) -> Measurement:

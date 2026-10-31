@@ -1,4 +1,5 @@
 # HUELLA-TEST-MONITOR-AUDITORA-20261031
+# HUELLA-TEST-MONITOR-HREF-20261031
 
 import csv
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -15,6 +16,12 @@ class MonitorHandler(BaseHTTPRequestHandler):
         if self.path == "/healthy":
             status = 200
             body = '<a href="https://wa.me/525649997759?text=contact">WhatsApp</a>'
+        elif self.path == "/malformed-link-before-valid":
+            status = 200
+            body = '<a href="http://[broken">broken</a><a href="https://wa.me/525649997759">WhatsApp</a>'
+        elif self.path == "/wrong-port":
+            status = 200
+            body = '<a href="https://wa.me:444/525649997759">WhatsApp</a>'
         elif self.path == "/missing-link":
             status = 200
             body = "<p>Site is online</p>"
@@ -80,6 +87,29 @@ class MonitorAuditoraTests(unittest.TestCase):
         self.assertEqual(result.http_status, 200)
         self.assertFalse(result.healthy)
         self.assertEqual(result.error, "WHATSAPP_MISSING")
+
+    def test_malformed_href_does_not_prevent_recording_later_valid_link(self) -> None:
+        with TemporaryDirectory() as directory:
+            output = Path(directory) / "telemetry.csv"
+            result = run_monitor(f"{self.base_url}/malformed-link-before-valid", output)
+            with output.open(newline="", encoding="utf-8") as csv_file:
+                rows = list(csv.DictReader(csv_file))
+
+        self.assertTrue(result.healthy)
+        self.assertEqual(rows[0]["http_status"], "200")
+        self.assertEqual(rows[0]["whatsapp_present"], "True")
+
+    def test_wrong_whatsapp_port_is_not_accepted(self) -> None:
+        with TemporaryDirectory() as directory:
+            output = Path(directory) / "telemetry.csv"
+            result = run_monitor(f"{self.base_url}/wrong-port", output)
+            with output.open(newline="", encoding="utf-8") as csv_file:
+                rows = list(csv.DictReader(csv_file))
+
+        self.assertFalse(result.healthy)
+        self.assertEqual(result.error, "WHATSAPP_MISSING")
+        self.assertEqual(rows[0]["http_status"], "200")
+        self.assertEqual(rows[0]["whatsapp_present"], "False")
 
 
 if __name__ == "__main__":
