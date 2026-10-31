@@ -9,7 +9,7 @@
    ./setup.sh
    ```
 
-   This changes only this clone's local Git configuration. Confirm with `git config --local --get core.hooksPath` (`.githooks`).
+   This sets the repository's hook path to `.githooks` only when no effective path exists; it preserves the global/local setting when it is already `.githooks` and stops rather than replacing a custom path. Confirm with `git config --get core.hooksPath` (`.githooks`).
 3. Before opening a pull request, run the local contact check:
 
    ```sh
@@ -28,9 +28,9 @@
 
 ## Current checks
 
-`main` requires pull requests and resolved conversations; it does not require an approval or a status check. This repository has an active GitHub Pages deployment workflow, but no CI workflow that tests pull requests. The billing block measured in the private `platino-labs` repository does not establish that Actions are disabled here.
+`main` requires pull requests, resolved conversations, and the `Portfolio contact regression` status check; it does not require approvals. The `Pull request checks` workflow runs `bash ./setup.sh` and `bash tests/test_portafolio_contacto.sh` for pull requests to `main`. The regression checks local pages only; published-page verification is separate because the PR content is not live yet.
 
-Running `./setup.sh` and passing the local `pre-push` hook are project requirements, but the hook is local and can be bypassed; GitHub does not enforce it server-side. Do not treat a green pull request as proof that the contact regression ran.
+Running `./setup.sh` and passing the local `pre-push` hook remain project requirements, but the hook is local and can be bypassed; GitHub enforces the regression separately through the status check. A green check certifies only the local contact checks.
 
 ## If the contact check fails
 
@@ -39,4 +39,5 @@ Running `./setup.sh` and passing the local `pre-push` hook are project requireme
 - Do not change the approved WhatsApp or GitHub Issues destinations without maintainer confirmation.
 
 <!-- CONTRIB-CI-STATE-20261031 -->
+<!-- HUELLA-CONTRIBUTING-CI-ENFORCED-20261031 -->
 <!-- HUELLA-CONTRIB-CTA-POLICY-20261031 -->

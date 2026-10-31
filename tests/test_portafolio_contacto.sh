@@ -26,6 +26,7 @@ for page in portafolio/index.html portafolio/en/index.html; do
   check_contact "$page" "$(<"$file")"
 done
 
+# HUELLA-TEST-PUBLISHED-OPT-IN-20261031
 case "${CHECK_PUBLISHED:-0}" in
   0) ;;
   1)

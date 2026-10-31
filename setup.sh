@@ -14,7 +14,7 @@ if [[ ! -f "$HOOK" || ! -x "$HOOK" ]]; then
   exit 1
 fi
 
-current="$(git -C "$ROOT" config --local --get core.hooksPath || true)"
+current="$(git -C "$ROOT" config --get core.hooksPath || true)"
 case "$current" in
   "") git -C "$ROOT" config --local core.hooksPath .githooks ;;
   .githooks) : ;;
@@ -24,6 +24,6 @@ case "$current" in
     ;;
 esac
 
-printf 'Hooks activados para este clon: %s\n' "$(git -C "$ROOT" config --local --get core.hooksPath)"
+printf 'Hooks activados para este clon: %s\n' "$(git -C "$ROOT" config --get core.hooksPath)"
 
 # SETUP-MARKER-20261031
