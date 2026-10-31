@@ -1,0 +1,31 @@
+name: Daily availability monitor
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Run monitor regression tests
+        run: python3 -m unittest discover -s tests -p 'test_monitor_auditora.py' -v
+      - name: Record public-site availability
+        run: python3 tools/monitor_auditora.py --output "$RUNNER_TEMP/monitor_auditora.csv"
+      - name: Upload telemetry CSV
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: auditora-monitor-${{ github.run_id }}
+          path: ${{ runner.temp }}/monitor_auditora.csv
+          if-no-files-found: warn
+          retention-days: 30
+
+# HUELLA-WORKFLOW-MONITOR-AUDITORA-20261031
