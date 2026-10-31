@@ -28,17 +28,18 @@
 
 ## Current checks
 
-`main` requires pull requests, resolved conversations, and the `Portfolio contact regression` status check; it does not require approvals. The `Pull request checks` workflow runs `bash ./setup.sh` and `bash tests/test_portafolio_contacto.sh` for pull requests to `main`. The regression checks local pages only; published-page verification is separate because the PR content is not live yet.
+`main` requires pull requests, resolved conversations, and the `validate_html` status check; it does not require approvals. The `Pull request checks` workflow runs two separate jobs for pull requests to `main`: `validate_html` checks the local pages and is required for merging; `smoke_test_live` checks the published pages and is not required, so a Pages or network outage does not block a merge when the deterministic check passes.
 
-Running `./setup.sh` and passing the local `pre-push` hook remain project requirements, but the hook is local and can be bypassed; GitHub enforces the regression separately through the status check. A green check certifies only the local contact checks.
+Running `./setup.sh` and passing the local `pre-push` hook remain project requirements, but the hook is local and can be bypassed; GitHub enforces `validate_html` through branch protection. A green `validate_html` check certifies only the local contact checks, not live availability.
 
 ## If the contact check fails
 
 - Keep the exact `FAIL:` message and run `bash tests/test_portafolio_contacto.sh` to reproduce a local failure.
-- For a published-page failure, confirm the Pages deployment completed, then run `CHECK_PUBLISHED=1 bash tests/test_portafolio_contacto.sh` again.
+- For a failed `smoke_test_live`, confirm the Pages deployment completed, then run `CHECK_PUBLISHED=1 bash tests/test_portafolio_contacto.sh` again; this check is informational and does not block merges.
 - Do not change the approved WhatsApp or GitHub Issues destinations without maintainer confirmation.
 
 <!-- CONTRIB-CI-STATE-20261031 -->
 <!-- HUELLA-CONTRIBUTING-CI-ENFORCED-20261031 -->
 <!-- HUELLA-CONTRIB-CTA-POLICY-20261031 -->
 <!-- HUELLA-CONTRIB-ALL-CTA-PAGES-20261031 -->
+<!-- HUELLA-CONTRIB-CI-SYNC-20261031 -->
