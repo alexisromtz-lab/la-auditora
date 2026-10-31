@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
 Sitemap: https://alexisromtz-lab.github.io/la-auditora/sitemap.xml
+Sitemap: https://alexisromtz-lab.github.io/la-auditora/portafolio/sitemap.xml
