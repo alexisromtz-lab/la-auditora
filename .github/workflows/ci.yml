@@ -9,15 +9,23 @@ permissions:
   contents: read
 
 jobs:
-  portfolio-contact:
-    name: Portfolio contact regression
+  validate_html:
+    name: validate_html
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - name: Configure repository hooks
-        run: bash ./setup.sh
-      - name: Test portfolio contact
+      - name: Validate local portfolio contact
         run: bash tests/test_portafolio_contacto.sh
 
+  smoke_test_live:
+    name: smoke_test_live
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Check published portfolio contact
+        run: bash tests/test_portafolio_contacto.sh published
+
 # HUELLA-CI-PORTAFOLIO-20261031
+# HUELLA-CI-DECOUPLED-20261031
