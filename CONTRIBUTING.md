@@ -9,7 +9,7 @@
    ./setup.sh
    ```
 
-   This changes only this clone's local Git configuration. Confirm with `git config --local --get core.hooksPath` (`.githooks`).
+   The setup preserves an effective `.githooks` path, stops rather than replacing a custom path, or sets `.githooks` locally if no hook path is configured. Confirm the effective value with `git config --get core.hooksPath` (`.githooks`).
 3. Before opening a pull request, run:
 
    ```sh
