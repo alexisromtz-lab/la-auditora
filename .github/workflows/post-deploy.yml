@@ -1,0 +1,47 @@
+name: Post-deploy verification
+
+# HUELLA-POSTDEPLOY-WORKFLOW-20261031
+# HUELLA-POSTDEPLOY-ESPERA-PAGES-20261031
+#
+# Por qué existe este workflow y no basta el de PR.
+# `smoke_test_live` (en `ci.yml`) mide el sitio vivo contra el contrato que ya está en `main`.
+# Un PR que cambia ese contrato no puede pasar esa comprobación: la página que se sirve
+# todavía es la vieja. Poner las aserciones nuevas en el trabajo de PR produce un rojo
+# estructural que no señala ningún defecto.
+#
+# Aquí se verifica el contrato de ESTE commit contra el sitio ya desplegado. Corre después
+# del merge (push a `main`), a mano, y una vez al día para detectar deriva de Pages.
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  schedule:
+    - cron: "17 6 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  verify_published:
+    name: verify_published
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # Pages tarda: se reintenta en vez de declarar rojo al primer intento. Ocho intentos
+      # de 30 s son cuatro minutos de cortesía; pasado ese plazo el rojo es real.
+      - name: Esperar a Pages y verificar el contrato de este commit
+        run: |
+          for intento in 1 2 3 4 5 6 7 8; do
+            if CHECK_PUBLISHED=1 bash tests/test_portafolio_contacto.sh; then
+              echo "OK: el sitio publicado cumple el contrato de este commit (intento ${intento})"
+              exit 0
+            fi
+            echo "intento ${intento}: el sitio todavía no sirve este commit; esperando 30 s"
+            sleep 30
+          done
+          echo "FAIL: el sitio publicado no cumple el contrato de este commit tras 8 intentos"
+          exit 1

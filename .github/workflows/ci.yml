@@ -26,10 +26,18 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - name: Check published portfolio contact
+      # Un PR no puede cumplir las aserciones publicadas de su propio contrato: el sitio que
+      # se sirve es `main`, así que la página nueva todavía no existe. Este trabajo responde
+      # una pregunta que el PR no puede romper: «¿el sitio vivo cumple el contrato que ya
+      # está publicado?». El contrato nuevo se verifica después del despliegue
+      # (`.github/workflows/post-deploy.yml`).
+      - name: Traer el contrato publicado desde main
+        run: git fetch --depth=1 origin main && git checkout origin/main -- tests/test_portafolio_contacto.sh
+      - name: Comprobar el sitio vivo contra el contrato publicado
         run: CHECK_PUBLISHED=1 bash tests/test_portafolio_contacto.sh
 
 # HUELLA-CI-MONITOR-TEST-20261031
 # HUELLA-CI-PORTAFOLIO-20261031
 # HUELLA-CI-DECOUPLED-20261031
 # HUELLA-CI-PUBLISHED-ENV-20261031
+# HUELLA-CI-SMOKE-CONTRATO-DE-MAIN-20261031
