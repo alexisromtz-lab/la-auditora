@@ -19,6 +19,47 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_monitor_auditora.py' -v
       - name: Record public-site availability
         run: python3 tools/monitor_auditora.py --output "$RUNNER_TEMP/monitor_auditora.csv"
+      # HUELLA-MONITOR-CENTRO-MANDO-WORKFLOW-20261031
+      - name: Send availability sample to Centro de Mando
+        if: always()
+        env:
+          CENTRO_MANDO_MONITOR_KEY: ${{ secrets.CENTRO_MANDO_MONITOR_KEY }}
+          MONITOR_CSV: ${{ runner.temp }}/monitor_auditora.csv
+        run: |
+          if [ ! -s "$MONITOR_CSV" ]; then
+            echo "No measurement CSV available; skipping Centro de Mando telemetry."
+            exit 0
+          fi
+          python3 - <<'PY'
+          import csv
+          import json
+          import os
+          from urllib.request import Request, urlopen
+
+          key = os.environ.get("CENTRO_MANDO_MONITOR_KEY", "")
+          if not key:
+              raise SystemExit("Missing CENTRO_MANDO_MONITOR_KEY repository secret")
+
+          with open(os.environ["MONITOR_CSV"], newline="", encoding="utf-8") as csv_file:
+              row = next(csv.DictReader(csv_file))
+
+          status_text = row["http_status"].strip()
+          payload = {
+              "timestamp_utc": row["timestamp_utc"],
+              "http_status": int(status_text) if status_text else None,
+              "response_time_ms": float(row["response_time_ms"]),
+              "whatsapp_present": row["whatsapp_present"].lower() == "true",
+              "error": row["error"][:120],
+          }
+          request = Request(
+              "https://centro-mando.alexis-romtz.workers.dev/api/internal/monitor-alert",
+              data=json.dumps(payload).encode("utf-8"),
+              headers={"Content-Type": "application/json", "X-Monitor-Key": key},
+              method="POST",
+          )
+          with urlopen(request, timeout=20) as response:
+              print(f"Centro de Mando recorded availability: HTTP {response.status}")
+          PY
       - name: Upload telemetry CSV
         if: always()
         uses: actions/upload-artifact@v4
