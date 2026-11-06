@@ -1,0 +1,25 @@
+{
+  "sujeto": {
+    "repo": "BerriAI/litellm",
+    "sha": "d947ec1f7d672883afbf8b79574be9ac8a44b43d",
+    "ambito": ".github/workflows/test-unit.yml"
+  },
+  "hallazgo": {
+    "titulo": "El paso que corre los tests del shard sale en verde cuando no corre ningun test",
+    "impacto": "Tres salidas del step `id: tests` terminan en `exit 0` sin haber ejecutado pytest: seleccion vacia, todos los paths de la seleccion inexistentes, y rc=5 (cero tests recogidos, el codigo documentado de pytest para esa condicion). Un renombrado de directorio de tests, o un shard cuyo path se vuelve obsoleto, produce un job verde indistinguible de un job que paso. Medido: los dos escenarios terminan con rc=0."
+  },
+  "limite": "Mide un unico step de un unico workflow, leido y ejecutado en el SHA declarado. No mide si el shard corrio en la ultima corrida real de GitHub Actions, ni cuantas veces ha ocurrido: eso exige la API de Actions sobre el historial y no se midio. No mide otros workflows. Las tres salidas imprimen anotaciones ::warning:: y el texto «passing», lo que sugiere que la decision fue deliberada, no un descuido; la ficha no afirma intencion, afirma que el verde deja de distinguir «todo paso» de «no se corrio nada». No se propone parche.",
+  "estado": "verificado",
+  "locus": [
+    {
+      "ruta": ".github/workflows/test-unit.yml",
+      "blob": "8ac157c94f5db607f755662d5b9038f37558fd16",
+      "lineas_0x0a": 1611
+    }
+  ],
+  "reproduccion": {
+    "comando": "python3 reproduce.py .github/workflows/test-unit.yml",
+    "rc": 1,
+    "salida": "RESULTADO: el paso reporta exito sin haber corrido un solo test."
+  }
+}

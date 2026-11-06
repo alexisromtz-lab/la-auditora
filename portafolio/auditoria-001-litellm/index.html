@@ -1,0 +1,173 @@
+<!doctype html>
+<!-- HUELLA-AUDITORIA-001-LITELLM-20261105 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Audit 001 · litellm — a green CI job that ran no tests | La Auditora</title>
+  <meta name="description" content="BerriAI/litellm at d947ec1f: the test-shard step exits 0 when the selection is empty, when every path in the selection is missing, and when pytest collects zero tests. Reproducible script included.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/auditoria-001-litellm/">
+  <link rel="alternate" hreflang="es" href="https://alexisromtz-lab.github.io/la-auditora/">
+  <link rel="alternate" hreflang="en" href="https://alexisromtz-lab.github.io/la-auditora/en/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Audit 001 · litellm — a green CI job that ran no tests">
+  <meta property="og:description" content="Three exit paths in one CI step report success without executing pytest. Reproducible in 60 seconds against the pinned commit.">
+  <meta property="og:url" content="https://alexisromtz-lab.github.io/la-auditora/portafolio/auditoria-001-litellm/">
+  <meta name="twitter:card" content="summary">
+  <style>
+    :root { color-scheme: dark; --bg:#101317; --panel:#171c22; --ink:#f3f1eb; --muted:#b2bac4; --line:#303943; --accent:#78e0c3; --warm:#f0bd76; --bad:#f08a8a; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; background:radial-gradient(ellipse at 14% 0%,#1e2a2d 0,transparent 34rem),var(--bg); color:var(--ink); font:16px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    a { color:var(--accent); text-underline-offset:.2em; }
+    a:hover { color:#b4f4e4; }
+    .skip { position:absolute; left:-9999px; top:auto; }
+    .skip:focus { left:1rem; top:1rem; z-index:5; background:var(--panel); padding:.7rem; }
+    .wrap { width:min(860px,calc(100% - 2rem)); margin:auto; }
+    header { display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:1.2rem 0; border-bottom:1px solid var(--line); }
+    .brand { color:var(--ink); font-weight:750; letter-spacing:.08em; text-decoration:none; text-transform:uppercase; font-size:.85rem; }
+    nav { display:flex; flex-wrap:wrap; gap:1rem; font-size:.9rem; }
+    nav a { text-decoration:none; }
+    main { padding:2.5rem 0 4rem; }
+    .eyebrow { color:var(--accent); font-size:.78rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; }
+    h1 { margin:.7rem 0 1rem; font-size:clamp(2rem,5.5vw,3.4rem); line-height:1.08; letter-spacing:-.04em; }
+    .lede { color:var(--muted); font-size:clamp(1.05rem,2vw,1.22rem); max-width:720px; }
+    .proof { display:flex; flex-wrap:wrap; gap:.65rem; margin:1.7rem 0 0; }
+    .proof span, .tag { border:1px solid var(--line); border-radius:999px; padding:.35rem .75rem; color:var(--muted); font-size:.82rem; }
+    h2 { margin:2.6rem 0 1rem; font-size:clamp(1.4rem,3.4vw,1.9rem); letter-spacing:-.02em; }
+    h3 { margin:1.8rem 0 .5rem; font-size:1.12rem; }
+    p { color:var(--muted); }
+    strong { color:var(--ink); }
+    code { background:#0c1013; border:1px solid var(--line); border-radius:5px; padding:.1rem .35rem; font-size:.88em; color:var(--warm); }
+    pre { background:#0c1013; border:1px solid var(--line); border-radius:10px; padding:1rem; overflow-x:auto; font-size:.86rem; line-height:1.55; }
+    pre code { background:none; border:0; padding:0; color:var(--ink); }
+    .card { border:1px solid var(--line); border-radius:14px; padding:1.25rem; background:linear-gradient(145deg,#1a2026,var(--panel)); }
+    .metric { color:var(--warm); font-size:1.05rem; font-weight:750; }
+    table { width:100%; border-collapse:collapse; margin:1rem 0; font-size:.94rem; }
+    th, td { text-align:left; padding:.55rem .6rem; border-bottom:1px solid var(--line); }
+    th { color:var(--ink); font-size:.8rem; letter-spacing:.06em; text-transform:uppercase; }
+    td { color:var(--muted); }
+    .green { color:var(--bad); font-weight:700; }
+    .limite { border-left:2px solid var(--warm); padding:.2rem 0 .2rem 1rem; margin:1.2rem 0; }
+    .limite p { margin:.3rem 0; }
+    .cta { border:1px solid var(--accent); border-radius:14px; padding:1.4rem; margin:3rem 0 0; }
+    .cta p { margin:.4rem 0; }
+    footer { border-top:1px solid var(--line); padding:1.5rem 0 3rem; color:var(--muted); font-size:.88rem; }
+  </style>
+</head>
+<body>
+<a class="skip" href="#contenido">Skip to content</a>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../../">La Auditora</a>
+    <nav>
+      <a href="../../">Audits</a>
+      <a href="../../en/">English</a>
+      <a href="#reproduce">Reproduce</a>
+      <a href="#limits">Limits</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <p class="eyebrow">Audit 001 · continuous integration</p>
+    <h1>A green job that ran no tests</h1>
+    <p class="lede">In <strong>BerriAI/litellm</strong> at commit <code>d947ec1f</code>, the step that runs the unit-test shard has three separate paths that call <code>exit 0</code> without pytest having executed a single test. I ran the file's own shell block to confirm it. It does.</p>
+    <div class="proof">
+      <span>commit d947ec1f7d672883afbf8b79574be9ac8a44b43d</span>
+      <span>.github/workflows/test-unit.yml · 1,611 lines</span>
+      <span>3 exit paths · 2 reproduced</span>
+      <span>status: verified</span>
+    </div>
+
+    <h2 id="finding">The finding</h2>
+    <p>The step is <code>id: tests</code> at line 1072. It reads a per-shard <code>test-path</code> from the build matrix, filters that list down to the paths that actually exist on disk, and then hands the survivors to pytest. Three times, it decides not to fail:</p>
+
+    <h3>1 · The shard selection is empty <span class="tag">lines 1087–1090</span></h3>
+<pre><code>selection="${TEST_PATH}"
+if [ -z "${selection// /}" ]; then
+  echo "shard selection is empty; nothing to run"
+  exit 0</code></pre>
+
+    <h3>2 · No path in the selection exists <span class="tag">lines 1106–1109</span></h3>
+<pre><code>if [ "${existing_paths}" -eq 0 ]; then
+  echo "No path in the selection exists (${selection}); nothing to run"
+  exit 0</code></pre>
+    <p>This is the one that matters most. A directory rename, a shard whose path went stale, or a typo in the matrix leaves <code>existing_paths</code> at zero — and the job goes green. The only trace is a <code>::warning::</code> annotation in a log nobody opens on a passing run.</p>
+
+    <h3>3 · pytest collected zero tests <span class="tag">lines 1132–1135</span></h3>
+<pre><code>if [ "$status" -eq 5 ]; then
+  echo "pytest collected no tests from ${selection}; passing"
+  exit 0</code></pre>
+    <p>Exit code 5 is pytest's documented code for “no tests were collected”. Here it is translated into success, with the word <em>passing</em>.</p>
+
+    <h2 id="reproduce">Reproduce it in 60 seconds</h2>
+    <p>The script below does not re-implement the workflow's logic. It extracts the <code>run:</code> block of the <code>id: tests</code> step <strong>from the file</strong>, executes it verbatim under <code>bash -e</code>, and replaces <code>uv</code> with a stub that reports what the real runner reported. Two scenarios, both of which should end red:</p>
+    <table>
+      <thead><tr><th>#</th><th>Scenario</th><th>Should be</th><th>Is</th></tr></thead>
+      <tbody>
+        <tr><td>A</td><td>the shard names a directory that no longer exists</td><td>red</td><td class="green">green (rc 0)</td></tr>
+        <tr><td>B</td><td>the runner returns 5 — zero tests collected</td><td>red</td><td class="green">green (rc 0)</td></tr>
+      </tbody>
+    </table>
+<pre><code>git clone --depth 1 https://github.com/BerriAI/litellm /tmp/litellm-001
+cd /tmp/litellm-001 &amp;&amp; git checkout d947ec1f7d672883afbf8b79574be9ac8a44b43d
+curl -O https://alexisromtz-lab.github.io/la-auditora/portafolio/auditoria-001-litellm/reproduce.py
+python3 reproduce.py .github/workflows/test-unit.yml ; echo "rc=$?"</code></pre>
+    <p>Exit code <code>1</code> means the step went green without running tests. The script returns <code>0</code> when a step fails closed, which is the control: patching the two guards to <code>exit 1</code> makes it return <code>0</code>. An instrument that cannot say “no finding” cannot say “finding” either.</p>
+
+    <h2 id="scanner">Why the automated scanner came back <code>indeterminate</code></h2>
+    <p>The structural analyser I run first was pointed at the same commit and declined to give a verdict. Its output, verbatim:</p>
+<pre><code>commit_sha_medido    d947ec1f7d672883afbf8b79574be9ac8a44b43d
+inv1                 UNVERIFIED
+selector_dinamico    true   (selector_dinamico_pytest: true)
+total_disco          4229 test files
+alcanzables_literal  4220
+huerfanos_candidatos 9
+loc_total_tests      1,970,420
+loc_huerfana         1,196
+loc_fail_open        0
+bsi_orfandad         0.0006   &lt;- upper bound, not a verdict
+bsi_permisividad     0.0
+clasificacion        indeterminado: inv1 UNVERIFIED</code></pre>
+    <p><strong>It returned “indeterminate” for a reason, and that reason is the audit.</strong> The analyser establishes the test universe from literal evidence in the CI files — a file is “reachable” if some workflow names its path. Here it found 4,220 of 4,229 reachable that way, and then declared the invariant unverified, because it had detected a <em>dynamic selector</em>: the shard paths are not written in the workflow, they are assembled from the build matrix at runtime.</p>
+    <p>So it refused to count orphans it could not falsify. Correct behaviour. But it leaves the actual question untouched: <strong>what happens when that runtime selector resolves to nothing?</strong> That is not a question about static reachability, it is a question about a branch in a shell script — and a branch in a shell script can simply be read and executed.</p>
+    <p>That is what this audit did. The 9 orphan candidates stay on the record as candidates: the dynamic selector may well reach them through the matrix, and without the run log I will not call them orphans. <code>bsi 0.0006</code> is an upper bound on orphaned test volume, not a cleanliness score.</p>
+
+    <h2 id="limits">What this does not prove</h2>
+    <div class="limite">
+      <p><strong>It does not prove this has ever happened.</strong> I did not read the GitHub Actions history for this repository. I am asserting that the code path exists and behaves as described at the pinned commit — not that a green run was wrong on any given date. Doing that needs the Actions API over a declared window, which I did not measure.</p>
+      <p><strong>It does not claim negligence.</strong> All three paths print an annotation, and one of them prints the word <em>passing</em>. That looks like a deliberate decision to tolerate empty shards, not an oversight. The finding is about what the signal can distinguish, not about intent.</p>
+      <p><strong>It covers one step of one workflow.</strong> <code>litellm</code> has 40 workflow files. I did not audit the other 39, and nothing here generalises to them.</p>
+      <p><strong>No patch is proposed here.</strong> This page reports a measurement. A fix is a separate conversation with the maintainers.</p>
+    </div>
+
+    <h2>What I did not find — and looked for</h2>
+    <p>A report that only lists hits is not a report. These are the checks that came back clean at the same commit, each measured directly on the clone:</p>
+    <table>
+      <thead><tr><th>Check</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>remote <code>uses:</code> references pinned to a full 40-hex SHA</td><td><strong>184 / 184</strong> — no floating tags. 27 distinct actions, 0 mutable refs. (Plus 72 references to local composite actions, which need no pin.)</td></tr>
+        <tr><td><code>continue-on-error: true</code></td><td>4 occurrences, <strong>all on <code>codecov/codecov-action</code> upload steps</strong>, none on a test runner</td></tr>
+        <tr><td><code>pytest-rerunfailures</code> / <code>pytest-retry</code> enabled on shared runners</td><td>disabled at lines 1530 and 1525 (<code>-p no:rerunfailures -p no:pytest-retry</code>)</td></tr>
+        <tr><td>step timeouts</td><td>present on the test steps (<code>timeout-minutes</code> from the matrix)</td></tr>
+        <tr><td>workflow permissions</td><td><code>permissions: {}</code> on the jobs checked</td></tr>
+      </tbody>
+    </table>
+    <p><strong>184 of 184 remote actions pinned, across 40 workflow files, is better than almost every repository I have measured.</strong> The organisation that wrote this file spends real effort on its supply chain. Which is exactly why the three empty-shard exits are worth reporting: they sit in a file that is otherwise careful.</p>
+    <p>One adjacent observation, offered as context and not as a finding: the five Codecov uploads also set <code>fail_ci_if_error: false</code>, so coverage is uploaded but cannot fail the build either. That is a normal and defensible choice; it is listed here so nobody thinks the coverage gate is load-bearing.</p>
+
+    <h2 id="contact">Need this on your repository?</h2>
+    <div class="cta">
+      <p><strong>The audit is the product, and the receipt is the point.</strong> Every finding ships as a pinned commit, the blob hash of the file it lives in, the exact command that reproduces it, and a declared list of what was <em>not</em> measured.</p>
+      <p><a href="https://github.com/alexisromtz-lab/git-preflight-gate/issues/new?title=Audit%20request&amp;body=Repository%3A%20%0ACommit%3A%20%0AWhat%20worries%20you%3A%20" target="_blank" rel="noopener noreferrer">Open a request on GitHub Issues</a> · <a href="https://wa.me/525649997759?text=Hello%2C%20I%20read%20audit%20001%20and%20want%20one%20for%20my%20repository" target="_blank" rel="noopener noreferrer">WhatsApp</a></p>
+    </div>
+  </main>
+
+  <footer>
+    <p>Audit 001 · <code>BerriAI/litellm</code> @ <a href="https://github.com/BerriAI/litellm/commit/d947ec1f7d672883afbf8b79574be9ac8a44b43d" target="_blank" rel="noopener noreferrer"><code>d947ec1f</code></a> · locus <a href="https://github.com/BerriAI/litellm/blob/d947ec1f7d672883afbf8b79574be9ac8a44b43d/.github/workflows/test-unit.yml#L1072-L1135" target="_blank" rel="noopener noreferrer"><code>.github/workflows/test-unit.yml</code></a> · blob <code>8ac157c9</code> · 1,611 lines. Report generated from the audit sheet, not from memory.</p>
+  </footer>
+</div>
+</body>
+</html>

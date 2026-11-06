@@ -96,6 +96,14 @@
         <p class="intro">Muestras verificables sobre repositorios públicos. Los resúmenes no sustituyen las actas completas: indican el commit, el resultado medido y lo que quedó sin medir.</p>
         <div class="grid">
           <article>
+            <span class="tag">litellm · CI · fail-closed</span>
+            <h3>Un job en verde que no corrió ningún test</h3>
+            <p class="metric">3 salidas <code>exit 0</code> sin ejecutar pytest · 2 reproducidas en el acto</p>
+            <p>En el commit auditado, el paso que corre el shard de tests termina en éxito si la selección del matrix llega vacía, si ninguno de los paths de la selección existe en disco, y si pytest devuelve 5 —su código documentado para «cero tests recogidos»—. Un renombrado de directorio de tests deja el job verde, y el único rastro es una anotación en un log que nadie abre cuando está verde.</p>
+            <p><strong>Límite:</strong> mide un step de un workflow en un commit fijado; no se leyó el historial de Actions, así que no se afirma que haya ocurrido en una corrida concreta. Las tres salidas imprimen anotación <code>::warning::</code>, lo que apunta a una decisión deliberada: se reporta la señal, no la intención.</p>
+            <p class="source"><a href="https://github.com/BerriAI/litellm/commit/d947ec1f7d672883afbf8b79574be9ac8a44b43d" target="_blank" rel="noopener noreferrer">BerriAI/litellm · d947ec1f</a> · <a href="portafolio/auditoria-001-litellm/">informe y script de reproducción</a></p>
+          </article>
+          <article>
             <span class="tag">PyTorch · tests · análisis estático</span>
             <h3>Tests reconocidos que ningún camino del CI convoca</h3>
             <p class="metric">45 archivos · 459 funciones de test · 3,35 % del corpus</p>
