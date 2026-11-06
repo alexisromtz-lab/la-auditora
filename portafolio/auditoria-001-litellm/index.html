@@ -148,14 +148,14 @@ clasificacion        indeterminado: inv1 UNVERIFIED</code></pre>
     <table>
       <thead><tr><th>Check</th><th>Result</th></tr></thead>
       <tbody>
-        <tr><td><code>uses:</code> references pinned to a full 40-hex SHA</td><td><strong>184 / 184</strong> — no floating tags</td></tr>
+        <tr><td>remote <code>uses:</code> references pinned to a full 40-hex SHA</td><td><strong>184 / 184</strong> — no floating tags. 27 distinct actions, 0 mutable refs. (Plus 72 references to local composite actions, which need no pin.)</td></tr>
         <tr><td><code>continue-on-error: true</code></td><td>4 occurrences, <strong>all on <code>codecov/codecov-action</code> upload steps</strong>, none on a test runner</td></tr>
         <tr><td><code>pytest-rerunfailures</code> / <code>pytest-retry</code> enabled on shared runners</td><td>disabled at lines 1530 and 1525 (<code>-p no:rerunfailures -p no:pytest-retry</code>)</td></tr>
         <tr><td>step timeouts</td><td>present on the test steps (<code>timeout-minutes</code> from the matrix)</td></tr>
         <tr><td>workflow permissions</td><td><code>permissions: {}</code> on the jobs checked</td></tr>
       </tbody>
     </table>
-    <p><strong>184 of 184 actions pinned is better than almost every repository I have measured.</strong> The organisation that wrote this file spends real effort on its supply chain. Which is exactly why the three empty-shard exits are worth reporting: they sit in a file that is otherwise careful.</p>
+    <p><strong>184 of 184 remote actions pinned, across 40 workflow files, is better than almost every repository I have measured.</strong> The organisation that wrote this file spends real effort on its supply chain. Which is exactly why the three empty-shard exits are worth reporting: they sit in a file that is otherwise careful.</p>
     <p>One adjacent observation, offered as context and not as a finding: the five Codecov uploads also set <code>fail_ci_if_error: false</code>, so coverage is uploaded but cannot fail the build either. That is a normal and defensible choice; it is listed here so nobody thinks the coverage gate is load-bearing.</p>
 
     <h2 id="contact">Need this on your repository?</h2>
