@@ -96,6 +96,14 @@
         <p class="intro">Verifiable samples from public repositories. Summaries do not replace full audit records; each gives the pinned commit, measured result and what remained unmeasured.</p>
         <div class="grid">
           <article>
+            <span class="tag">litellm · CI · fail-closed</span>
+            <h3>A green job that ran no tests</h3>
+            <p class="metric">3 <code>exit 0</code> paths without pytest · 2 reproduced</p>
+            <p>At the audited commit, the step that runs the test shard succeeds when the matrix selection arrives empty, when no path in the selection exists on disk, and when pytest returns 5 — its documented code for “no tests collected”. A test-directory rename leaves the job green, and the only trace is an annotation in a log nobody opens on a passing run.</p>
+            <p><strong>Limit:</strong> one step of one workflow at a pinned commit; the Actions history was not read, so this does not claim a specific run was wrong. All three paths print a <code>::warning::</code> annotation, which points to a deliberate decision: this reports the signal, not the intent.</p>
+            <p class="source"><a href="https://github.com/BerriAI/litellm/commit/d947ec1f7d672883afbf8b79574be9ac8a44b43d" target="_blank" rel="noopener noreferrer">BerriAI/litellm · d947ec1f</a> · <a href="../portafolio/auditoria-001-litellm/">report and reproduction script</a></p>
+          </article>
+          <article>
             <span class="tag">PyTorch · tests · static analysis</span>
             <h3>Recognized tests with no CI execution path</h3>
             <p class="metric">45 files · 459 test functions · 3.35% of the corpus</p>
