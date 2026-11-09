@@ -1,0 +1,251 @@
+<!doctype html>
+<!-- HUELLA-PAGINA-ARTICULO-el-hackeo-de-6-3b-no-fue-un-bug-de-codigo-20261108 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The $6.3B hack was not a code bug | La Auditora</title>
+  <meta name="description" content="Ten public repositories with a deployment workflow, measured with the exact commit of each one: 807 findings and 115 with a conjunction of authority. None of the ten returns a clean green, and the article says why that is not 807 vulnerabilities.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/el-hackeo-de-6-3b-no-fue-un-bug-de-codigo/">
+  <link rel="alternate" hreflang="es" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/el-hackeo-de-6-3b-no-fue-un-bug-de-codigo/">
+  <link rel="alternate" hreflang="en" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/el-hackeo-de-6-3b-no-fue-un-bug-de-codigo/">
+  <link rel="alternate" hreflang="x-default" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/el-hackeo-de-6-3b-no-fue-un-bug-de-codigo/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="The $6.3B hack was not a code bug">
+  <meta property="og:description" content="Ten public repositories with a deployment workflow, measured with the exact commit of each one: 807 findings and 115 with a conjunction of authority. None of the ten returns a clean green, and the article says why that is not 807 vulnerabilities.">
+  <meta property="og:url" content="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/el-hackeo-de-6-3b-no-fue-un-bug-de-codigo/">
+  <meta property="og:locale" content="en_US">
+  <meta property="article:published_time" content="2026-11-06">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../../articulo.css">
+</head>
+<body>
+<a class="skip" href="#contenido">Skip to content</a>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../../../">La Auditora</a>
+    <nav>
+      <a href="../">Articles</a>
+      <a href="../../../">Audits</a>
+      <a href="../../../en/">Portfolio (EN)</a>
+      <a href="../../el-hackeo-de-6-3b-no-fue-un-bug-de-codigo/" hreflang="es" lang="es">Leer en espanol</a>
+      <a href="../../el-hackeo-de-6-3b-no-fue-un-bug-de-codigo/articulo.en.md">Source .md</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <p class="eyebrow">Article · 2026-11-06</p>
+    <h1>The $6.3B hack was not a code bug</h1>
+    <p class="lede">Ten public repositories with a deployment workflow, measured with the exact commit of each one: 807 findings and 115 with a conjunction of authority. None of the ten returns a clean green, and the article says why that is not 807 vulnerabilities.</p>
+    <div class="proof"><span>security</span><span>devops</span><span>supplychain</span><span>opensource</span></div>
+
+<p><strong>Where the figures come from:</strong> my own measurement, reproducible. Every figure in this article has its commit; the breakdown by code is further down, not in an appendix.</p>
+
+<hr>
+
+<h2>What is confirmed, and what the press is still arguing about</h2>
+
+<p>Between October 29 and 30, eight outlets published the same fact: the largest theft in the history of cryptocurrency, between <strong>$6.3 and $6.4 billion</strong>, with TRM Labs attributing it to North Korea. An Ethereum upgrade, <strong>EIP-7702</strong>, appears in every piece: it lets an account delegate its signing capability to another contract. With that delegation signed, hot wallets were drained.</p>
+
+<p>So far, the headline. Now the part almost nobody is publishing:</p>
+
+<ul>
+<li><strong>Cryptonews, October 30:</strong> «EIP-7702 didn't cause Binance hack, but may have amplified losses».</li>
+<li><strong>CCN, October 30:</strong> «$3.66B Was Stolen Without It».</li>
+<li><strong>CryptoTicker, October 29:</strong> «$2.8B Drained From Hot Wallet via EIP-7702».</li>
+</ul>
+
+<p>Added up, those three pieces say something uncomfortable: <strong>most of the money was lost without the upgrade being involved</strong>. If that holds, then EIP-7702 is not the cause. It is the amplifier.</p>
+
+<p>And a fourth piece, from the same day, closes the circle from the other side: <strong>The News International</strong> headlines that Binance «confirms advanced EIP-7702 exploits and compromised DevOps laptop». That is: that the vector came through a <strong>compromised engineer machine</strong> is not this article's hypothesis — the exchange itself confirmed it. The fact is not mine; the angle is.</p>
+
+<p>All four headlines were verified on October 30, 2026 with publication date and outlet; none is quoted from memory.</p>
+
+<p>And if it is not the cause, the right question is not «what primitive failed?». It is: <strong>who could sign?</strong></p>
+
+<hr>
+
+<h2>The hole is the chain of authority, not the line of code</h2>
+
+<p>A code audit looks for the error in the program. The incident points elsewhere: an engineer's machine with signing and deployment capability, and a delegation that turns one signature into permanent authority. None of that lives in a badly written line. It lives in the <strong>chain of authority</strong>: which identity can publish, with which token, from which artifact, and with how many factors.</p>
+
+<p>That is not a hypothesis about cryptocurrency. It is the structure of any modern deployment. And it can be measured.</p>
+
+<hr>
+
+<h2>We measured it in our own house first</h2>
+
+<p>We have an instrument that audits the authority surface of GitHub Actions: who has write permission and at the same time executes code, who can publish through OIDC and at the same time builds the artifact, which actions come in by movable tag, where secrets travel inline.</p>
+
+<p>We ran it against our own repository, before running it against anyone else's.</p>
+
+<p><strong>Result: 8 findings, <code>RC 1</code> (<code>FINDINGS</code>).</strong> Six were from the same workflow. The three that matter:</p>
+
+<ol>
+<li>That workflow declares <code>pages: write</code> + <code>id-token: write</code> <strong>at the root</strong>, not on the deployment job. Every job inherits it, including the one that compiles.</li>
+<li>It comes in through <strong>four floating tags</strong> (<code>@v4</code>, <code>@v5</code>, <code>@v3</code>, <code>@v4</code>). A tag is a movable reference: whoever can move it executes code inside the perimeter that can publish.</li>
+<li>The deploy job consumes the OIDC token without consuming an artifact built separately: <strong>it builds and signs in the same context</strong>.</li>
+</ol>
+
+<p>None of the three pieces is dramatic on its own. <strong>The conjunction is the finding</strong>: a publishing token inherited by every job, plus four entry doors that somebody else can move.</p>
+
+<p>Run time: <strong>1.2 seconds</strong>. Zero tokens. Without installing anything in the audited repository.</p>
+
+<hr>
+
+<h2>And then we fixed it, because a report with no fix is an invoice</h2>
+
+<p>This is where most audits end and where this article should start to differentiate itself.</p>
+
+<p><strong>First move — fix.</strong> Root permissions cut to <code>contents: read</code>. <code>pages: write</code> and <code>id-token: write</code> drop to the <code>deploy</code> job, where they are exercised. The workflow splits into two jobs with <code>needs:</code>: one builds and uploads the artifact, the other publishes, and <strong>the one that publishes no longer has the repository code on its disk</strong>. The four floating refs become full SHAs. And a <code>download-artifact</code> appears that did not exist before: the gate had demanded it from the start and we were right not to believe the first green — without that step, the whole artifact is a sink for the instrument, because no step in the job declares it as an input.</p>
+
+<p><strong>Second move — measure again.</strong> 8 findings → <strong>3</strong>.</p>
+
+<p><strong>Third move — the one almost nobody makes: do not delete the residue, declare it.</strong></p>
+
+<p>The 3 that remain are not bugs. Two are the corpus <code>keepalive</code>: a job that needs <code>contents: write</code> because its work <strong>is</strong> to run <code>git push --dry-run</code>. Taking the write away does not close a hole: it turns off the keepalive. The third is the write grant for the <code>deploy</code> job, which now really is where it is used.</p>
+
+<p>The obvious temptation is to silence the instrument. Add an exclusion list, a <code># noqa</code>, a filter. That turns the audit into theater: the next real finding comes in through the same door we just opened.</p>
+
+<p>What we did instead was an <strong>adjudication registry</strong>: a file where each exception is written with its code, its workflow, its job and <strong>the record that authorizes it</strong>. The instrument reads that registry and demands two things a filter cannot give:</p>
+
+<ul>
+<li><strong>Zero orphans.</strong> A row that no longer matches any finding is reported as an error. A registry that only grows is a graveyard of exceptions.</li>
+<li><strong>Adjudication does not delete the finding.</strong> The finding stays in the JSON, with its severity, its <code>job</code> and its <code>motivo</code>. What changes is the verdict of the repository: from <code>FINDINGS</code> to <code>ADJUDICADO</code>.</li>
+</ul>
+
+<p><strong>Result: <code>RC 0</code>, <code>ADJUDICADO</code>, zero orphans.</strong> And when the instrument finds something again that is not in the registry, it goes red again. <em>That</em> is what a <code># noqa</code> cannot do.</p>
+
+<p>This is the commercial point, and it is worth saying without decoration: <strong>the deliverable is not a number of findings. It is a number of findings that moves, and a residue with a name and a record.</strong> Anyone can run a scanner and hand you 29 violations. What almost nobody delivers is the proof that the 29 dropped to 3, why those 3 are still there, and who signed each one.</p>
+
+<hr>
+
+<h2>And in somebody else's project, 21 findings</h2>
+
+<p>On an active open source project (≈11 workflows), the same instrument returned <strong>21 findings</strong>: a release job with <code>contents: write</code>, <code>pull-requests: write</code> and <code>id-token: write</code> that also runs the build in the same context, and a bot token passed inline to a third-party action.</p>
+
+<p><strong>And here comes the part almost no security vendor writes:</strong> that job only fires on <code>push</code> to <code>main</code>, inside an <code>if</code> that requires being the repository owner. <strong>There is no untrusted input.</strong> The finding is <em>structural, not exploitable</em>. Publishing «secret exposed in a public repo» would have been technically true on the surface and false in the risk.</p>
+
+<p>That distinction —<strong>structural ≠ exploitable</strong>— is the difference between a report a CISO can use and one they have to shut off.</p>
+
+<p>And that foreign repo was not cloned. <code>--repo owner/name</code> resolves the name before the first call, reads the workflows through a read-only API and publishes the exact commit it measured (<code>6c9ca431</code>). <strong>Not one write to somebody else's disk, not one extra token.</strong> If measuring someone's house requires copying their code, it is not a measurement: it is a move.</p>
+
+<hr>
+
+<h2>Ten repositories, ten measurements, none silent</h2>
+
+<p>One case is not a sample. Ten public repositories, all with at least one workflow whose name publishes or deploys something. The inclusion criterion is declared before measuring, not after: <strong>a repository enters the batch if it has a deployment or publishing workflow</strong>.</p>
+
+<table>
+<thead>
+<tr>
+<th>Repository</th>
+<th>Measured commit</th>
+<th>Findings</th>
+<th>Conjunction of authority</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>withastro/starlight</code></td><td><code>6c9ca431</code></td><td>21</td><td>4</td><td><code>RC 1</code></td></tr>
+<tr><td><code>withastro/astro</code></td><td><code>10dae2f3</code></td><td>51</td><td>19</td><td><code>RC 1</code></td></tr>
+<tr><td><code>vercel/next.js</code></td><td><code>4fed142e</code></td><td>181</td><td>36</td><td><code>RC 1</code></td></tr>
+<tr><td><code>nuxt/nuxt</code></td><td><code>363f3b87</code></td><td>59</td><td>12</td><td><code>RC 1</code></td></tr>
+<tr><td><code>sveltejs/svelte</code></td><td><code>fe21fce0</code></td><td>12</td><td>2</td><td><code>RC 1</code></td></tr>
+<tr><td><code>remix-run/remix</code></td><td><code>2eb9249c</code></td><td>170</td><td>9</td><td><code>RC 1</code></td></tr>
+<tr><td><code>angular/angular</code></td><td><code>458303fe</code></td><td>26</td><td>4</td><td><code>RC 1</code></td></tr>
+<tr><td><code>vuejs/core</code></td><td><code>24c9d0bf</code></td><td>11</td><td>6</td><td><code>RC 1</code></td></tr>
+<tr><td><code>facebook/react</code></td><td><code>16453bcd</code></td><td>234</td><td>11</td><td><code>RC 1</code></td></tr>
+<tr><td><code>vitejs/vite</code></td><td><code>90bc034a</code></td><td>42</td><td>12</td><td><code>RC 1</code></td></tr>
+<tr><td><strong>Total</strong></td><td><strong>10 commits</strong></td><td><strong>807</strong></td><td><strong>115</strong></td><td><strong>10 of 10</strong></td></tr>
+</tbody>
+</table>
+
+<p>Two repositories from the original list were left out, and saying so is part of the method: <code>gatsbyjs/gatsby</code> has no deployment or publishing workflow at all (one only, and it is not a deploy one) — it is declared <code>NO_APLICA</code> and replaced by <code>vitejs/vite</code>. <code>astro-build/astro</code> does not exist: the correct organization is <code>withastro</code>, and <code>withastro/astro</code> was measured.</p>
+
+<p><strong>And here is the part a scanner vendor does not write: 807 are not 807 vulnerabilities.</strong> They are 807 observations of the YAML surface. Of those, <strong>115 are the conjunction this article defends</strong> — write authority that executes, authority inherited from the root, or missing root permissions. The other <strong>692</strong> split without decoration: <strong>308</strong> movable refs (real hygiene), <strong>153</strong> scope reviews that contract SC-1 marks as <code>REVIEW</code>, <strong>3</strong> root reads under review, and <strong>228</strong> from <strong>two codes of the instrument itself that detect the mechanism, not the defect</strong>. <code>SECRETO_EXPUESTO</code> flags any <code>${{ secrets.* }}</code> in an <code>env:</code>, which is <em>the correct way</em> to pass a secret to a step; and <code>SUMIDERO_IMPUDO</code> flags a job with <code>id-token: write</code> that runs <code>actions/checkout</code>, which is what <strong>every</strong> publishing job has to do to have something to publish. Publishing the raw number would have been the same sin we criticize three paragraphs above, with the sign flipped.</p>
+
+<p>The full table, with the breakdown by code and the exact commit of each measurement, is the one above: ten rows, ten commits, none silent. The batch record keeps the ten SHAs and the criterion they were chosen with.</p>
+
+<hr>
+
+<h2>What this instrument does NOT measure</h2>
+
+<p>Saying it is part of the contract, not a clause at the foot of the page:</p>
+
+<ul>
+<li><strong>Default permissions</strong> of <code>GITHUB_TOKEN</code> at repository or organization level: invisible from the YAML.</li>
+<li><strong>OIDC policies of the destination</strong> (npm, PyPI, AWS): the instrument sees that there is a door, not which lock it has.</li>
+<li><strong>Dependency modification at runtime</strong> when non-isolated native code runs.</li>
+<li><strong>Reusable workflows (<code>workflow_call</code>) and composite actions hosted in foreign repositories.</strong></li>
+<li><strong>Runtime.</strong> It measures the declared surface of the YAML; it does not certify what happens when it runs.</li>
+</ul>
+
+<p>An instrument that does not declare its blindness is not an instrument: it is an opinion with a JSON format.</p>
+
+<hr>
+
+<h2>The falsifier</h2>
+
+<p>This thesis dies in two ways, and both are measurable:</p>
+
+<ul>
+<li>If in <strong>10 repositories with deployment workflows</strong> the instrument does not find <strong>a single</strong> conjunction of inherited authority with movable doors, then there is no market: the problem does not exist outside our house.</li>
+<li>If it finds <strong>10 of 10</strong>, then the finding stops being a finding and becomes the norm — and the product is no longer the scan (which anyone runs in a second), but the <strong>remediation</strong> and the evidence that it was done.</li>
+</ul>
+
+<p>Neither of the two is a defeat. Both force you to stop selling «audit» and start selling «this got closed, and here is the proof».</p>
+
+<p><strong>The falsifier has already been exercised, and the comfortable branch did not come out.</strong> Ten repositories, ten measurements: <strong>10 of 10 have at least one conjunction of authority</strong> (minimum 2, in <code>sveltejs/svelte</code>; maximum 36, in <code>vercel/next.js</code>). There is not a single repository in the batch where the problem does not exist.</p>
+
+<p><strong>And the measurement found a hole in the falsifier, not in the thesis.</strong> The text said «conjunction of inherited authority <strong>with</strong> movable doors», and that conjunction admits three readings. All three are published:</p>
+
+<table>
+<thead>
+<tr>
+<th>Reading of the falsifier</th>
+<th>Repositories that satisfy it</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><strong>A</strong> — at least one conjunction of authority (criterion declared in the evidence)</td><td><strong>10 of 10</strong></td></tr>
+<tr><td><strong>B</strong> — conjunction of authority <strong>and</strong> at least one <code>uses:</code> with a movable tag</td><td><strong>6 of 10</strong></td></tr>
+<tr><td><strong>C</strong> — write authority inherited <strong>from the root</strong> and movable tag</td><td><strong>4 of 10</strong></td></tr>
+</tbody>
+</table>
+
+<p><strong>No reading gives zero.</strong> The first branch of the falsifier —«if it does not find a single one, there is no market»— is refuted under all three. But the second is not reached clean either: only reading <strong>A</strong> gets to 10 of 10. The falsifier was written with two branches and a hole in the middle, and that hole was filled by the measurement, not by rhetoric. The honest version of the falsifier is not binary: it is <strong>a threshold</strong> — «if fewer than half of the repositories with deployment show the conjunction, the problem is not structural, and this falls». Measured: 4 of 10 under the strictest reading. <strong>It does not fall, and barely.</strong></p>
+
+<p>That resolves the thesis to the <strong>second</strong> branch under the declared reading, and it has to be said with the same clarity used for our own finding: <strong>the conjunction of authority is not a rarity; it is the norm of the ecosystem.</strong> If it is the norm, the scan is not a product — anyone runs it in a second, and ours is not billed for speed either. <strong>What is scarce is closure:</strong> that the number goes down, that the residue has a name and a record, and that the next scan can prove it did not go back up.</p>
+
+<p>The branch that kills the thesis would have been the first. The second came out. <strong>The product that survives this measurement is the one already described in the 8 → 3 → 0 section, not the one described in the headline.</strong></p>
+
+<hr>
+
+<h2>If you want to know where your single signing point is</h2>
+
+<p>You do not need to install anything or give us access to your code. A repository name is enough: the instrument reads the declared surface of your workflows and returns, in seconds, how many jobs concentrate publishing authority and how many of their inputs somebody else can move.</p>
+
+<p>If the result is «there is no declared chain of authority», that is the finding: absence is published too.</p>
+
+<hr>
+
+<p><em>Do you want the measurement on your repository? Leave the name (<code>owner/repo</code>) in the comments of this article and I will publish the count in the same thread: how many jobs concentrate publishing authority, and how many of their inputs somebody else can move. Without cloning your code, without asking you for a key, without installing anything on your machine.</em></p>
+
+    <section class="cta">
+      <p><strong>Everything on this page can be measured again.</strong></p>
+      <p>Every number travels with the command or the <code>file:line</code> that produces it. If something
+      does not add up, the answer is not an argument: it is the instrument, in
+      <a href="../../../auditoria-002-economia-contexto/">the reproducible report</a> (in Spanish) and in
+      <a href="https://github.com/alexisromtz-lab/la-auditora">the repository</a>.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>La Auditora · Platino Labs · <a href="../">more articles</a> · <a href="../../../">audits</a></p>
+  </footer>
+</div>
+</body>
+</html>
+

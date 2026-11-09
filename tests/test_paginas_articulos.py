@@ -55,6 +55,20 @@ en la linea siguiente
 """
 
 
+FUENTE_EN = """---
+title: A fixture article
+lede: It exists to falsify the generator, not to be published.
+date: 2026-11-06
+tags: fixture, markdown
+lang: en
+---
+
+# An H1 the page must not repeat
+
+Text that is already English.
+"""
+
+
 def construir(destino: Path, fuente: str = FUENTE) -> Path:
     carpeta = destino / "portafolio" / "articulos" / "un-articulo"
     carpeta.mkdir(parents=True)
@@ -174,6 +188,57 @@ class GeneradorFalsable(unittest.TestCase):
         self.correr("--aplicar")
         self.assertNotIn("<script>", self.html())
         self.assertIn("&lt;script&gt;", self.html())
+
+    # ── el gemelo ingles: opcional, pero consistente ──────────────────────
+
+    def gemelo(self, fuente: str = FUENTE_EN) -> Path:
+        return (self.root / "portafolio" / "articulos" / "un-articulo" / "articulo.en.md")
+
+    def test_el_gemelo_genera_pagina_espejo_y_su_indice(self) -> None:
+        self.gemelo().write_text(FUENTE_EN, encoding="utf-8")
+        proc = self.correr("--aplicar")
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        en = self.root / "portafolio" / "articulos" / "en"
+        self.assertTrue((en / "un-articulo" / "index.html").is_file(), "falta la pagina EN")
+        self.assertTrue((en / "index.html").is_file(), "falta el indice EN")
+        self.assertIn('lang="en"', (en / "un-articulo" / "index.html").read_text(encoding="utf-8"))
+
+    def test_el_hreflang_es_reciproco(self) -> None:
+        self.gemelo().write_text(FUENTE_EN, encoding="utf-8")
+        self.correr("--aplicar")
+        en = self.root / "portafolio" / "articulos" / "en" / "un-articulo" / "index.html"
+        html_en = en.read_text(encoding="utf-8")
+        html_es = self.html()
+        self.assertIn('hreflang="es"', html_en)
+        self.assertIn('hreflang="en"', html_es)
+        self.assertIn("articulos/en/un-articulo/", html_es)
+        self.assertIn("articulos/un-articulo/", html_en)
+        self.assertEqual(html_en.count('<link rel="alternate"'), 3, "faltan los tres alternates")
+
+    def test_sin_gemelo_no_se_declara_hreflang(self) -> None:
+        self.correr("--aplicar")
+        self.assertNotIn("hreflang=", self.html())
+        self.assertFalse((self.root / "portafolio" / "articulos" / "en").exists())
+
+    def test_el_gemelo_sin_fuente_es_error(self) -> None:
+        (self.root / "portafolio" / "articulos" / "un-articulo" / "articulo.md").unlink()
+        self.gemelo().write_text(FUENTE_EN, encoding="utf-8")
+        proc = self.correr("--aplicar")
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.assertIn("sin fuente ES", proc.stdout)
+
+    def test_el_encabezado_que_contradice_al_nombre_es_error(self) -> None:
+        self.gemelo().write_text(FUENTE_EN.replace("lang: en", "lang: es"), encoding="utf-8")
+        proc = self.correr("--aplicar")
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.assertIn("el encabezado dice es", proc.stdout)
+
+    def test_las_paginas_en_son_idempotentes(self) -> None:
+        self.gemelo().write_text(FUENTE_EN, encoding="utf-8")
+        self.correr("--aplicar")
+        proc = self.correr("--aplicar")
+        self.assertEqual(proc.returncode, 0, proc.stdout)
+        self.assertIn("Cero cambios", proc.stdout)
 
 
 if __name__ == "__main__":

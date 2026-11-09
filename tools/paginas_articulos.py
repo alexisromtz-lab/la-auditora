@@ -48,8 +48,13 @@ from pathlib import Path
 
 DIR_ARTICULOS = Path("portafolio/articulos")
 SITIO = "https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/"
+SITIO_EN = SITIO + "en/"
 REQUERIDOS = ("title", "lede", "date")
 NO_MEDIDO = "NO_MEDIDO"
+
+# El gemelo ingles vive al lado de su fuente: `articulo.en.md`. El nombre del
+# archivo ES la declaracion de idioma; si el encabezado dice otra cosa, es error.
+NOMBRES = {"es": "articulo.md", "en": "articulo.en.md"}
 
 # ── el subconjunto de markdown ───────────────────────────────────────────────
 
@@ -240,6 +245,14 @@ def leer_articulo(ruta: Path) -> dict:
         raise ValueError("%s: el encabezado no cierra con ---" % ruta)
     meta["cuerpo"] = "\n".join(lineas[fin + 1:])
     meta["ruta"] = ruta
+    meta["slug"] = ruta.parent.name
+    declarado = meta.get("lang")
+    meta["lang"] = "en" if ruta.name == NOMBRES["en"] else "es"
+    if declarado and declarado != meta["lang"]:
+        raise ValueError(
+            "%s: el nombre del archivo dice %s y el encabezado dice %s"
+            % (ruta, meta["lang"], declarado)
+        )
     faltan = [c for c in REQUERIDOS if not meta.get(c)]
     if faltan:
         raise ValueError("%s: el encabezado no declara %s" % (ruta, ", ".join(faltan)))
@@ -251,9 +264,91 @@ def leer_articulo(ruta: Path) -> dict:
 
 CSS = """<link rel="stylesheet" href="%sarticulo.css">"""
 
+TEXTOS = {
+    "es": {
+        "saltar": "Saltar al contenido",
+        "marca_href": "../../",
+        "locale": "es_ES",
+        "eyebrow": "Articulo · {date}",
+        "cta": (
+            "      <p><strong>Todo lo que hay aqui se puede medir otra vez.</strong></p>\n"
+            "      <p>Las cifras viajan con el comando o el <code>archivo:linea</code> que las produce. Si algo no cuadra,\n"
+            "      la respuesta no es un argumento: es el instrumento, en\n"
+            '      <a href="../../auditoria-002-economia-contexto/">el informe reproducible</a> y en\n'
+            '      <a href="https://github.com/alexisromtz-lab/la-auditora">el repositorio</a>.</p>'
+        ),
+        "pie": 'La Auditora · Platino Labs · <a href="../">mas articulos</a> · <a href="../../">auditorias</a>',
+        "fuente_href": "articulo.md",
+        "fuente": "Fuente .md",
+        "nav": (
+            '      <a href="../">Articulos</a>\n'
+            '      <a href="../../">Auditorias</a>\n'
+            '      <a href="../../en/">Portafolio EN</a>'
+        ),
+        "gemelo": '      <a href="../en/{slug}/" hreflang="en" lang="en">Read in English</a>',
+    },
+    "en": {
+        "saltar": "Skip to content",
+        "marca_href": "../../../",
+        "locale": "en_US",
+        "eyebrow": "Article · {date}",
+        "cta": (
+            "      <p><strong>Everything on this page can be measured again.</strong></p>\n"
+            "      <p>Every number travels with the command or the <code>file:line</code> that produces it. If something\n"
+            "      does not add up, the answer is not an argument: it is the instrument, in\n"
+            '      <a href="../../../auditoria-002-economia-contexto/">the reproducible report</a> (in Spanish) and in\n'
+            '      <a href="https://github.com/alexisromtz-lab/la-auditora">the repository</a>.</p>'
+        ),
+        "pie": 'La Auditora · Platino Labs · <a href="../">more articles</a> · <a href="../../../">audits</a>',
+        "fuente_href": "../../{slug}/articulo.en.md",
+        "fuente": "Source .md",
+        "nav": (
+            '      <a href="../">Articles</a>\n'
+            '      <a href="../../../">Audits</a>\n'
+            '      <a href="../../../en/">Portfolio (EN)</a>'
+        ),
+        "gemelo": '      <a href="../../{slug}/" hreflang="es" lang="es">Leer en espanol</a>',
+    },
+}
+
+IND_TEXTOS = {
+    "es": {
+        "saltar": "Saltar al contenido",
+        "marca_href": "../",
+        "titulo": "Articulos",
+        "descripcion": (
+            "Los articulos de La Auditora: cada cifra con el comando que la produce, "
+            "cada pieza reproducible desde el repositorio."
+        ),
+        "eyebrow": "Articulos",
+        "h1": "Lo que medimos, escrito para que se pueda rehacer",
+        "lede": (
+            "Ninguna cifra de estas piezas se escribe a mano: cada una lleva el comando o el\n"
+            '    <code>archivo:linea</code> que la produce, y la que no tiene denominador declarado no se publica.'
+        ),
+        "pie": 'La Auditora · Platino Labs · <a href="../">auditorias</a>',
+    },
+    "en": {
+        "saltar": "Skip to content",
+        "marca_href": "../../",
+        "titulo": "Articles",
+        "descripcion": (
+            "The La Auditora articles: every number with the command that produces it, "
+            "every piece reproducible from the repository."
+        ),
+        "eyebrow": "Articles",
+        "h1": "What we measured, written so it can be done again",
+        "lede": (
+            "No number in these pieces is typed by hand: each one carries the command or the\n"
+            '    <code>file:line</code> that produces it, and the one without a declared denominator is not published.'
+        ),
+        "pie": 'La Auditora · Platino Labs · <a href="../../">audits</a>',
+    },
+}
+
 PLANTILLA = """<!doctype html>
 <!-- HUELLA-PAGINA-ARTICULO-{slug}-20261108 -->
-<html lang="es">
+<html lang="{lang}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -261,29 +356,29 @@ PLANTILLA = """<!doctype html>
   <meta name="description" content="{lede}">
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="{canonical}">
+{alternates}
   <meta property="og:type" content="article">
   <meta property="og:title" content="{title}">
   <meta property="og:description" content="{lede}">
   <meta property="og:url" content="{canonical}">
+  <meta property="og:locale" content="{locale}">
   <meta property="article:published_time" content="{date}">
   <meta name="twitter:card" content="summary_large_image">
   {css}
 </head>
 <body>
-<a class="skip" href="#contenido">Saltar al contenido</a>
+<a class="skip" href="#contenido">{saltar}</a>
 <div class="wrap">
   <header>
-    <a class="brand" href="../../">La Auditora</a>
+    <a class="brand" href="{marca_href}">La Auditora</a>
     <nav>
-      <a href="../">Articulos</a>
-      <a href="../../">Auditorias</a>
-      <a href="../../en/">English</a>
-      <a href="articulo.md">Fuente .md</a>
+{nav}
+      <a href="{fuente_href}">{fuente}</a>
     </nav>
   </header>
 
   <main id="contenido">
-    <p class="eyebrow">Articulo · {date}</p>
+    <p class="eyebrow">{eyebrow}</p>
     <h1>{title}</h1>
     <p class="lede">{lede}</p>
     <div class="proof">{pruebas}</div>
@@ -291,16 +386,12 @@ PLANTILLA = """<!doctype html>
 {cuerpo}
 
     <section class="cta">
-      <p><strong>Todo lo que hay aqui se puede medir otra vez.</strong></p>
-      <p>Las cifras viajan con el comando o el <code>archivo:linea</code> que las produce. Si algo no cuadra,
-      la respuesta no es un argumento: es el instrumento, en
-      <a href="../../auditoria-002-economia-contexto/">el informe reproducible</a> y en
-      <a href="https://github.com/alexisromtz-lab/la-auditora">el repositorio</a>.</p>
+{cta}
     </section>
   </main>
 
   <footer>
-    <p>La Auditora · Platino Labs · <a href="../">mas articulos</a> · <a href="../../">auditorias</a></p>
+    <p>{pie}</p>
   </footer>
 </div>
 </body>
@@ -309,39 +400,37 @@ PLANTILLA = """<!doctype html>
 
 INDICE = """<!doctype html>
 <!-- HUELLA-PAGINA-ARTICULOS-INDICE-20261108 -->
-<html lang="es">
+<html lang="{lang}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Articulos | La Auditora</title>
-  <meta name="description" content="Los articulos de La Auditora: cada cifra con el comando que la produce, cada pieza reproducible desde el repositorio.">
+  <title>{titulo} | La Auditora</title>
+  <meta name="description" content="{descripcion}">
   <meta name="robots" content="index,follow">
-  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/">
+  <link rel="canonical" href="{canonical}">
   {css}
 </head>
 <body>
-<a class="skip" href="#contenido">Saltar al contenido</a>
+<a class="skip" href="#contenido">{saltar}</a>
 <div class="wrap">
   <header>
-    <a class="brand" href="../">La Auditora</a>
+    <a class="brand" href="{marca_href}">La Auditora</a>
     <nav>
-      <a href="../">Auditorias</a>
-      <a href="../en/">English</a>
+{nav}
     </nav>
   </header>
 
   <main id="contenido">
-    <p class="eyebrow">Articulos</p>
-    <h1>Lo que medimos, escrito para que se pueda rehacer</h1>
-    <p class="lede">Ninguna cifra de estas piezas se escribe a mano: cada una lleva el comando o el
-    <code>archivo:linea</code> que la produce, y la que no tiene denominador declarado no se publica.</p>
+    <p class="eyebrow">{eyebrow}</p>
+    <h1>{h1}</h1>
+    <p class="lede">{lede}</p>
     <ul class="lista">
 {entradas}
     </ul>
   </main>
 
   <footer>
-    <p>La Auditora · Platino Labs · <a href="../">auditorias</a></p>
+    <p>{pie}</p>
   </footer>
 </div>
 </body>
@@ -354,43 +443,112 @@ def _pruebas(meta: dict) -> str:
     return "".join(piezas)
 
 
-def pagina(meta: dict) -> str:
-    slug = meta["ruta"].parent.name
-    cuerpo = re.sub(r"^\s{0,3}#\s+.*$", "", meta["cuerpo"], count=1, flags=re.MULTILINE)
-    return PLANTILLA.format(
-        slug=slug,
-        title=html.escape(meta["title"], quote=True),
-        lede=html.escape(meta["lede"], quote=True),
-        date=html.escape(meta["date"]),
-        canonical=SITIO + slug + "/",
-        css=CSS % "../",
-        pruebas=_pruebas(meta),
-        cuerpo=renderizar(cuerpo).rstrip(),
+def _alternates(slug: str, gemelo: bool) -> str:
+    if not gemelo:
+        return ""
+    return (
+        '  <link rel="alternate" hreflang="es" href="%s%s/">\n'
+        '  <link rel="alternate" hreflang="en" href="%s%s/">\n'
+        '  <link rel="alternate" hreflang="x-default" href="%s%s/">'
+        % (SITIO, slug, SITIO_EN, slug, SITIO, slug)
     )
 
 
-def indice(metas: list) -> str:
+def pagina(meta: dict, gemelos=()) -> str:
+    lang = meta["lang"]
+    slug = meta["slug"]
+    t = TEXTOS[lang]
+    gemelo = slug in gemelos
+    cuerpo = re.sub(r"^\s{0,3}#\s+.*$", "", meta["cuerpo"], count=1, flags=re.MULTILINE)
+    nav = t["nav"]
+    if gemelo:
+        nav += "\n" + t["gemelo"].format(slug=slug)
+    return PLANTILLA.format(
+        slug=slug,
+        lang=lang,
+        title=html.escape(meta["title"], quote=True),
+        lede=html.escape(meta["lede"], quote=True),
+        date=html.escape(meta["date"]),
+        canonical=(SITIO if lang == "es" else SITIO_EN) + slug + "/",
+        alternates=_alternates(slug, gemelo),
+        locale=t["locale"],
+        css=CSS % ("../" if lang == "es" else "../../"),
+        saltar=t["saltar"],
+        marca_href=t["marca_href"],
+        nav=nav,
+        fuente_href=t["fuente_href"].format(slug=slug),
+        fuente=t["fuente"],
+        eyebrow=t["eyebrow"].format(date=html.escape(meta["date"])),
+        pruebas=_pruebas(meta),
+        cuerpo=renderizar(cuerpo).rstrip(),
+        cta=t["cta"],
+        pie=t["pie"],
+    )
+
+
+def _nav_indice(lang: str, hay_en: bool) -> str:
+    if lang == "es":
+        partes = ['      <a href="../">Auditorias</a>']
+        if hay_en:
+            partes.append('      <a href="en/">Articles (EN)</a>')
+    else:
+        partes = [
+            '      <a href="../">Articulos (ES)</a>',
+            '      <a href="../../">Audits</a>',
+            '      <a href="../../en/">Portfolio (EN)</a>',
+        ]
+    return "\n".join(partes)
+
+
+def indice(metas: list, lang: str = "es", hay_en: bool = False) -> str:
+    t = IND_TEXTOS[lang]
     entradas = []
     for m in metas:
-        slug = m["ruta"].parent.name
         entradas.append(
             '      <li><a href="%s/">%s</a> <span class="fecha">%s</span><br>%s</li>'
-            % (slug, html.escape(m["title"]), html.escape(m["date"]), html.escape(m["lede"]))
+            % (
+                m["slug"],
+                html.escape(m["title"]),
+                html.escape(m["date"]),
+                html.escape(m["lede"]),
+            )
         )
-    return INDICE.format(css=CSS % "", entradas="\n".join(entradas))
-
+    return INDICE.format(
+        lang=lang,
+        titulo=t["titulo"],
+        descripcion=t["descripcion"],
+        canonical=SITIO if lang == "es" else SITIO_EN,
+        css=CSS % ("" if lang == "es" else "../"),
+        saltar=t["saltar"],
+        marca_href=t["marca_href"],
+        nav=_nav_indice(lang, hay_en),
+        eyebrow=t["eyebrow"],
+        h1=t["h1"],
+        lede=t["lede"],
+        entradas="\n".join(entradas),
+        pie=t["pie"],
+    )
 
 # ── el acto ─────────────────────────────────────────────────────────────────
 
 def cosechar(raiz: Path) -> list:
     base = raiz / DIR_ARTICULOS
     metas, errores = [], []
-    for ruta in sorted(base.glob("*/articulo.md")):
+    rutas = []
+    for nombre in NOMBRES.values():
+        rutas.extend(base.glob("*/" + nombre))
+    for ruta in sorted(rutas):
         try:
             metas.append(leer_articulo(ruta))
         except ValueError as e:
             errores.append(str(e))
     return metas, errores
+
+
+def destino(base: Path, meta: dict) -> Path:
+    if meta["lang"] == "es":
+        return base / meta["slug"] / "index.html"
+    return base / "en" / meta["slug"] / "index.html"
 
 
 def aplicar(raiz: Path, escribir: bool):
@@ -402,17 +560,36 @@ def aplicar(raiz: Path, escribir: bool):
     if not metas:
         return cambios, errores
 
-    objetivos = [(m["ruta"].parent / "index.html", pagina(m)) for m in metas]
-    objetivos.append((base / "index.html", indice(metas)))
+    es = [m for m in metas if m["lang"] == "es"]
+    en = [m for m in metas if m["lang"] == "en"]
+    slugs_es = {m["slug"] for m in es}
+    for m in en:
+        if m["slug"] not in slugs_es:
+            errores.append(
+                "%s: gemelo EN sin fuente ES (%s)" % (m["ruta"], NOMBRES["es"])
+            )
+    en = [m for m in en if m["slug"] in slugs_es]
+    gemelos = {m["slug"] for m in en}
 
-    for destino, contenido in objetivos:
+    objetivos = []
+    for m in es:
+        objetivos.append((destino(base, m), pagina(m, gemelos)))
+    for m in en:
+        objetivos.append((destino(base, m), pagina(m, gemelos)))
+    if es:
+        objetivos.append((base / "index.html", indice(es, "es", hay_en=bool(en))))
+    if en:
+        objetivos.append((base / "en" / "index.html", indice(en, "en", hay_en=True)))
+
+    for ruta_pagina, contenido in objetivos:
         contenido += "\n"
-        actual = destino.read_text(encoding="utf-8") if destino.is_file() else None
+        actual = ruta_pagina.read_text(encoding="utf-8") if ruta_pagina.is_file() else None
         if actual == contenido:
             continue
-        rel = destino.relative_to(raiz)
+        rel = ruta_pagina.relative_to(raiz)
         if escribir:
-            destino.write_text(contenido, encoding="utf-8")
+            ruta_pagina.parent.mkdir(parents=True, exist_ok=True)
+            ruta_pagina.write_text(contenido, encoding="utf-8")
             cambios.append("%s: escrita" % rel)
         else:
             cambios.append("%s: desincronizada" % rel)
@@ -438,12 +615,18 @@ def main(argv=None) -> int:
         print("NO_MEDIDO: no hay articulos en %s" % DIR_ARTICULOS)
         return 2
     if a.listar:
+        base = raiz / DIR_ARTICULOS
         for m in metas:
-            slug = m["ruta"].parent.name
-            pagina_ = (m["ruta"].parent / "index.html").is_file()
+            ruta_pagina = destino(base, m)
             print(
-                "%-52s %s  pagina=%s  tags=%d"
-                % (slug, m["date"], "si" if pagina_ else "NO", len(m["tags"]))
+                "%-52s %s  %s  pagina=%s  tags=%d"
+                % (
+                    m["slug"],
+                    m["lang"],
+                    m["date"],
+                    "si" if ruta_pagina.is_file() else "NO",
+                    len(m["tags"]),
+                )
             )
         for e in errores:
             print("FALLA " + e)

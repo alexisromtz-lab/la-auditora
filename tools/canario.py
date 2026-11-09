@@ -172,6 +172,7 @@ def check_grafo(root: Path):
     # la familia articulos: el indice es la portada de sus piezas, y el indice
     # se alcanza desde las portadas -- una pieza sin indice es un huerfano igual
     piezas = articulos(root)
+    gemelos = []
     if piezas:
         indice = root / "portafolio" / "articulos" / "index.html"
         if not indice.is_file():
@@ -196,9 +197,51 @@ def check_grafo(root: Path):
                         "%s no enlaza %s"
                         % (indice.relative_to(root), objetivo.relative_to(root))
                     )
+        # el gemelo ingles es opcional, pero si existe tiene que estar cableado
+        # igual que su fuente: una version que nadie enlaza no se lee.
+        gemelos = [(p, p / "articulo.en.md") for p in piezas if (p / "articulo.en.md").is_file()]
+        if gemelos:
+            indice_en = indice.parent / "en" / "index.html"
+            url = SITE_BASE + indice_en.parent.relative_to(root).as_posix() + "/"
+            if not indice_en.is_file():
+                fallas.append("%s no existe y hay %d gemelo(s) EN" % (indice_en.relative_to(root), len(gemelos)))
+            elif url not in locs:
+                fallas.append("sitemap.xml no declara %s" % url)
+            for portada in portadas:
+                if not portada.relative_to(root).as_posix().startswith("en/"):
+                    continue
+                if indice_en.is_file() and not _links(portada, indice_en, root):
+                    fallas.append(
+                        "%s no enlaza %s"
+                        % (portada.relative_to(root), indice_en.relative_to(root))
+                    )
+            for pieza, _fuente in gemelos:
+                en = indice.parent / "en" / pieza.name
+                objetivo = en / "index.html"
+                url = SITE_BASE + en.relative_to(root).as_posix() + "/"
+                if not objetivo.is_file():
+                    fallas.append("%s no existe (gemelo de %s)" % (objetivo.relative_to(root), pieza.relative_to(root)))
+                    continue
+                if url not in locs:
+                    fallas.append("sitemap.xml no declara %s" % url)
+                if indice_en.is_file() and not _links(indice_en, objetivo, root):
+                    fallas.append(
+                        "%s no enlaza %s"
+                        % (indice_en.relative_to(root), objetivo.relative_to(root))
+                    )
+                if not _links(pieza / "index.html", objetivo, root):
+                    fallas.append(
+                        "%s no enlaza su gemelo %s"
+                        % ((pieza / "index.html").relative_to(root), objetivo.relative_to(root))
+                    )
+                if not _links(objetivo, pieza / "index.html", root):
+                    fallas.append(
+                        "%s no enlaza su fuente %s"
+                        % (objetivo.relative_to(root), (pieza / "index.html").relative_to(root))
+                    )
     return (
-        "%d informes, %d articulos, %d URL en sitemap"
-        % (len(informes), len(piezas), len(locs)),
+        "%d informes, %d articulos (%d con gemelo EN), %d URL en sitemap"
+        % (len(informes), len(piezas), len(gemelos), len(locs)),
         fallas,
         [],
     )

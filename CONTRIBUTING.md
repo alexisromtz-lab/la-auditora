@@ -98,8 +98,45 @@ The RC contract of the generator: `0` pages current or written · `1` drift or a
 collapses into `0`.
 
 The canary covers the family as well: every article must be declared in `sitemap.xml`, linked from
-the articles index, and that index linked from each landing page. Four mutations in
-`tests/test_canario.py` and fourteen in `tests/test_paginas_articulos.py` prove both can ring.
+the articles index, and that index linked from each landing page. Nine mutations in
+`tests/test_canario.py` and twenty in `tests/test_paginas_articulos.py` prove both can ring.
+
+## Language: what is published travels in English, what is instructed stays in Spanish
+
+A published copy is read by people who do not read Spanish; an instruction is read by whoever is
+pasting it. Mixing the two languages in the same block is how a draft gets published as if it were
+the article. So the rule is a boundary, not a preference:
+
+- **Published text — the article bodies, the page copy, the network variants — is written in
+  English.** `portafolio/articulos/<slug>/articulo.en.md` is its only source.
+- **Instructions, commit messages, ledger rows and this file stay in Spanish.** They are read while
+  working, not after publishing.
+
+The English twin lives **beside** its Spanish source, never in place of it, and the generator
+publishes it at the mirrored path `portafolio/articulos/en/<slug>/`:
+
+| file | what it is | who writes it |
+|---|---|---|
+| `articulo.en.md` | the English source of the same article, header declaring `lang: en` | a person |
+| `en/<slug>/index.html` | the English page, generated from `articulo.en.md` | `tools/paginas_articulos.py` |
+| `en/index.html` | the English articles index | `tools/paginas_articulos.py` |
+
+Three rules keep the twin from becoming a second truth:
+
+- **The filename declares the language, and the header cannot contradict it.** A file named
+  `articulo.en.md` whose header says `lang: es` stops the generator with `1`: that is the
+  "the name claims more than the file does" pattern, caught before it ships.
+- **An English twin without a Spanish source is an error, not an orphan.** The twin is a
+  translation; a translation of nothing is a fork of the site.
+- **A twin that exists must be reachable.** The canary requires the English index, its entries in
+  `sitemap.xml`, a link from the Spanish page to its twin and a link back. Both pages declare
+  `hreflang` (`es`, `en`, `x-default`) so a machine pairs them without reading them.
+
+What a twin may **not** do is move a number. `tests/test_articulos_en.py` compares the multiset of
+numeric tokens of the Spanish body against the English one, requires each fenced code block to be
+byte-identical, and requires the density of Spanish markers to collapse against the Spanish source.
+A translated figure is not a translation: it is a second measurement that nobody ran.
+
 
 ## If the contact check fails
 
