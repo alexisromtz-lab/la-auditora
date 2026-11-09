@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "Cita la versión que leíste: cada informe declara su propio comando de reproducción."
+title: "la-auditora: informes de auditoría reproducibles"
+type: techreport
+authors:
+  - family-names: "Román Martínez"
+    given-names: "Jose Alexis"
+    affiliation: "Platino Labs"
+abstract: >-
+  Informes de auditoría técnica sobre proyectos de código abierto, publicados como artefacto
+  ejecutable: cada informe trae un reproduce.py que vuelve a obtener el veredicto, un ficha.json
+  legible por máquina y un index.html que lo narra. Ningún resultado se publica sin su control
+  negativo ni sin declarar los límites de la medición.
+license: MIT
+license-url: "https://github.com/alexisromtz-lab/la-auditora/blob/main/LICENSE"
+repository-code: "https://github.com/alexisromtz-lab/la-auditora"
+url: "https://alexisromtz-lab.github.io/la-auditora/"
+date-released: "2026-11-09"
+keywords:
+  - reproducibility
+  - software audit
+  - static analysis
+  - reachability
+  - continuous integration

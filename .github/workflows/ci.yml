@@ -17,8 +17,15 @@ jobs:
         uses: actions/checkout@v4
       - name: Test availability monitor
         run: python3 -m unittest discover -s tests -p 'test_monitor_auditora.py' -v
+      - name: Test site canary falsifiers
+        run: python3 -m unittest discover -s tests -p 'test_canario.py' -v
       - name: Validate local portfolio contact
         run: bash tests/test_portafolio_contacto.sh
+      # El canario mide lo que ninguna otra comprobacion mira: enlaces relativos
+      # resueltos, informes sin huerfano, ficha completa, metadatos citables
+      # legibles y el `rc` declarado contra el devuelto. Offline y sin red.
+      - name: Canary of site invariants
+        run: python3 tools/canario.py
 
   smoke_test_live:
     name: smoke_test_live
@@ -41,3 +48,4 @@ jobs:
 # HUELLA-CI-DECOUPLED-20261031
 # HUELLA-CI-PUBLISHED-ENV-20261031
 # HUELLA-CI-SMOKE-CONTRATO-DE-MAIN-20261031
+# HUELLA-CI-CANARIO-INVARIANTES-20261108
