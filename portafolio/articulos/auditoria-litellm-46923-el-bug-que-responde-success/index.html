@@ -1,0 +1,295 @@
+<!doctype html>
+<!-- HUELLA-PAGINA-ARTICULO-auditoria-litellm-46923-el-bug-que-responde-success-20261108 -->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>El bug que responde SUCCESS: auditoría reproducible de litellm#46923 | La Auditora</title>
+  <meta name="description" content="Seis brazos, un servidor HTTP que registra el payload real y un control negativo. Cómo se audita un defecto de framework sin mocks, por qué el parche candidato empeora el camino sincrónico, y por qué el estado peligroso es el que se parece al éxito.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/auditoria-litellm-46923-el-bug-que-responde-success/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="El bug que responde SUCCESS: auditoría reproducible de litellm#46923">
+  <meta property="og:description" content="Seis brazos, un servidor HTTP que registra el payload real y un control negativo. Cómo se audita un defecto de framework sin mocks, por qué el parche candidato empeora el camino sincrónico, y por qué el estado peligroso es el que se parece al éxito.">
+  <meta property="og:url" content="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/auditoria-litellm-46923-el-bug-que-responde-success/">
+  <meta property="article:published_time" content="2026-11-06">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../articulo.css">
+</head>
+<body>
+<a class="skip" href="#contenido">Saltar al contenido</a>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../../">La Auditora</a>
+    <nav>
+      <a href="../">Articulos</a>
+      <a href="../../">Auditorias</a>
+      <a href="../../en/">English</a>
+      <a href="articulo.md">Fuente .md</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <p class="eyebrow">Articulo · 2026-11-06</p>
+    <h1>El bug que responde SUCCESS: auditoría reproducible de litellm#46923</h1>
+    <p class="lede">Seis brazos, un servidor HTTP que registra el payload real y un control negativo. Cómo se audita un defecto de framework sin mocks, por qué el parche candidato empeora el camino sincrónico, y por qué el estado peligroso es el que se parece al éxito.</p>
+    <div class="proof"><span>devops</span><span>git</span><span>productivity</span><span>opensource</span></div>
+
+<p>Un programa que falla es fácil de auditar: devuelve un error, lo lees, lo arreglas.</p>
+
+<p>El problema caro es el contrario. El programa <strong>termina bien</strong>, escribe <code>SUCCESS</code> en el log, y por el camino se saltó el guardia que debía protegerte. No hay traza, no hay excepción, no hay nada que buscar. Solo un pedido enorme que salió crudo hacia el proveedor.</p>
+
+<p>Eso es lo que encontramos en <a href="https://github.com/BerriAI/litellm"><code>BerriAI/litellm</code></a> <code>#46923</code>, y lo que este artículo intenta mostrar no es el bug: es <strong>cómo se mide</strong> para que el bug no sea una opinión.</p>
+
+<p>Todo lo que sigue tiene un comando, un commit y un testigo.</p>
+
+<hr>
+
+<h2>1. La trampa del instrumento (la que había que encontrar antes de creer nada)</h2>
+
+<p>La primera regla de una auditoría es que el instrumento no es el objeto. Aquí el instrumento estaba mintiendo por una razón de una línea:</p>
+
+<pre><code>cd /tmp/litellm
+/tmp/venv_lit103/bin/python -c "import litellm; print(litellm.__file__)"
+  -&gt; /private/tmp/litellm/litellm/__init__.py</code></pre>
+
+<p>Correr desde la raíz del clon pone <strong>el árbol en <code>sys.path[0]</code></strong>. El paquete instalado en el virtualenv <strong>nunca se importa</strong>. Cualquier medición con <code>PYTHONPATH=/tmp/litellm</code> mide el árbol (<code>1.107.0</code> más un parche local), no la versión que el informe declara.</p>
+
+<p>La etiqueta «probado en <code>1.103.0</code>» no estaba sostenida por el comando.</p>
+
+<p>La reparación no es <code>PYTHONPATH</code> — es sacar el instrumento del árbol:</p>
+
+<pre><code>cd /tmp &amp;&amp; /tmp/venv_lit103/bin/python -c "import litellm; print(litellm.__file__)"
+  -&gt; /private/tmp/venv_lit103/lib/python3.14/site-packages/litellm/__init__.py
+VERSION_MEDIDA 1.103.0</code></pre>
+
+<p>Un instrumento que no imprime <strong>de dónde</strong> importa no está midiendo: está citando.</p>
+
+<hr>
+
+<h2>2. Seis brazos, un servidor que es testigo</h2>
+
+<p><code>REPRO_46923_V4.py</code> (181 líneas) levanta un servidor HTTP local que <strong>registra el payload que recibe</strong>. Sin mocks: el servidor es el testigo. Si el pedido salió crudo, se ve en el cuerpo que llegó.</p>
+
+<p>Parámetros declarados: <code>WINDOW = 1000</code>, prompt <code>"hello " * 3000</code> (≈ 6 000 tokens crudos, 18 000 caracteres).</p>
+
+<p>Brazos: <strong>A</strong> <code>acompletion</code> con checks ON + hook · <strong>B</strong> <code>acompletion</code> con checks OFF + hook · <strong>C</strong> <code>acompletion</code> con checks ON y <strong>sin</strong> hook (control) · <strong>D</strong> <code>completion</code> sincrónico ON + hook · <strong>E</strong> sincrónico OFF + hook · <strong>F</strong> sincrónico OFF sin hook.</p>
+
+<h3><code>litellm==1.103.0</code> — site-packages, instrumento fuera del árbol · <code>RC=0</code></h3>
+
+<table>
+<thead>
+<tr>
+<th>brazo</th>
+<th>camino</th>
+<th>checks</th>
+<th>resultado</th>
+<th>hook ejecutado</th>
+<th>hits</th>
+<th>payload</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>A</td><td><code>acompletion</code></td><td>ON</td><td><code>RAISED ContextWindowExceededError</code></td><td>NO</td><td>0</td><td>—</td></tr>
+<tr><td>B</td><td><code>acompletion</code></td><td>OFF</td><td><code>SUCCESS</code></td><td><strong>SÍ</strong></td><td>1</td><td><code>'short'</code> (5 chars)</td></tr>
+<tr><td>C</td><td><code>acompletion</code></td><td>ON (sin hook)</td><td><code>RAISED ContextWindowExceededError</code></td><td>NO</td><td>0</td><td>—</td></tr>
+<tr><td>D</td><td><code>completion</code></td><td>ON</td><td><code>RAISED ContextWindowExceededError</code></td><td>NO</td><td>0</td><td>—</td></tr>
+<tr><td>E</td><td><code>completion</code></td><td>OFF</td><td><code>SUCCESS</code></td><td><strong>NO</strong></td><td>1</td><td><strong>crudo (18 000 chars)</strong></td></tr>
+<tr><td>F</td><td><code>completion</code></td><td>OFF (sin hook)</td><td><code>SUCCESS</code></td><td>NO</td><td>1</td><td>crudo (18 000 chars)</td></tr>
+</tbody>
+</table>
+
+<p>Las cuatro filas del informe público quedan respaldadas por <strong>A · B · D · E</strong>.</p>
+
+<p>Y sobre <code>HEAD</code> limpio (<code>d7620c77a1eb</code>, versión <code>1.107.0</code>, extraído con <code>git archive HEAD litellm</code>, 79 MiB): <strong>idéntico brazo por brazo</strong>. El defecto no es de versión.</p>
+
+<hr>
+
+<h2>3. La causa no es «la compresión no llega»: es un hook inalcanzable</h2>
+
+<p>La lectura fácil es que el hook de compresión falla. No falla: <strong>no existe en el camino sincrónico</strong>.</p>
+
+<pre><code>grep "def pre_call_deployment_hook"  -&gt;  0 ocurrencias</code></pre>
+
+<p>Solo hay <code>async def async_pre_call_deployment_hook</code> (<code>integrations/custom_logger.py:280</code>, invocado en <code>utils.py:1543</code> y <code>utils.py:2078</code>). <strong>No hay hermano sincrónico.</strong> En <code>Router.completion</code> no se puede esperar una corrutina, así que el hook nunca corre y el payload crudo sale al proveedor.</p>
+
+<p>Un detalle de vocabulario que cambia el diagnóstico: no es «compresión que no llega». Es <strong>un hook estructuralmente inalcanzable</strong>.</p>
+
+<hr>
+
+<h2>4. El control negativo que corrige la lectura fácil</h2>
+
+<p>El brazo <strong>C</strong> es el que más información dio, y es el que casi nadie corre: <code>acompletion</code> con checks ON y <strong>sin</strong> hook registrado.</p>
+
+<p>Resultado: <code>RAISED ContextWindowExceededError</code>.</p>
+
+<p>Es decir: <strong>el chequeo sí funciona</strong>. El defecto no es «el chequeo nunca sirve», es «el chequeo decide sobre el crudo cuando un hook podría haberlo reducido». Sin el brazo C, el artículo habría dicho lo contrario con la misma seguridad.</p>
+
+<p>Un banco de pruebas sin control positivo solo demuestra que el instrumento sabe decir <em>no</em>.</p>
+
+<hr>
+
+<h2>5. La retractación que no se reproduce</h2>
+
+<p>Aquí viene la parte incómoda, y la incluyo porque es el método.</p>
+
+<p>En el mismo hilo publiqué una <strong>retractación</strong>: afirmé haber medido <code>main @ d7620c7</code>. Al medirla:</p>
+
+<pre><code>                                         HEAD limpio d7620c7      árbol /tmp/litellm
+_has_pre_deployment_request_rewriters           0 ocurrencias            2 ocurrencias
+litellm/router.py                                       16 171 líneas      16 200 líneas
+git status --porcelain -- litellm/router.py               (limpio)              M</code></pre>
+
+<p>La función que citaba mi retractación <strong>no existe en el commit que decía haber medido</strong>: es la que <strong>añade el parche candidato</strong>. El número de línea que cité correspondía al árbol parcheado (+29 líneas), y el <code>WARNING router.py:13931</code> solo aparece ahí.</p>
+
+<p>La retractación era una medición sobre el árbol equivocado. Se publicó, se midió contra el objeto y se declaró la discrepancia — no se editó el historial.</p>
+
+<hr>
+
+<h2>6. El parche candidato arregla A y empeora D</h2>
+
+<p>El parche que existe hoy en el hilo: <strong>47 líneas · 2 331 B · SHA16 <code>210bdc4c91cfdddd</code></strong>, aplica con <code>patch --dry-run -p1</code> → <code>RC 0</code> sobre <code>HEAD</code> limpio. No es upstream: es una propuesta local.</p>
+
+<p>Medido en el árbol parcheado:</p>
+
+<table>
+<thead>
+<tr>
+<th>brazo</th>
+<th>antes</th>
+<th>después</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>A</td><td><code>RAISED</code></td><td><strong><code>SUCCESS</code></strong> + <code>WARNING router.py:13931</code></td></tr>
+<tr><td>D</td><td><code>RAISED</code></td><td><strong><code>SUCCESS</code> con payload crudo de 18 000 chars</strong></td></tr>
+</tbody>
+</table>
+
+<p>Su condición <code>_has_pre_deployment_request_rewriters()</code> <strong>omite el rechazo local sin distinguir camino</strong>. En el camino sincrónico no hay hook que pueda correr, así que se pierde el único guardia y el pedido sobre-ventana sale crudo, <strong>sin error y sin compresión</strong>.</p>
+
+<p>Un parche que mejora un brazo y degrada otro no es un parche a medias: es un <strong>cambio de comportamiento</strong> que el informe original no declaraba.</p>
+
+<hr>
+
+<h2>7. El defecto hermano: <code>ttl</code> que se calcula y no se lee</h2>
+
+<p>En <code>#47340</code> el patrón se repite con otra forma. El rate limiter calcula la caducidad del contador:</p>
+
+<pre><code>parallel_request_limiter_v3.py:1391-1397
+  key=counter_key, increment_value=total_tokens, ttl=self.window_size</code></pre>
+
+<p>Y el camino en memoria la descarta:</p>
+
+<pre><code>in_memory_cache.py:255-264
+  await self.async_increment(increment["key"], increment["increment_value"], **kwargs)</code></pre>
+
+<p><code>increment["ttl"]</code> <strong>nunca se lee</strong>. Idéntico en <code>HEAD</code> (<code>1.107.0</code>, l. 266-273). La ventana por defecto es <strong>60 s</strong> (<code>LITELLM_RATE_LIMIT_WINDOW_SIZE</code>).</p>
+
+<p>Mientras tanto, la rama Redis <strong>sí</strong> lo honra: <code>redis.call('SET', …)</code> seguido de <code>EXPIRE counter_key window_size</code> y <code>if ttl &gt; 0 then EXPIRE counter_key ttl</code>.</p>
+
+<p>Dos puertas, un mismo contrato: <strong>una lo cumple y la otra lo tira sin avisar</strong>. Quien despliega con Redis no ve el bug; quien despliega en memoria sí. La configuración decide si el defecto existe para ti.</p>
+
+<hr>
+
+<h2>8. Lo que <strong>no</strong> afirma esta auditoría</h2>
+
+<ul>
+<li><strong>No</strong> reproduce el caso del reporte original (267 860 tokens crudos contra ventana 262 144). El instrumento usa <code>WINDOW=1000</code> y un prompt de ≈ 6 000 tokens: mide <strong>el orden</strong>, no esa magnitud.</li>
+<li>El numeral «<em>sends 500 tokens raw</em>» de la fila 4 publicada <strong>no tiene comando que lo respalde en este instrumento</strong>: aquí el brazo sincrónico envía <strong>18 000 caracteres</strong>. La discrepancia se declara, no se adjudica: son dos instrumentos distintos.</li>
+<li>El default efectivo de <code>default_ttl</code> en <code>1.83.10</code> <strong>no se midió</strong>: se midió <code>base_cache.py:23</code> (60) y el del handler en <code>HEAD</code> (600).</li>
+<li>El parche <strong>no</strong> está mergeado ni se abrió PR con él.</li>
+</ul>
+
+<p>Una auditoría sin sección de límites es publicidad.</p>
+
+<hr>
+
+<h2>9. El patrón, que es lo único que se puede generalizar</h2>
+
+<p>Los tres casos de este artículo no son tres bugs: son <strong>una misma ley</strong>.</p>
+
+<table>
+<thead>
+<tr>
+<th>caso</th>
+<th>cómo se ve desde fuera</th>
+<th>qué pasó de verdad</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>sys.path[0]</code></td><td>«probado en 1.103.0»</td><td>se midió 1.107.0 + parche</td></tr>
+<tr><td>brazo E</td><td><code>SUCCESS</code>, 1 hit</td><td>payload crudo al proveedor</td></tr>
+<tr><td>rama memoria</td><td>contador creado</td><td>sin caducidad de ventana</td></tr>
+</tbody>
+</table>
+
+<p><strong>El estado peligroso es el que se parece al éxito.</strong> Y por eso el instrumento que lo detecta no puede ser un <code>assert</code> que no falla: tiene que ser un guardia que <strong>niega la escritura antes de tocar el archivo</strong>.</p>
+
+<p>Esa es exactamente la forma del gate que usamos para auditar sin ensuciar el árbol de nadie. Antes de escribir una línea exige una tupla de destino —<code>TARGET</code> absoluto · <code>BLOB_PRE</code> · marca exclusiva · líneas previas— y devuelve un código que autoriza o bloquea:</p>
+
+<table>
+<thead>
+<tr>
+<th>RC</th>
+<th>significado</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>0</code></td><td>pre-vuelo correcto: el destino acepta edición sobre <code>BLOB_PRE</code></td></tr>
+<tr><td><code>10</code></td><td>el objeto no existe (creación)</td></tr>
+<tr><td><code>11</code></td><td><strong>la marca ya vive en el destino</strong> ⇒ colisión: la fila ya está escrita</td></tr>
+<tr><td><code>12</code></td><td>el blob medido no es el contratado ⇒ el árbol se movió</td></tr>
+<tr><td><code>13</code></td><td>estado de git sucio ⇒ modificaciones sin adjudicar</td></tr>
+<tr><td><code>14</code></td><td>el destino no está en un árbol git ⇒ el gate no puede verificar identidad</td></tr>
+<tr><td><code>15</code></td><td>el conteo de líneas no coincide con el contrato</td></tr>
+<tr><td><code>20</code></td><td>uso incorrecto (tupla incompleta, o <code>TARGET</code> relativo)</td></tr>
+</tbody>
+</table>
+
+<p>El <code>RC 14</code> existe por el mismo motivo que este artículo: sin árbol git, <code>git status</code> devuelve <code>128</code> con <strong>salida vacía</strong>, y un gate ingenuo lee «vacío» como «limpio» y da verde. Aquí la imposibilidad se declara.</p>
+
+<p>Cada código sale <strong>con su causa impresa</strong>. Un <code>RC</code> correcto por la razón equivocada no es un gate: es una coincidencia.</p>
+
+<hr>
+
+<h2>10. Cómo lo corres tú</h2>
+
+<p>El gate de CI es un paquete, y el de pre-escritura es un script sin dependencias:</p>
+
+<pre><code class="language-bash">pip install git-preflight-gate        # gate de CI (trae PyYAML)
+ci-authority-gate /path/to/your/repo  # RC 0 = pasa · RC &gt; 0 = fail-closed, causa impresa</code></pre>
+
+<pre><code class="language-bash">curl -fsSL https://raw.githubusercontent.com/alexisromtz-lab/git-preflight-gate/main/preflight-gate.sh -o preflight-gate.sh
+bash preflight-gate.sh /ruta/absoluta/archivo.py &lt;blob_pre&gt; &lt;marca_exclusiva&gt; &lt;lineas_pre&gt;</code></pre>
+
+<p>El banco de casos viene incluido y se ejerce con <code>bash tests/must_fail.sh</code>: <strong>9 casos, 9/9</strong>, cada uno verificando el código <strong>y</strong> la causa — <code>20</code> (tupla incompleta), <code>20</code> (ruta relativa), <code>10</code>, <code>11</code>, <code>12</code>, <code>15</code>, <code>13</code>, <code>14</code>, y el control positivo <code>0</code>.</p>
+
+<hr>
+
+<h2>Cierre</h2>
+
+<p>El bug de <code>#46923</code> es real, está vivo en <code>HEAD</code> y no lo arregla una versión. Pero el hallazgo del artículo no es el bug: es que <strong>seis brazos y un testigo</strong> convierten «creo que el hook no corre» en una tabla que cualquiera puede volver a correr — y que <strong>el control negativo</strong> fue el que impidió publicar la conclusión contraria con la misma seguridad.</p>
+
+<hr>
+
+<p><strong>¿Quieres auditar tu repo?</strong> Usa <code>pip install git-preflight-gate</code> o contáctame en <a href="https://github.com/alexisromtz-lab/la-auditora">la-auditora</a>.</p>
+
+<p>Si prefieres empezar sin instalar nada, deja <code>owner/repo</code> en los comentarios y publico en este mismo hilo el primer conteo: qué tan limpio está tu árbol para un agente que escribe, y qué códigos devuelve el gate sobre tus rutas más movidas. Sin clonar tu código, sin pedirte una llave.</p>
+
+    <section class="cta">
+      <p><strong>Todo lo que hay aqui se puede medir otra vez.</strong></p>
+      <p>Las cifras viajan con el comando o el <code>archivo:linea</code> que las produce. Si algo no cuadra,
+      la respuesta no es un argumento: es el instrumento, en
+      <a href="../../auditoria-002-economia-contexto/">el informe reproducible</a> y en
+      <a href="https://github.com/alexisromtz-lab/la-auditora">el repositorio</a>.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>La Auditora · Platino Labs · <a href="../">mas articulos</a> · <a href="../../">auditorias</a></p>
+  </footer>
+</div>
+</body>
+</html>
+

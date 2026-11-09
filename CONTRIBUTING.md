@@ -69,6 +69,38 @@ landing page or from `sitemap.xml`, that each ficha declares its six fields, tha
 is the one its script returns. `tests/test_canario.py` proves the canary can ring: every check has a
 mutation that turns it red.
 
+## Articles: the markdown is the source, the page is a projection
+
+An article is not a report and does not carry `reproduce.py`. It is a sourced text plus the page
+that publishes it, under `portafolio/articulos/<slug>/`:
+
+| file | what it is | who writes it |
+|---|---|---|
+| `articulo.md` | the only source: `title`, `lede`, `date` in a `---` header, then the body | a person |
+| `index.html` | the page, generated from `articulo.md` | `tools/paginas_articulos.py` |
+
+`tools/paginas_articulos.py --aplicar` writes every page and the index at
+`portafolio/articulos/`; `--check` writes nothing and returns `1` when a page differs by a single
+byte from its source. CI runs `--check`, so a hand-edited page or a source edited without
+regenerating fails the required check instead of shipping a page that disagrees with its own source.
+
+Two invariants come from being public on a static site:
+
+- **A relative link is not published as a link.** The body of an article may cite internal corpus
+  files; those destinations do not exist in this repository, so the generator renders them as
+  `<code>` and never as an anchor. The canary fails on a link that points outside the published
+  tree, which is the negative control of that rule.
+- **A source missing `title`, `lede` or `date` stops the generator** with `1` and names the field.
+  A public page without a description is not a lesser page, it is an incomplete one.
+
+The RC contract of the generator: `0` pages current or written · `1` drift or an unreadable source ·
+`2` nothing to measure (no `portafolio/articulos`, or no article) · `3` invalid arguments. `2` never
+collapses into `0`.
+
+The canary covers the family as well: every article must be declared in `sitemap.xml`, linked from
+the articles index, and that index linked from each landing page. Four mutations in
+`tests/test_canario.py` and fourteen in `tests/test_paginas_articulos.py` prove both can ring.
+
 ## If the contact check fails
 
 - Keep the exact `FAIL:` message and run `bash tests/test_portafolio_contacto.sh` to reproduce a local failure.

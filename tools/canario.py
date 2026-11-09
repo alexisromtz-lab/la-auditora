@@ -96,6 +96,14 @@ def informs(root: Path):
     )
 
 
+def articulos(root: Path):
+    """Los articulos publicados: un directorio bajo `portafolio/articulos/` con su fuente."""
+    base = root / "portafolio" / "articulos"
+    if not base.is_dir():
+        return []
+    return sorted(d for d in base.iterdir() if d.is_dir() and (d / "articulo.md").is_file())
+
+
 def _inside(target: Path, root: Path) -> bool:
     raiz = str(root)
     return str(target) == raiz or str(target).startswith(raiz + os.sep)
@@ -160,7 +168,40 @@ def check_grafo(root: Path):
                     "%s no enlaza %s"
                     % (portada.relative_to(root), objetivo.relative_to(root))
                 )
-    return "%d informes, %d URL en sitemap" % (len(informes), len(locs)), fallas, []
+
+    # la familia articulos: el indice es la portada de sus piezas, y el indice
+    # se alcanza desde las portadas -- una pieza sin indice es un huerfano igual
+    piezas = articulos(root)
+    if piezas:
+        indice = root / "portafolio" / "articulos" / "index.html"
+        if not indice.is_file():
+            fallas.append("portafolio/articulos/index.html no existe y hay %d articulo(s)" % len(piezas))
+        else:
+            url = SITE_BASE + indice.parent.relative_to(root).as_posix() + "/"
+            if url not in locs:
+                fallas.append("sitemap.xml no declara %s" % url)
+            for portada in portadas:
+                if not _links(portada, indice, root):
+                    fallas.append(
+                        "%s no enlaza %s"
+                        % (portada.relative_to(root), indice.relative_to(root))
+                    )
+            for pieza in piezas:
+                url = SITE_BASE + pieza.relative_to(root).as_posix() + "/"
+                if url not in locs:
+                    fallas.append("sitemap.xml no declara %s" % url)
+                objetivo = pieza / "index.html"
+                if not _links(indice, objetivo, root):
+                    fallas.append(
+                        "%s no enlaza %s"
+                        % (indice.relative_to(root), objetivo.relative_to(root))
+                    )
+    return (
+        "%d informes, %d articulos, %d URL en sitemap"
+        % (len(informes), len(piezas), len(locs)),
+        fallas,
+        [],
+    )
 
 
 def check_triada(root: Path):
