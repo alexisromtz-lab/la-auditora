@@ -96,6 +96,14 @@
         <p class="intro">Muestras verificables sobre repositorios públicos. Los resúmenes no sustituyen las actas completas: indican el commit, el resultado medido y lo que quedó sin medir.</p>
         <div class="grid">
           <article>
+            <span class="tag">medición propia · economía de contexto · reproducibilidad</span>
+            <h3>El 99 % que se paga antes de la primera palabra</h3>
+            <p class="metric">población ×1.90 · volumen ×3.076 · fracción 99.16 % – 99.28 %</p>
+            <p>Tres generaciones del mismo instrumento sobre el mismo corpus, en crecimiento. La población pasó de 10 a 19 tareas y el volumen por tarea se triplicó, mientras la fracción de tokens que se reenvía como contexto se movió 0.1145 puntos porcentuales y el cociente entre tokens totales y llamadas al modelo se movió 0.018 %. La cifra absoluta responde al tamaño del corpus; la razón responde al instrumento.</p>
+            <p><strong>Límite:</strong> no atribuye coste a un modelo —la fuente registra cuál corrió, nunca por qué—; son tres puntos, dos de ellos con 18 minutos de separación, y no se leen como tendencia; los denominadores son 10, 10 y 19 tareas. La aritmética se reproduce sin acceso al repositorio; releer los blobs exige el repositorio, que es privado.</p>
+            <p class="source">tres blobs del panel · <a href="portafolio/auditoria-002-economia-contexto/">informe y script de reproducción</a></p>
+          </article>
+          <article>
             <span class="tag">litellm · CI · fail-closed</span>
             <h3>Un job en verde que no corrió ningún test</h3>
             <p class="metric">3 salidas <code>exit 0</code> sin ejecutar pytest · 2 reproducidas en el acto</p>
