@@ -137,6 +137,24 @@ numeric tokens of the Spanish body against the English one, requires each fenced
 byte-identical, and requires the density of Spanish markers to collapse against the Spanish source.
 A translated figure is not a translation: it is a second measurement that nobody ran.
 
+### The round trip to the network loses structure, and that is a measurable defect
+
+`portafolio/articulos/<slug>/devto.md` is the dev.to projection: the English body, untouched, under
+the header dev.to actually reads (`description`, `published`, `canonical_url`). `tools/devto.py`
+writes it and `--check` in CI refuses a hand-edited copy.
+
+The reason it exists is a publication that came out wrong: the body travelled wrapped in a
+` ```text ` fence "so it could be copied", the outer fence closed at the first inner fence, and the
+page was published with 1 code block instead of 8, 0 tables instead of 4 and 1 heading instead of
+11 — the `##` had not survived the trip, so `3. The cause` arrived as an ordered list. Copying from
+the **rendered** GitHub view produces the same damage without any fence: the markers are markup, and
+copying a rendered page copies the text, not the markup.
+
+So: **paste from the raw file, never from the rendered page**, and never wrap markdown in a fence to
+make it copyable. `tests/test_devto.py` holds the four falsifiers that name this defect, including
+the mechanism measured on the fence itself (a wrapped body yields two fenced regions instead of one,
+and the second one is empty).
+
 
 ## If the contact check fails
 
