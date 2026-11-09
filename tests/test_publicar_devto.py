@@ -374,6 +374,15 @@ class Reparacion(unittest.TestCase):
         self.assertEqual(datos["article"]["canonical_url"], CANONICA)
         self.assertEqual(datos["article"]["body_markdown"], cuerpo)
 
+    def test_una_coma_decimal_es_la_misma_cifra_que_un_punto(self):
+        self.assertEqual(pd.numeros("12,06 s"), pd.numeros("12.06 s"))
+
+    def test_un_espacio_de_miles_es_la_misma_cifra_que_una_coma(self):
+        self.assertEqual(pd.numeros("1 015 imports"), pd.numeros("1,015 imports"))
+
+    def test_una_version_no_se_confunde_con_un_decimal(self):
+        self.assertEqual(pd.numeros("3.12.13"), pd.numeros("3.12.13"))
+
 
 class Estructura(unittest.TestCase):
     """Los dos falsadores del defecto real: la pagina salio con 1 valla y 0 tablas."""
@@ -391,6 +400,81 @@ class Estructura(unittest.TestCase):
 
     def test_el_cuerpo_que_viaja_conserva_los_titulares_numerados(self):
         self.assertGreaterEqual(self.cuerpo().count("\n## "), 10)
+
+
+class Sustitucion(unittest.TestCase):
+    """Traducir un articulo vivo no es republicarlo: es reemplazar su cuerpo."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.ruta = Path(self.tmp.name) / "cuerpo.md"
+
+    def remoto(self, cuerpo, titulo="Titulo viejo"):
+        return [{"id": 4936293, "body_markdown": cuerpo, "title": titulo, "published_at": "2026-10-28"}]
+
+    def cuerpo(self, texto):
+        self.ruta.write_text(texto, encoding="utf-8")
+        return str(self.ruta)
+
+    def test_una_traduccion_que_conserva_las_cifras_se_envia(self):
+        transporte = Transporte((200, self.remoto("Hola 42 % y 807")), (200, {"id": 4936293, "body_markdown": "Hello 42 % and 807"}))
+        with con_clave():
+            rc = pd.main(["--sustituir", "4936293", "--cuerpo", self.cuerpo("Hello 42 % and 807"), "--enviar"], transporte=transporte)
+        self.assertEqual(rc, 0)
+        self.assertEqual(transporte.metodos, ["GET", "PUT"])
+
+    def test_una_traduccion_que_mueve_una_cifra_no_se_envia(self):
+        transporte = Transporte((200, self.remoto("Hola 807")))
+        with con_clave():
+            rc = pd.main(["--sustituir", "4936293", "--cuerpo", self.cuerpo("Hello 806"), "--enviar"], transporte=transporte)
+        self.assertEqual(rc, 5)
+        self.assertEqual(transporte.metodos, ["GET"])
+
+    def test_la_excusa_declarada_permite_mover_la_cifra(self):
+        transporte = Transporte((200, self.remoto("Hola 807")), (200, {"id": 4936293, "body_markdown": "Hello 806"}))
+        with con_clave():
+            rc = pd.main(
+                ["--sustituir", "4936293", "--cuerpo", self.cuerpo("Hello 806"), "--enviar", "--excusa", "corregido"],
+                transporte=transporte,
+            )
+        self.assertEqual(rc, 0)
+        self.assertEqual(transporte.metodos, ["GET", "PUT"])
+
+    def test_si_el_cuerpo_ya_es_el_nuevo_no_hay_put(self):
+        transporte = Transporte((200, self.remoto("Hello 42 % and 807")))
+        with con_clave():
+            rc = pd.main(["--sustituir", "4936293", "--cuerpo", self.cuerpo("Hello 42 % and 807"), "--enviar"], transporte=transporte)
+        self.assertEqual(rc, 0)
+        self.assertEqual(transporte.metodos, ["GET"])
+
+    def test_el_titulo_nuevo_viaja_solo_si_se_declara(self):
+        transporte = Transporte((200, self.remoto("Hola 1")), (200, {"id": 4936293, "body_markdown": "Hello 1"}))
+        with con_clave():
+            pd.main(["--sustituir", "4936293", "--cuerpo", self.cuerpo("Hello 1"), "--enviar"], transporte=transporte)
+        _, _, datos = transporte.llamadas[1]
+        self.assertNotIn("title", datos["article"])
+
+    def test_un_id_que_no_existe_no_inventa_nada(self):
+        transporte = Transporte((200, self.remoto("Hola 1")))
+        with con_clave():
+            rc = pd.main(["--sustituir", "999", "--cuerpo", self.cuerpo("Hello 1"), "--enviar"], transporte=transporte)
+        self.assertEqual(rc, 3)
+        self.assertEqual(transporte.metodos, ["GET"])
+
+    def test_sustituir_sin_cuerpo_es_error_de_contrato(self):
+        transporte = Transporte((200, self.remoto("Hola 1")))
+        with con_clave():
+            rc = pd.main(["--sustituir", "4936293", "--enviar"], transporte=transporte)
+        self.assertEqual(rc, 2)
+        self.assertEqual(transporte.metodos, [])
+
+    def test_en_seco_lee_pero_no_escribe(self):
+        transporte = Transporte((200, self.remoto("Hola 42 % y 807")))
+        with con_clave():
+            rc = pd.main(["--sustituir", "4936293", "--cuerpo", self.cuerpo("Hello 42 % and 807")], transporte=transporte)
+        self.assertEqual(rc, 0)
+        self.assertEqual(transporte.metodos, ["GET"])
 
 
 if __name__ == "__main__":
