@@ -358,9 +358,19 @@ def sustituir(
     enviar: bool,
     titulo: str | None = None,
     excusa: str | None = None,
+    canonica: str | None = None,
 ) -> int:
-    """Reemplaza el cuerpo de un articulo vivo. Rechaza una traduccion que mueva una cifra."""
-    nuevo = cuerpo_nuevo.read_text(encoding="utf-8")
+    """Reemplaza el cuerpo de un articulo vivo. Rechaza una traduccion que mueva una cifra.
+
+    Con --canonica y sin --cuerpo solo re-apunta la canonica: el cuerpo viaja
+    intacto. Sirve para que un articulo en espanol declare como canonico a su
+    gemelo en ingles en vez de a si mismo, que es lo que hoy los hace competir.
+    """
+    if cuerpo_nuevo is None and canonica is None:
+        raise ValueError("--sustituir necesita --cuerpo o --canonica")
+    if canonica is not None and not canonica.startswith("https://"):
+        print("--canonica exige una URL https (recibido: %s)" % canonica, file=sys.stderr)
+        return 2
     estado, listado = transporte("GET", API + "/articles/me/all?per_page=1000", clave_api, None)
     if estado != 200:
         print("API %d al listar: %s" % (estado, json.dumps(listado)[:400]), file=sys.stderr)
@@ -370,9 +380,17 @@ def sustituir(
         print("no hay articulo con id %s" % identificador, file=sys.stderr)
         return 3
     viejo = remoto.get("body_markdown") or ""
+    nuevo = cuerpo_nuevo.read_text(encoding="utf-8") if cuerpo_nuevo else viejo
+    actual = remoto.get("canonical_url") or ""
+    if canonica is not None and canonica == remoto.get("url"):
+        print("  NO SE ENVIA: la canonica es la URL del propio articulo (%s)" % canonica, file=sys.stderr)
+        print("  Una canonica a si mismo no deduplica nada: apunta al gemelo o al sitio.", file=sys.stderr)
+        return 6
     print("id=%s titulo remoto: %s" % (remoto["id"], remoto.get("title")))
     print("  cuerpo remoto %d B -> nuevo %d B" % (len(viejo.encode("utf-8")), len(nuevo.encode("utf-8"))))
-    if normalizar(viejo) == normalizar(nuevo):
+    if canonica is not None:
+        print("  canonica %s -> %s" % (actual or "(ninguna)", canonica))
+    if normalizar(viejo) == normalizar(nuevo) and (canonica is None or canonica == actual):
         print("  sin cambio (sha256:%s)" % huella(nuevo))
         return 0
     antes, despues = numeros(viejo), numeros(nuevo)
@@ -389,6 +407,8 @@ def sustituir(
     datos: dict = {"body_markdown": nuevo}
     if titulo:
         datos["title"] = titulo
+    if canonica is not None:
+        datos["canonical_url"] = canonica
     if not enviar:
         print("  SECO: no se envio nada. --enviar para sustituir.")
         return 0
@@ -431,6 +451,7 @@ def main(argv=None, transporte=transporte_urllib) -> int:
     p.add_argument("--cuerpo", help="archivo con el cuerpo nuevo (para --sustituir)")
     p.add_argument("--titulo", help="titulo nuevo (para --sustituir)")
     p.add_argument("--excusa", help="razon por la que las cifras cambian; sin ella, se rechaza")
+    p.add_argument("--canonica", help="URL https a la que el articulo debe declarar como canonica")
     p.add_argument("--borrador", action="store_true", help="publicar como borrador en vez de publico")
     p.add_argument("--clave-archivo", help="archivo con la clave (por defecto, la variable de entorno)")
     try:
@@ -442,8 +463,8 @@ def main(argv=None, transporte=transporte_urllib) -> int:
     # exige una lectura. Publicar en seco no abre ninguna conexion.
     necesita_clave = args.enviar or args.listar or bool(args.reparar) or bool(args.sustituir)
     try:
-        if args.sustituir and not args.cuerpo:
-            raise Config("--sustituir exige --cuerpo <archivo>")
+        if args.sustituir and not args.cuerpo and not args.canonica:
+            raise Config("--sustituir exige --cuerpo <archivo> o --canonica <url>")
         if necesita_clave:
             valor, origen = clave(args.clave_archivo)
             print("clave %s %s" % (origen, describir_clave(valor)))
@@ -455,12 +476,13 @@ def main(argv=None, transporte=transporte_urllib) -> int:
         if args.sustituir:
             return sustituir(
                 args.sustituir,
-                Path(args.cuerpo).expanduser(),
+                Path(args.cuerpo).expanduser() if args.cuerpo else None,
                 valor,
                 transporte,
                 args.enviar,
                 args.titulo,
                 args.excusa,
+                args.canonica,
             )
         raiz = Path(args.raiz).resolve()
         if args.reparar:
