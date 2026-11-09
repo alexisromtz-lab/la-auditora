@@ -170,6 +170,34 @@ class Seco(unittest.TestCase):
             self.assertEqual(pd.main(["--raiz", str(RAIZ), "--slug", SLUG], transporte=Transporte()), 0)
 
 
+class Normalizacion(unittest.TestCase):
+    """Lo que dev.to reescribe al guardar no es un cambio del autor."""
+
+    def test_la_linea_en_blanco_inicial_no_es_un_desfase(self):
+        self.assertEqual(pd.normalizar("\n\nA\n"), pd.normalizar("\nA\n"))
+
+    def test_la_etiqueta_de_valla_que_pone_devto_no_es_un_desfase(self):
+        self.assertEqual(pd.normalizar("```\nx\n```\n"), pd.normalizar("```shell\nx\n```\n"))
+        self.assertEqual(pd.normalizar("```\nx\n```\n"), pd.normalizar("```python\nx\n```\n"))
+
+    def test_una_valla_ausente_si_es_un_desfase(self):
+        # La estructura no se normaliza: perder una valla es perder estructura.
+        self.assertNotEqual(
+            pd.normalizar("```\nx\n```\n"),
+            pd.normalizar("x\n"),
+        )
+
+    def test_un_cambio_de_texto_sigue_siendo_un_desfase(self):
+        self.assertNotEqual(pd.normalizar("uno\n"), pd.normalizar("dos\n"))
+
+    def test_los_saltos_de_windows_no_son_un_desfase(self):
+        self.assertEqual(pd.normalizar("a\r\nb\r\n"), pd.normalizar("a\nb\n"))
+
+    def test_una_valla_en_medio_de_una_linea_no_se_normaliza(self):
+        # Solo la linea que es una valla entera lleva etiqueta de la plataforma.
+        self.assertEqual(pd.normalizar("texto ```x``` texto\n"), "texto ```x``` texto")
+
+
 class Cabeceras(unittest.TestCase):
     """dev.to responde 403 al User-Agent por defecto de urllib. Medido, no supuesto."""
 

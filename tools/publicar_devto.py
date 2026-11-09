@@ -28,6 +28,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -147,6 +148,28 @@ def huella(cuerpo: str) -> str:
     return hashlib.sha256(cuerpo.encode("utf-8")).hexdigest()[:12]
 
 
+VALLA = re.compile(r"^```[A-Za-z0-9_+-]*\s*$")
+
+
+def normalizar(cuerpo: str) -> str:
+    """El cuerpo comparable: sin lo que dev.to reescribe al guardar.
+
+    Medido contra el articulo vivo, dev.to hace dos cosas que no hacemos
+    nosotros: quita la linea en blanco inicial y etiqueta las vallas
+    desnudas (``` -> ```shell / ```python). Comparar byte a byte hacia que
+    la reparacion "idempotente" enviara un PUT en cada corrida. Se compara
+    todo lo demas, incluida la estructura: una valla ausente sigue siendo
+    un desfase.
+    """
+    lineas = cuerpo.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+    lineas = ["```" if VALLA.match(l.rstrip()) else l.rstrip() for l in lineas]
+    while lineas and not lineas[0]:
+        lineas.pop(0)
+    while lineas and not lineas[-1]:
+        lineas.pop()
+    return "\n".join(lineas)
+
+
 def transporte_urllib(metodo: str, url: str, clave_api: str, datos: dict | None):
     cuerpo = json.dumps(datos, ensure_ascii=False).encode("utf-8") if datos is not None else None
     peticion = urllib.request.Request(url, data=cuerpo, method=metodo)
@@ -252,7 +275,7 @@ def reparar(raiz: Path, slug: str, clave_api: str, transporte, publicado: bool, 
     print("%s: reconocido por %s (id=%s)" % (slug, por, remoto.get("id")))
     if not remoto.get("canonical_url"):
         print("  WARN: el articulo remoto no declara canonica; el PUT la añade (%s)" % canonica)
-    if (remoto.get("body_markdown") or "").strip() == cuerpo.strip():
+    if normalizar(remoto.get("body_markdown") or "") == normalizar(cuerpo):
         print("%s: sin cambio (id=%s, sha256:%s)" % (slug, remoto["id"], huella(cuerpo)))
         return 0
     print(
