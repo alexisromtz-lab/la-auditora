@@ -809,3 +809,25 @@ class Canonicos(unittest.TestCase):
             with mock.patch("sys.stderr", io.StringIO()):
                 rc = pd.main(["--raiz", str(self.raiz), "--canonicos"], transporte=Transporte())
         self.assertEqual(rc, 2)
+
+    def test_una_canonica_a_si_mismo_es_propia_y_no_gemelo(self):
+        """El gemelo de un post es el mismo: buscarlo antes que la URL propia
+        etiquetaba de GEMELO el defecto por defecto de dev.to."""
+        propio = self.post(canonical_url="https://dev.to/alexisromtz7/uno-abc")
+        rc, salida = self.correr(propio)
+        self.assertEqual(rc, 0)
+        self.assertIn("PROPIA", salida)
+        self.assertNotIn("GEMELO", salida)
+
+    def test_un_gemelo_de_verdad_no_se_lee_como_propio(self):
+        """El arreglo no puede tragarse el caso que sí importa: dos posts del
+        mismo idioma, uno canonico al otro."""
+        gemelo = self.post(id=1, canonical_url=self.SITIO + "en/uno/")
+        copia = self.post(
+            id=2,
+            url="https://dev.to/alexisromtz7/uno-copia",
+            canonical_url="https://dev.to/alexisromtz7/uno-abc",
+        )
+        rc, salida = self.correr(copia, gemelo)
+        self.assertEqual(rc, 0)
+        self.assertIn("GEMELO        2", salida)

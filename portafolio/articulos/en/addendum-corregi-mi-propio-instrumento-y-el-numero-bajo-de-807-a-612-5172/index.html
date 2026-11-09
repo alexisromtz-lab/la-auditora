@@ -1,0 +1,174 @@
+<!doctype html>
+<!-- HUELLA-PAGINA-ARTICULO-addendum-corregi-mi-propio-instrumento-y-el-numero-bajo-de-807-a-612-5172-20261108 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Addendum: the number was 807, then 612 — and why I published both | La Auditora</title>
+  <meta name="description" content="Sobre: El hackeo de $6.3B no fue un bug de código (Dev.to, id 4949662, publicado 30-Oct-2026...">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/addendum-corregi-mi-propio-instrumento-y-el-numero-bajo-de-807-a-612-5172/">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Addendum: the number was 807, then 612 — and why I published both">
+  <meta property="og:description" content="Sobre: El hackeo de $6.3B no fue un bug de código (Dev.to, id 4949662, publicado 30-Oct-2026...">
+  <meta property="og:url" content="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/addendum-corregi-mi-propio-instrumento-y-el-numero-bajo-de-807-a-612-5172/">
+  <meta property="og:locale" content="en_US">
+  <meta property="article:published_time" content="2026-10-31">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../../articulo.css">
+</head>
+<body>
+<a class="skip" href="#contenido">Skip to content</a>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../../../">La Auditora</a>
+    <nav>
+      <a href="../">Articles</a>
+      <a href="../../../">Audits</a>
+      <a href="../../../en/">Portfolio (EN)</a>
+      <a href="../../addendum-corregi-mi-propio-instrumento-y-el-numero-bajo-de-807-a-612-5172/articulo.en.md">Source .md</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <p class="eyebrow">Article · 2026-10-31</p>
+    <h1>Addendum: the number was 807, then 612 — and why I published both</h1>
+    <p class="lede">Sobre: El hackeo de $6.3B no fue un bug de código (Dev.to, id 4949662, publicado 30-Oct-2026...</p>
+    <div class="proof"><span>s</span><span>e</span><span>c</span><span>u</span><span>r</span><span>i</span><span>t</span><span>y</span><span>d</span><span>e</span><span>v</span><span>o</span><span>p</span><span>s</span><span>o</span><span>p</span><span>e</span><span>n</span><span>s</span><span>o</span><span>u</span><span>r</span><span>c</span><span>e</span><span>g</span><span>i</span><span>t</span><span>h</span><span>u</span><span>b</span></div>
+
+<p><strong>About:</strong> "<a href="https://dev.to/alexisromtz7/el-hackeo-de-63b-no-fue-un-bug-de-codigo-4gah">The $6.3B hack was not a code bug</a>" (Dev.to, id <code>4949662</code>, published 30-Oct-2026 21:58:55Z). <strong>Fingerprint:</strong> <code>HUELLA-ADDENDUM-CORRECCION-MOTOR-20261030</code></p>
+
+<p>The article states that <strong>807 of the observations across ten repositories are not 807 vulnerabilities</strong>, and names <strong>228</strong> of them as coming from <strong>two codes of the instrument itself that detect the mechanism, not the defect</strong>. That paragraph was honest and still is. What was missing was the next step: <strong>if the code detects the mechanism and not the defect, the code was wrong.</strong> I fixed it. This addendum publishes the exact figure, because silently correcting an already published number is the same class of fraud as inflating it.</p>
+
+<hr>
+
+<h2>What was wrong (two domain defects, not two thresholds)</h2>
+
+<p><strong>1. <code>GATE_RC_4_SECRETO_EXPUESTO</code> measured usage, not leakage.</strong> It flagged <code>${{ secrets.* }}</code> in <code>env:</code> — global or job level — and in <code>with:</code>. Those are <strong>the two sanctioned mechanisms</strong> for handing a secret to a step without letting it into the body of the script: flagging them as a finding was marking the correct way to use it as a leak. <strong>Domain corrected:</strong> <code>RC 4</code> measures the interpolation <strong>inside <code>run:</code></strong>, the only case where the value enters a shell line and can end up in a log.</p>
+
+<p><strong>2. <code>GATE_RC_2_SUMIDERO_IMPUDO</code> treated the absence of <code>download-artifact</code> as if it were the sink.</strong> A job with <code>id-token: write</code> that materialises no tree, invokes no dynamic tool and restores no cache <strong>executes nothing</strong>: the invariant held vacuously and the finding was the shape of a job that consumes nothing. <strong>Domain corrected:</strong> <code>RC 2</code> measures the presence of the tree or of its dependencies (checkout, <code>npx</code>/<code>pipx</code>, or <code>actions/cache</code> <strong>instead of</strong> the artifact — the cache is not authenticated against the build of the same run, and that is a broken chain of custody).</p>
+
+<hr>
+
+<h2>The exact number</h2>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th>before</th>
+<th>after</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>Gate observations</td><td>596</td><td><strong>401</strong></td></tr>
+<tr><td><code>SC1_*</code> (permission surface)</td><td>211</td><td><strong>211</strong></td></tr>
+<tr><td><strong>Total</strong></td><td><strong>807</strong></td><td><strong>612</strong></td></tr>
+<tr><td><code>RC 4</code> (secret exposed)</td><td>152</td><td><strong>3</strong></td></tr>
+<tr><td><code>RC 2</code> (impure sink)</td><td>76</td><td><strong>30</strong></td></tr>
+<tr><td><code>RC 1</code> (contaminated authority)</td><td>60</td><td><strong>60</strong></td></tr>
+<tr><td><code>RC 5</code> (movable ref)</td><td>308</td><td><strong>308</strong></td></tr>
+</tbody>
+</table>
+
+<p><strong>Removed: 195 observations</strong> (149 from <code>RC 4</code>, 46 from <code>RC 2</code>). <strong>Not 228: 228 was the size of the class, 195 its contribution</strong> — the rest of the class was already falling out through other conjunctions. The codes that hold the thesis up (<code>RC 1</code>, <code>RC 5</code>, <code>SC1_ROOT_WRITE_INHERITED</code>) <strong>did not move</strong>: the correction removed noise, not criteria.</p>
+
+<p>The delta is not estimated: the <strong>163 workflows</strong> of the batch were loaded once, anchored by <code>blob_sha</code> + <code>sha256</code>, and were run <strong>against the previous engine and the corrected one in the same run</strong>.</p>
+
+<hr>
+
+<h2>And the headline shrinks while the thesis gets stronger</h2>
+
+<ul>
+<li><strong>807 observations, 115 with the conjunction</strong> → <strong>14.2 %</strong>.</li>
+<li><strong>612 observations, 115 with the conjunction</strong> → <strong>18.8 %</strong>.</li>
+</ul>
+
+<p>The proportion of what the article defends <strong>went up 4.6 points</strong> because noise was removed from the denominator. <strong>The falsifier did not move:</strong> 10 out of 10 repositories still have at least one authority conjunction, and the three readings of the falsifier (A 10/10, B 6/10, C 4/10) remain identical. What changed is the instrument; the thesis still stands on the same code as before the correction.</p>
+
+<hr>
+
+<h2>The method, so that it can be repeated or taken apart</h2>
+
+<ol>
+<li><strong>Pre-registered prediction before touching the engine</strong> — the independent census of the surface predicted <code>RC 4</code> = 4 and <code>RC 2</code> = 30. Measured: <code>RC 4</code> = <strong>3</strong> (the census counted job rows; <code>RC 4</code> emits one finding per job, and a job in <code>withastro/astro</code> had two steps with a secret), <code>RC 2</code> = <strong>30</strong>. The prediction missed by one and the miss is published in the record, not deleted.</li>
+<li><strong>Reproduction of the 807 as a control</strong> over the same bytes before correcting: 596 + 211 = 807, exact. An engine that does not reproduce its own published figure cannot measure its correction.</li>
+<li><strong>The test bench was part of the defect.</strong> The positive case of <code>RC 4</code> asserted <code>RC 4</code> on <code>env:</code> — that is, the bench <em>endorsed</em> the defect. It was rewritten, and <strong>three negative controls that make the old behaviour fail</strong> were added: sanctioned <code>env:</code> → 0 findings, sanctioned <code>with:</code> → 0, job without a tree, dynamic tool or cache → 0. <code>--self-test</code>: <strong>8 → 11 cases</strong>, <code>RC 0</code>.</li>
+<li><strong>Residue declared, not hidden:</strong> a job with <code>env:</code> carrying secrets that executes third-party code only falls under <code>RC 1</code> if it also declares write scopes; outside that case the combination stays <strong>OUT OF MEASUREMENT</strong>. The narrowing is accepted in exchange for removing 195 observations that were not a defect.</li>
+</ol>
+
+<hr>
+
+<h2>The rate that was missing</h2>
+
+<p>The TPR of <code>RC 2</code> and <code>RC 4</code> is already measured, and measured on the current engine. It is not a sample: it is a <strong>census</strong> of the whole class, because the residual population was 33 findings and sampling 20 of 30 would have saved nothing.</p>
+
+<p>Before opening a single job body, a pre-registered prediction was written, so that the result would not be post-hoc. Then the <strong>163</strong> workflow files of the batch were re-downloaded and their <code>sha256</code> verified against the manifest: 163 identical, 0 failures. The corrected engine reproduced <strong>401</strong> exact gate findings over those bytes (<code>RC 1</code> 60 · <code>RC 2</code> 30 · <code>RC 4</code> 3 · <code>RC 5</code> 308). The population is reproduced, not remembered.</p>
+
+<table>
+<thead>
+<tr>
+<th>reading</th>
+<th>question</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><strong>Formal</strong></td><td>does the shape the engine reports exist in the raw YAML?</td><td><strong>33/33</strong>, 0 false positives</td></tr>
+<tr><td><strong>Negative control</strong></td><td>the 46 <code>RC 2</code> the old engine emitted and the corrected one removed, do they read as <em>without shape</em>?</td><td><strong>46/46</strong>, 0 red</td></tr>
+<tr><td><strong>Substantive</strong></td><td>of those 33 shapes, how many are a broken chain of custody?</td><td><strong>5/33</strong> (15.2 %)</td></tr>
+</tbody>
+</table>
+
+<p>The negative control is the part that matters and the part almost nobody publishes: without it, a high TPR only proves that the reader agrees with itself.</p>
+
+<p><strong>The figure that cannot be published as "vulnerabilities" is 612.</strong> Of the 30 residual <code>RC 2</code> findings, <strong>20 emit only the <code>actions/checkout</code> reason</strong> — and <code>actions/checkout</code> next to <code>id-token: write</code> is the shape of <em>every</em> correct OIDC workflow: the checkout is a requirement of the pattern, not its defect. The false positive did not disappear with the correction: <strong>it changed form</strong>. Before, the engine read badly (228 spurious observations); now it reads well a shape that is not a defect. Saying "612 vulnerabilities" would still be an error, and this addendum does not say it.</p>
+
+<p>And <strong>16 of the 33</strong> (48 %) are a finding of another class, which the prediction itself had not foreseen: <code>NO_SUMIDERO</code>. The job declares <code>id-token: write</code> and <strong>no step consumes that authority</strong>. It does not publish, does not sign, does not attest. The authority is granted and not exercised. The taxonomy of the prediction did not have that class; it is declared as a gap in the prediction, not as a finding forced into place.</p>
+
+<p><strong>That class is not assigned a severity, and the reason is declared: its value is <code>NOT_MEASURED</code>.</strong> We do not know whether it is worth <code>0</code> — the authority granted to a job that does not use it is surface without an act, and surface is not a defect by itself — nor whether it is <strong>the strongest finding of the batch</strong>: a short-lived OIDC token that nobody consumes is still a credential issued against the registry, and least privilege is measured by what the credential <em>can</em> do, not by what the YAML <em>uses</em>. Both readings are defensible on the same bytes and neither is measured. Writing a severity here would be inventing it; writing <code>0</code> would be reading <code>not measured</code> as zero. It stays open and in plain sight, in the same document that does close the figures it could close.</p>
+
+<p><strong>Two defects of the reader were found and corrected before publishing any figure.</strong> The first gave 45/46 on the negative control, because a comment at the end of a job key (<code>test-dev: # TODO</code>) broke the anchor. The second gave 30/33 in the formal census, because a comment at the end of a permission (<code>id-token: write # OIDC</code>) broke the test. Both, had they been published, would have "proven" that the engine was wrong when the error belonged to whoever read it. They remain written here because the path counts.</p>
+
+<p>What is still unmeasured does not change shape, only size: <code>RC 1</code> (60), <code>RC 5</code> (308) and the <code>SC1</code> codes (211) <strong>still have no rate</strong>. And the four blind spots of the instrument are still there: default permissions of <code>GITHUB_TOKEN</code>, OIDC policies of the destination registry, native code not isolated at runtime, and reusable workflows hosted in foreign repositories.</p>
+
+<hr>
+
+<p><strong>Verifiable evidence.</strong> The six artefacts are published in a public release, each with the blob this text declares:</p>
+
+<ul>
+<li><a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/tpr-motor-corregido-20261030/gate_workflows_ci.py"><code>gate_workflows_ci.py</code></a> — blob <code>bc5f83ca</code>, 711 l: the instrument of the measurement.</li>
+<li><a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/tpr-motor-corregido-20261030/preregistro_correccion_motor_20261030.json"><code>preregistro_correccion_motor_20261030.json</code></a> — blob <code>47dfc620</code>, 43 l.</li>
+<li><a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/tpr-motor-corregido-20261030/preregistro_tpr_motor_corregido_20261030.json"><code>preregistro_tpr_motor_corregido_20261030.json</code></a> — blob <code>7e66dac0</code>, 73 l: the prior prediction.</li>
+<li><a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/tpr-motor-corregido-20261030/censo_tpr_motor_corregido_20261030.json"><code>censo_tpr_motor_corregido_20261030.json</code></a> — blob <code>2308ecbc</code>, 507 l: the census, 33 findings, their class, their locus and their negative control.</li>
+<li><a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/tpr-motor-corregido-20261030/lote_autoridad_10_repos_20261030_post_correccion.json"><code>lote_autoridad_10_repos_20261030_post_correccion.json</code></a> — blob <code>a2b3b5c2</code>, 1361 l: the measurement after the correction.</li>
+<li><a href="https://github.com/alexisromtz-lab/platino-data-room/releases/download/tpr-motor-corregido-20261030/lote_autoridad_10_repos_20261030.json"><code>lote_autoridad_10_repos_20261030.json</code></a> — blob <code>1bef96a8</code>, 238 l: the previous measurement, <strong>superseded, not deleted</strong>.</li>
+</ul>
+
+<p>Full release, with the table of blobs and sizes: <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/tag/tpr-motor-corregido-20261030">tpr-motor-corregido-20261030</a>.</p>
+
+<p>The pair <code>1bef96a8</code> / <code>a2b3b5c2</code> is published side by side on purpose: a corrected instrument is demonstrated by showing the old number next to the new one, not by replacing it.</p>
+
+<p><strong>Addendum · 2026-10-31 — two defects of this very addendum.</strong> The first: the evidence was cited by path in a private repository, unreadable for anyone without access. A path without a URL is not evidence: it is a claim with an inaccessible locus. Now every artefact is a link that answers 200 without a session, measured. The second: the marker that closed the text was published <strong>broken</strong> — the leading <code>&lt;!--</code> was lost on publishing — and the rest stayed in view as a line of junk at the end of the page, verified in the served <code>body_html</code>. Both fingerprints remain here, written in a way that no markdown sanitiser can mangle.</p>
+
+<p><em>Fingerprints: <code>HUELLA-TPR-MEDIDA-ADDENDUM-20261030</code> · <code>HUELLA-NO-SUMIDERO-MEDIDO-ADDENDUM-20261030</code></em></p>
+
+<p>HUELLA-ADDENDUM-EVIDENCIA-VERIFICABLE-20261031</p>
+
+    <section class="cta">
+      <p><strong>Everything on this page can be measured again.</strong></p>
+      <p>Every number travels with the command or the <code>file:line</code> that produces it. If something
+      does not add up, the answer is not an argument: it is the instrument, in
+      <a href="../../../auditoria-002-economia-contexto/">the reproducible report</a> (in Spanish) and in
+      <a href="https://github.com/alexisromtz-lab/la-auditora">the repository</a>.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>La Auditora · Platino Labs · <a href="../">more articles</a> · <a href="../../../">audits</a></p>
+  </footer>
+</div>
+</body>
+</html>
+

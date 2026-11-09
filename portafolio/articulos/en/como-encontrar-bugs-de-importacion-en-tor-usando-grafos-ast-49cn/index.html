@@ -1,0 +1,173 @@
+<!doctype html>
+<!-- HUELLA-PAGINA-ARTICULO-como-encontrar-bugs-de-importacion-en-tor-usando-grafos-ast-49cn-20261108 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How to find import bugs in Tor using AST graphs | La Auditora</title>
+  <meta name="description" content="Un ciclo de importación en stem (Tor) que solo falla según el punto de entrada, detectado con un grafo AST antes de leer una sola línea de código.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/como-encontrar-bugs-de-importacion-en-tor-usando-grafos-ast-49cn/">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="How to find import bugs in Tor using AST graphs">
+  <meta property="og:description" content="Un ciclo de importación en stem (Tor) que solo falla según el punto de entrada, detectado con un grafo AST antes de leer una sola línea de código.">
+  <meta property="og:url" content="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/como-encontrar-bugs-de-importacion-en-tor-usando-grafos-ast-49cn/">
+  <meta property="og:locale" content="en_US">
+  <meta property="article:published_time" content="2026-10-27">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../../articulo.css">
+</head>
+<body>
+<a class="skip" href="#contenido">Skip to content</a>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../../../">La Auditora</a>
+    <nav>
+      <a href="../">Articles</a>
+      <a href="../../../">Audits</a>
+      <a href="../../../en/">Portfolio (EN)</a>
+      <a href="../../como-encontrar-bugs-de-importacion-en-tor-usando-grafos-ast-49cn/articulo.en.md">Source .md</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <p class="eyebrow">Article · 2026-10-27</p>
+    <h1>How to find import bugs in Tor using AST graphs</h1>
+    <p class="lede">Un ciclo de importación en stem (Tor) que solo falla según el punto de entrada, detectado con un grafo AST antes de leer una sola línea de código.</p>
+    <div class="proof"><span>p</span><span>y</span><span>t</span><span>h</span><span>o</span><span>n</span><span>s</span><span>t</span><span>a</span><span>t</span><span>i</span><span>c</span><span>a</span><span>n</span><span>a</span><span>l</span><span>y</span><span>s</span><span>i</span><span>s</span><span>a</span><span>s</span><span>t</span><span>t</span><span>o</span><span>r</span></div>
+
+<p>There is a class of bug that tests do not catch and linters do not see: the module works, but <strong>the order in which you import it decides whether it starts</strong>. The code is not broken; the dependency graph is.  The same pattern later appeared in a much bigger repo: an environment with 117 packages where <code>uv pip check</code> answered <code>All installed packages are compatible</code> and <strong>12.06 s later the same interpreter</strong> raised <code>ModuleNotFoundError: No module named 'prisma'</code>. Six import hops to a package that the installed extra does not declare. I wrote it up with the exact lines: <a href="https://doi.org/10.5281/zenodo.23955654">Coherence is not completeness</a> · the measurement rules behind it, published in <a href="https://github.com/alexisromtz-lab/corpus-medido"><code>corpus-medido</code></a> · and the upstream thread in <a href="https://github.com/astral-sh/uv/issues/13963"><code>astral-sh/uv#13963</code></a>.</p>
+
+<p>This is the record of a real one, found in <a href="https://github.com/torproject/stem"><code>torproject/stem</code></a> — the Python library for controlling a Tor daemon — and reported in <a href="https://github.com/torproject/stem/issues/160">torproject/stem#160</a>.</p>
+
+<h2>Step 1 — Clone the subject and declare the universe</h2>
+
+<pre><code class="language-bash">git clone --depth 50 https://github.com/torproject/stem.git stem_art
+cd stem_art &amp;&amp; git rev-parse HEAD
+# d5012a1039f05c69ebe832723ce96ecbe8f79fe1</code></pre>
+
+<p>The universe is <strong>only <code>.py</code> files</strong>. Any number published afterwards has to declare that universe: a tree without Python produces no graph, and an empty graph is not a clean graph.</p>
+
+<h2>Step 2 — Build the import graph from the AST</h2>
+
+<p>The tool does not run the code: it parses every <code>.py</code> with <code>ast</code>, extracts the <code>import</code>/<code>from ... import</code> statements, resolves them to modules of the corpus, and splits two subgraphs:</p>
+
+<ul>
+<li><strong>eager</strong>: the statement runs when the module is imported (module body, including the body of a <code>class</code>).</li>
+<li><strong>deferred</strong>: it lives inside a function; it does not run on import.</li>
+</ul>
+
+<p>That separation is the whole method. A deferred cycle cannot close on import. An <strong>eager</strong> cycle can.</p>
+
+<pre><code class="language-bash">python3 tools/grafo_ciclos_tt_metal_20261026.py --root /tmp/stem_art --raices-no-resueltas</code></pre>
+
+<p>Output, measured on <code>d5012a1</code>:</p>
+
+<pre><code class="language-text">archivos python     : 219
+aristas import      : 611
+  eager (al importar): 594
+  diferidas          : 17
+SCC total           : 5
+SCC eager           : 5
+  ciclo(11): stem/connection.py, stem/control.py, stem/response/__init__.py,
+             stem/response/authchallenge.py, stem/response/events.py,
+             stem/response/getconf.py, stem/response/getinfo.py,
+             stem/response/mapaddress.py, stem/response/onion_client_auth.py,
+             stem/response/protocolinfo.py, stem/socket.py
+  CICLO EAGER(2): stem/response/__init__.py, stem/socket.py</code></pre>
+
+<p>Five strongly connected components, and <strong>all five contain at least one eager edge</strong>. The smallest one is the interesting one: <code>stem/response/__init__.py</code> ↔ <code>stem/socket.py</code>.</p>
+
+<h2>Step 3 — Turn the suspicion into a two-command reproduction</h2>
+
+<p>An eager cycle is a hypothesis, not a finding. The cheapest falsifier is two fresh processes, with different entry points:</p>
+
+<pre><code class="language-bash">python -c 'import stem.response'   # entry through the package
+python -c 'import stem.socket'     # entry through the other end</code></pre>
+
+<p>Measured with Python 3.12.13:</p>
+
+<pre><code class="language-text">--- import stem.response:  RC=1
+Traceback (most recent call last):
+  File "&lt;string&gt;", line 1, in &lt;module&gt;
+  File "stem/response/__init__.py", line 37, in &lt;module&gt;
+    import stem.socket
+  File "stem/socket.py", line 105, in &lt;module&gt;
+    class BaseSocket(object):
+  File "stem/socket.py", line 253, in BaseSocket
+    async def _recv(self, handler: Callable[[asyncio.StreamReader], Awaitable[stem.response.ControlMessage]]) -&gt; stem.response.ControlMessage:
+                                                                              ^^^^^^^^^^^^^
+AttributeError: cannot access submodule 'response' of module 'stem' (most likely due to a circular import)
+
+--- import stem.socket:    RC=0</code></pre>
+
+<p>The same code, two opposite results depending on where you enter. That is the signature of a <strong>load-order</strong> defect, not of a badly written function.</p>
+
+<h2>Why this is a load-order defect</h2>
+
+<p>Three facts, each one verifiable in the file:</p>
+
+<ol>
+<li><code>stem/response/__init__.py:37</code> does <code>import stem.socket</code> <strong>while <code>stem.response</code> is still being initialised</strong>. At that instant, <code>stem.response</code> exists in <code>sys.modules</code>, but the <code>response</code> attribute of the <code>stem</code> package — the one that makes <code>stem.response.ControlMessage</code> work — is not bound yet.</li>
+<li><code>stem/socket.py:105</code> opens <code>class BaseSocket(object):</code>. A class body <strong>runs on import</strong>, and <code>stem/socket.py</code> has no <code>from __future__ import annotations</code>.</li>
+<li>That is why the annotation on <code>stem/socket.py:253</code> is evaluated immediately, at the exact moment when the name <code>stem.response</code> is not reachable as an attribute.</li>
+</ol>
+
+<p>The annotation is not code that runs; it is metadata that Python 3 evaluates eagerly unless told otherwise. And <code>stem/socket.py:90</code> (<code>import stem.response</code>) closes the circle: the two modules need each other, and <strong>which one finishes first decides whether the annotation resolves</strong>.</p>
+
+<p>When you enter through <code>stem.socket</code>, <code>stem.socket</code> initialises first, its <code>import stem.response</code> runs to the end, and by the time the annotation is evaluated the name already exists. When you enter through <code>stem.response</code>, the order reverses and it blows up.</p>
+
+<h2>The fix</h2>
+
+<p>Either of the two breaks the ordering dependency:</p>
+
+<pre><code class="language-python">from __future__ import annotations   # at the top of stem/socket.py</code></pre>
+
+<p>or quoting the affected annotation (<code>'stem.response.ControlMessage'</code>). Both leave <code>typing.get_type_hints()</code> working, because the names resolve once the package is loaded.</p>
+
+<p>Measured, not assumed: with the line added, <code>import stem.response</code> exits <strong>RC 0</strong>; with the line reverted, it goes back to <strong>RC 1</strong> with the same <code>AttributeError</code>. The defect and its closure live in the same pair of commands.</p>
+
+<h2>Why an AST graph and not a linter</h2>
+
+<ul>
+<li>An import linter looks at one file; the bug <strong>is not in a file</strong>, it is in the pair.</li>
+<li>The <code>stem</code> tests do not see it because each test module imports what it needs in whatever order suits it: the accidental order of the test masks the real order of the user.</li>
+<li>The graph costs seconds and does not execute the subject. It produces a <strong>ranking</strong>: 5 SCCs, all with an eager edge. That shrinks the search space from "219 files" to "one pair".</li>
+</ul>
+
+<p>The real cost is in name resolution, not in parsing: on this checkout, <strong>1,015 imports did not resolve</strong> (913 from <code>STDLIB</code>, 102 from external dependencies such as <code>cryptography</code>), and <strong>211 edges into the <code>__init__</code> of an ancestor package were discarded</strong> on purpose — the package is already in <code>sys.modules</code> when the child runs, so counting them fabricates cycles the runtime never walks. An engine that does not declare those two decisions publishes false cycles with complete ease.</p>
+
+<h2>Scope and limits</h2>
+
+<ul>
+<li><strong>No security claim.</strong> It is an import-time defect: it shows up as a hard <code>AttributeError</code> instead of an import that works.</li>
+<li><strong>It was not tested against a running Tor daemon.</strong> Only the import, in a clean interpreter.</li>
+<li>The bug belongs to the subject, not to the method: the method only made it visible without reading <code>stem/socket.py</code> top to bottom first.</li>
+</ul>
+
+<h2>Evidence</h2>
+
+<ul>
+<li>Open issue: <a href="https://github.com/torproject/stem/issues/160">torproject/stem#160 — <em>AttributeError on class-body annotation evaluation in stem/socket.py when importing stem.response first</em></a></li>
+<li>Observed and reproducible on <code>d5012a1039f05c69ebe832723ce96ecbe8f79fe1</code>, Python 3.12.13, macOS.</li>
+</ul>
+
+<p>If you maintain a library whose packages import each other, the experiment costs you two commands: build the graph, separate eager from deferred, and test every small cycle with two opposite entry points. The one that fails one way and not the other is your bug.</p>
+
+    <section class="cta">
+      <p><strong>Everything on this page can be measured again.</strong></p>
+      <p>Every number travels with the command or the <code>file:line</code> that produces it. If something
+      does not add up, the answer is not an argument: it is the instrument, in
+      <a href="../../../auditoria-002-economia-contexto/">the reproducible report</a> (in Spanish) and in
+      <a href="https://github.com/alexisromtz-lab/la-auditora">the repository</a>.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>La Auditora · Platino Labs · <a href="../">more articles</a> · <a href="../../../">audits</a></p>
+  </footer>
+</div>
+</body>
+</html>
+

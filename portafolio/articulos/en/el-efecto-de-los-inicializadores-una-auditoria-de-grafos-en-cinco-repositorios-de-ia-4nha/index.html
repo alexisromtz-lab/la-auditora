@@ -1,0 +1,156 @@
+<!doctype html>
+<!-- HUELLA-PAGINA-ARTICULO-el-efecto-de-los-inicializadores-una-auditoria-de-grafos-en-cinco-repositorios-de-ia-4nha-20261108 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The initializer effect: a graph audit of five AI repositories | La Auditora</title>
+  <meta name="description" content="Ablación de expansión de __init__.py en cinco snapshots Python; sensibilidad de SCC en grafos estáticos, no una puntuación de riesgo.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/el-efecto-de-los-inicializadores-una-auditoria-de-grafos-en-cinco-repositorios-de-ia-4nha/">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="The initializer effect: a graph audit of five AI repositories">
+  <meta property="og:description" content="Ablación de expansión de __init__.py en cinco snapshots Python; sensibilidad de SCC en grafos estáticos, no una puntuación de riesgo.">
+  <meta property="og:url" content="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/el-efecto-de-los-inicializadores-una-auditoria-de-grafos-en-cinco-repositorios-de-ia-4nha/">
+  <meta property="og:locale" content="en_US">
+  <meta property="article:published_time" content="2026-10-28">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../../articulo.css">
+</head>
+<body>
+<a class="skip" href="#contenido">Skip to content</a>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../../../">La Auditora</a>
+    <nav>
+      <a href="../">Articles</a>
+      <a href="../../../">Audits</a>
+      <a href="../../../en/">Portfolio (EN)</a>
+      <a href="../../el-efecto-de-los-inicializadores-una-auditoria-de-grafos-en-cinco-repositorios-de-ia-4nha/articulo.en.md">Source .md</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <p class="eyebrow">Article · 2026-10-28</p>
+    <h1>The initializer effect: a graph audit of five AI repositories</h1>
+    <p class="lede">Ablación de expansión de __init__.py en cinco snapshots Python; sensibilidad de SCC en grafos estáticos, no una puntuación de riesgo.</p>
+    <div class="proof"><span>p</span><span>y</span><span>t</span><span>h</span><span>o</span><span>n</span><span>a</span><span>r</span><span>c</span><span>h</span><span>i</span><span>t</span><span>e</span><span>c</span><span>t</span><span>u</span><span>r</span><span>e</span><span>o</span><span>p</span><span>e</span><span>n</span><span>s</span><span>o</span><span>u</span><span>r</span><span>c</span><span>e</span><span>s</span><span>o</span><span>f</span><span>t</span><span>w</span><span>a</span><span>r</span><span>e</span></div>
+
+<p><strong>Date the analysis was published:</strong> 28 October 2026. This is a descriptive measurement of five Python packages selected on purpose. It is not a ranking of the five biggest startups, and it is not a statistically representative sample.</p>
+
+<h2>Introduction</h2>
+
+<p>Platino Labs published a reproducible import-graph analysis of five projects in the AI ecosystem. The <a href="https://github.com/alexisromtz-lab/la-auditora/releases/tag/arch-index-20261028-v2">Data Room v2</a> contains the calculator, the five public <code>graph-input/1</code> projections and the sensitivity results. The <a href="https://github.com/alexisromtz-lab/la-auditora/releases/tag/arch-index-20261028-v1">Release v1</a> keeps the methodology and the base results, including the commits evaluated.</p>
+
+<p>The question is bounded: <strong>how much does the static import graph change when only the expansion into ancestor <code>__init__.py</code> files is omitted?</strong> We do not measure vulnerabilities, overall quality, business risk or run-time behaviour.</p>
+
+<h2>Main finding: LangChain changes under ablation</h2>
+
+<p>In the <code>langchain</code> snapshot, the base graph contains <strong>2 cyclic strongly connected components (SCC)</strong>; the largest one holds 19 modules. When you keep the resolved direct destinations and omit only the ancestor expansion of <code>__init__.py</code>, the projected graph contains <strong>0 cyclic SCC</strong>.</p>
+
+<p>This proves that the result of the static graph is sensitive to that edge-construction rule. It <strong>does not prove</strong> that the cycles disappear at run time, that packaging is the root cause, or that a performance defect exists. The ablation identifies a question for a later dynamic audit; it does not answer it.</p>
+
+<p>LlamaIndex shows another shape: <strong>4 cyclic SCC</strong> persist in both graphs, although the largest one goes from <strong>334 to 239 modules</strong> inside a universe of 480 modules. The largest cycle shrinks, but it does not disappear. Nor is that, by itself, a measure of risk or technical debt.</p>
+
+<h2>What the ablation removes, exactly</h2>
+
+<p>The obvious objection — "maybe the collapse from 2 to 0 is an artefact of the edge-construction rule" — can be measured instead of argued. On the same projection, the ablation removes <strong>66 edges</strong> across <strong>25 of the 40 modules</strong>.</p>
+
+<p>And the cycles do not live in the initializer layer: the largest SCC has <strong>19 modules, of which 17 are real modules</strong> (<code>agents/factory.py</code> and sixteen <code>agents/middleware/*.py</code>) and only 2 are <code>__init__.py</code>. The second SCC has 3 modules: <code>mcp/adapter.py</code>, <code>mcp/tools.py</code> and <code>mcp/__init__.py</code>.</p>
+
+<p>That the removed edge is real is not a convention of the calculator. In Python, importing a descendant executes the <code>__init__.py</code> of its ancestors: when you import <code>langchain.agents.middleware.pii</code>, the trace of <code>python -X importtime</code> shows <code>langchain</code>, <code>langchain.agents</code> and <code>langchain.agents.middleware</code> executed. That is exactly the <code>child → ancestor __init__</code> edge that the ablation suppresses. In an environment without <code>langchain-core</code> the import never completes, and that does not change the datum: the three ancestors already ran before the failure.</p>
+
+<p><strong>Consequence, and it corrects the easy reading of the headline:</strong> the <strong>ablated</strong> graph is the one that drifts away from Python's behaviour, not the base graph. The 0 describes what would happen if the <code>__init__.py</code> files were not executed when importing a descendant; it does not describe <code>langchain</code>. The conclusion of the previous section — that the measurement describes a property of the static graph and not a defect — still stands, but "2" is the faithful reading and "0" is the hypothetical one.</p>
+
+<p>Membership of each SCC is recomputed with the <code>strongly_connected_components</code> function of the published calculator, applied to the projection whose SHA-256 is quoted above: the datum does not depend on a private instrument.</p>
+
+<h2>Results per snapshot</h2>
+
+<table>
+<thead>
+<tr>
+<th>Repository / package</th>
+<th>Commit measured</th>
+<th>Base SCC</th>
+<th>LOC</th>
+<th>SCC / 10,000 LOC</th>
+<th>SCC without initializer expansion</th>
+<th>Largest SCC size: base → ablation</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><a href="https://github.com/vllm-project/vllm">vLLM</a> · <code>vllm</code></td><td><code>7e3e3f6ab652550fdefecd8e9823394fd8e51950</code></td><td>23</td><td>959,216</td><td>0.240</td><td>8</td><td>1,648 → 1,394</td></tr>
+<tr><td><a href="https://github.com/langchain-ai/langchain">LangChain</a> · <code>langchain</code></td><td><code>facf2788ae1f60c62f2397d15698237c405a5f05</code></td><td>2</td><td>13,352</td><td>1.498</td><td>0</td><td>19 → 0</td></tr>
+<tr><td><a href="https://github.com/huggingface/transformers">Transformers</a> · <code>transformers</code></td><td><code>95bafdcccfffe17ec383999fc39273867b11385e</code></td><td>8</td><td>996,643</td><td>0.080</td><td>6</td><td>176 → 169</td></tr>
+<tr><td><a href="https://github.com/bentoml/BentoML">BentoML</a> · <code>bentoml</code></td><td><code>0aa1aea52b63b82100ff93675eff25f6428fb841</code></td><td>5</td><td>38,508</td><td>1.298</td><td>4</td><td>78 → 42</td></tr>
+<tr><td><a href="https://github.com/run-llama/llama_index">LlamaIndex</a> · <code>llama_index</code></td><td><code>619d74664e8404612038bc15a1a40c686037277c</code></td><td>4</td><td>61,322</td><td>0.652</td><td>4</td><td>334 → 239</td></tr>
+</tbody>
+</table>
+
+<blockquote><p><strong>What is verified and what is not, in these five rows.</strong> The numbers are computed over the <code>graph-input/1</code> projections of Release v2. The <code>langchain</code> projection used here has SHA-256 <code>5733904a58211822291827c58f5104b013626acc6ef186aad4c569d77d71ff17</code>, identical to the published asset. The <code>--graph-sensitivity</code> mode <strong>does not re-hash the source files</strong> and declares <code>source_bytes_verified: false</code>: what is verified is the integrity of the distribution (the hash of the projection), <strong>not</strong> the correctness of the extraction. For the path with verification against the sources, use Release v1 and its commits.</p></blockquote>
+
+<p>LOC counts physical lines with Python tokens and excludes comments and blank lines. Density is <code>cyclic SCC / LOC × 10,000</code>; it serves to describe these snapshots, <strong>not</strong> as a quality score or as a probability of failure. The sample was selected on purpose and does not allow inferring prevalence across the whole industry.</p>
+
+<h2>Reproducible methodology</h2>
+
+<p>The calculator builds a directed graph of Python modules and obtains its SCC with Tarjan's algorithm. An SCC counts as cyclic if it contains more than one module or a self-loop. <code>type_checking</code> imports are excluded; the other types included in the projection are kept.</p>
+
+<p>To reproduce the ablation, download the assets of <a href="https://github.com/alexisromtz-lab/la-auditora/releases/tag/arch-index-20261028-v2">Release v2</a> and run, with Python 3.10 or later:</p>
+
+<pre><code class="language-bash">python3 calculate_arch_index.py public_graph_bentoml_0aa1aea5.json --graph-sensitivity &gt; graph_sensitivity_bentoml.json
+python3 calculate_arch_index.py public_graph_langchain_facf2788.json --graph-sensitivity &gt; graph_sensitivity_langchain.json
+python3 calculate_arch_index.py public_graph_llamaindex_619d7466.json --graph-sensitivity &gt; graph_sensitivity_llama_index.json
+python3 calculate_arch_index.py public_graph_transformers_95bafdcc.json --graph-sensitivity &gt; graph_sensitivity_transformers.json
+python3 calculate_arch_index.py public_graph_vllm_7e3e3f6a.json --graph-sensitivity &gt; graph_sensitivity_vllm.json</code></pre>
+
+<p>Every result includes the SHA-256 of the bytes of its input projection. The projections omit code snippets and local roots; <strong>the <code>--graph-sensitivity</code> mode does not re-hash the source files</strong> and declares <code>source_bytes_verified: false</code>, as warned next to the results table. To reproduce the base results with verification against the sources, follow the instructions and the full commits of Release v1.</p>
+
+<h2>Why it matters — and what it does not claim</h2>
+
+<p>Cycles and the size of their components describe a topological property of the computed static graph. They can orient a review of boundaries between modules and later tests, but these data do not measure load times, import failures, testing complexity, vulnerabilities or technical debt. To claim any of those things you need specific instruments, windows and controls.</p>
+
+<h2>CTA</h2>
+
+<p>Do you lead engineering and want to understand the dependency structure of your own system? <a href="https://github.com/alexisromtz-lab/la-auditora">See Platino Labs' work on GitHub</a> and request an evaluation bounded to your repository, commit and research question.</p>
+
+<hr>
+
+<p><strong>Addendum · 2026-10-31.</strong> A reader pointed out that the warning <code>source_bytes_verified: false</code> lived in the methodology section and not next to the numbers. It was moved to the table block, and a measurement of what the ablation removes was added (66 edges across 25 of 40 modules; 17 of the 19 modules of the largest SCC are real modules) so that the figure of 0 SCC is not read as a property of <code>langchain</code>. The CTA destination was also fixed: it pointed to a private repository and returned 404 to any anonymous reader.</p>
+
+<h2>The run-time objection, answered with the interpreter</h2>
+
+<p>The warning above says that these numbers describe a static graph. The question that follows — and it is the right one — is whether the cycle exists at run time or only in the graph. It was measured with <code>python -X importtime</code> on the published projection:</p>
+
+<pre><code class="language-text">import time:      2414 |       2414 |       langchain
+import time:     24984 |      55275 |       langchain.agents.factory
+import time:      4025 |      61714 |     langchain.agents
+import time:      36 |      61749 |   langchain.agents.middleware
+import time:       47 |      61795 | langchain.agents.middleware.pii</code></pre>
+
+<p>The indentation is the causal chain: importing the child executes its three ancestors. (The import does not complete in an environment without <code>langchain-core</code>; the ancestors ran before the <code>ModuleNotFoundError</code>, and that is exactly the point: an import that fails is still evidence of the edges that precede the failure.)</p>
+
+<p>With that, the consequence inverts the easy reading of the headline. The <strong>ablated</strong> graph is the one that drifts from the interpreter: the <code>0</code> describes what would happen if the <code>__init__.py</code> files were not executed when importing a descendant, and the <code>2</code> is the faithful reading of <code>langchain</code> at that commit. The ablation does not erase the cycles because they are in the initializers — 17 of the 19 modules of the largest SCC are real modules — it erases them by removing the 66 expansion edges that Python does execute.</p>
+
+<p>The objection produced the measurement, and the measurement moved the conclusion. That is the best use a comment can have.</p>
+
+<p>&lt;!-- HUELLA-ARTICULO-INDICE-ARQUITECTURA-20261028 --&gt;</p>
+
+<p>&lt;!-- HUELLA-ARTICULO-RESPUESTA-EJECUCION-20261031 --&gt;</p>
+
+    <section class="cta">
+      <p><strong>Everything on this page can be measured again.</strong></p>
+      <p>Every number travels with the command or the <code>file:line</code> that produces it. If something
+      does not add up, the answer is not an argument: it is the instrument, in
+      <a href="../../../auditoria-002-economia-contexto/">the reproducible report</a> (in Spanish) and in
+      <a href="https://github.com/alexisromtz-lab/la-auditora">the repository</a>.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>La Auditora · Platino Labs · <a href="../">more articles</a> · <a href="../../../">audits</a></p>
+  </footer>
+</div>
+</body>
+</html>
+

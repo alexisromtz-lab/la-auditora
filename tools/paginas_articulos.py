@@ -564,12 +564,15 @@ def aplicar(raiz: Path, escribir: bool):
     en = [m for m in metas if m["lang"] == "en"]
     slugs_es = {m["slug"] for m in es}
     for m in en:
-        if m["slug"] not in slugs_es:
+        if m["slug"] not in slugs_es and m.get("solo_en") != "si":
             errores.append(
-                "%s: gemelo EN sin fuente ES (%s)" % (m["ruta"], NOMBRES["es"])
+                "%s: gemelo EN sin fuente ES (%s); si el articulo existe solo en "
+                "ingles, declaralo con `solo_en: si`" % (m["ruta"], NOMBRES["es"])
             )
-    en = [m for m in en if m["slug"] in slugs_es]
-    gemelos = {m["slug"] for m in en}
+    en = [m for m in en if m["slug"] in slugs_es or m.get("solo_en") == "si"]
+    # hreflang solo cuando existen las dos paginas: un alternate que apunta a
+    # una pagina que no existe es peor que no declararlo.
+    gemelos = {m["slug"] for m in en} & slugs_es
 
     objetivos = []
     for m in es:

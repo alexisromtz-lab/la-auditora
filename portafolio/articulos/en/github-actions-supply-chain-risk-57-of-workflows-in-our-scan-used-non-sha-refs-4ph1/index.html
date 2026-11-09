@@ -1,0 +1,109 @@
+<!doctype html>
+<!-- HUELLA-PAGINA-ARTICULO-github-actions-supply-chain-risk-57-of-workflows-in-our-scan-used-non-sha-refs-4ph1-20261108 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub Actions Supply-Chain Risk: 57% of Workflows in Our Scan Used Non-SHA Refs | La Auditora</title>
+  <meta name="description" content="The 64.9% figure describes rule occurrences—not workflow prevalence. Here is what our scan of 279...">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/github-actions-supply-chain-risk-57-of-workflows-in-our-scan-used-non-sha-refs-4ph1/">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="GitHub Actions Supply-Chain Risk: 57% of Workflows in Our Scan Used Non-SHA Refs">
+  <meta property="og:description" content="The 64.9% figure describes rule occurrences—not workflow prevalence. Here is what our scan of 279...">
+  <meta property="og:url" content="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/github-actions-supply-chain-risk-57-of-workflows-in-our-scan-used-non-sha-refs-4ph1/">
+  <meta property="og:locale" content="en_US">
+  <meta property="article:published_time" content="2026-10-31">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../../articulo.css">
+</head>
+<body>
+<a class="skip" href="#contenido">Skip to content</a>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../../../">La Auditora</a>
+    <nav>
+      <a href="../">Articles</a>
+      <a href="../../../">Audits</a>
+      <a href="../../../en/">Portfolio (EN)</a>
+      <a href="../../github-actions-supply-chain-risk-57-of-workflows-in-our-scan-used-non-sha-refs-4ph1/articulo.en.md">Source .md</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <p class="eyebrow">Article · 2026-10-31</p>
+    <h1>GitHub Actions Supply-Chain Risk: 57% of Workflows in Our Scan Used Non-SHA Refs</h1>
+    <p class="lede">The 64.9% figure describes rule occurrences—not workflow prevalence. Here is what our scan of 279...</p>
+    <div class="proof"><span>a</span><span>i</span><span>s</span><span>e</span><span>c</span><span>u</span><span>r</span><span>i</span><span>t</span><span>y</span><span>s</span><span>u</span><span>p</span><span>p</span><span>l</span><span>y</span><span>c</span><span>h</span><span>a</span><span>i</span><span>n</span><span>g</span><span>i</span><span>t</span><span>h</span><span>u</span><span>b</span><span>a</span><span>c</span><span>t</span><span>i</span><span>o</span><span>n</span><span>s</span></div>
+
+<p><em>The 64.9% figure describes rule occurrences—not workflow prevalence. Here is what our scan of 279 GitHub Actions workflow files actually measured.</em></p>
+
+<h2>The denominator changes the headline</h2>
+
+<p>In a snapshot captured on October 31, 2026, we scanned 279 workflow files across nine open-source repositories. The rule <code>GATE_RC_5_REF_MUTABLE</code> flags each <code>uses:</code> reference that is not pinned to a full commit SHA.</p>
+
+<p>At least one such reference appeared in 159 of the 279 workflows: <strong>57.0%</strong>. The finding appeared in seven of the nine repositories.</p>
+
+<p>So where does 64.9% come from? The scan recorded 607 non-SHA-pinned <code>uses:</code> occurrences out of 936 total rule occurrences across seven rule categories. That is <strong>64.9% of the occurrences</strong>, not 64.9% of workflows. One workflow can contain multiple references and findings; those are different units.</p>
+
+<table>
+<thead>
+<tr>
+<th>Repository</th>
+<th>Workflow files scanned</th>
+<th>Non-SHA-pinned <code>uses:</code> occurrences</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><a href="https://github.com/activepieces/activepieces">activepieces/activepieces</a></td><td>38</td><td>149</td></tr>
+<tr><td><a href="https://github.com/calcom/cal.com">calcom/cal.com</a></td><td>50</td><td>89</td></tr>
+<tr><td><a href="https://github.com/documenso/documenso">documenso/documenso</a></td><td>14</td><td>29</td></tr>
+<tr><td><a href="https://github.com/formbricks/formbricks">formbricks/formbricks</a></td><td>34</td><td>0</td></tr>
+<tr><td><a href="https://github.com/hoppscotch/hoppscotch">hoppscotch/hoppscotch</a></td><td>4</td><td>84</td></tr>
+<tr><td><a href="https://github.com/medusajs/medusa">medusajs/medusa</a></td><td>50</td><td>162</td></tr>
+<tr><td><a href="https://github.com/nocodb/nocodb">nocodb/nocodb</a></td><td>11</td><td>22</td></tr>
+<tr><td><a href="https://github.com/openstatusHQ/openstatus">openstatusHQ/openstatus</a></td><td>20</td><td>72</td></tr>
+<tr><td><a href="https://github.com/supabase/supabase">supabase/supabase</a></td><td>58</td><td>0</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>279</strong></td><td><strong>607</strong></td></tr>
+</tbody>
+</table>
+
+<h2>Why a non-SHA reference matters</h2>
+
+<p>A workflow can refer to an action by a version tag or branch, such as <code>owner/action@v4</code> or <code>owner/action@main</code>. Those names are convenient, but they do not themselves identify an immutable commit. If a reference is moved—or its upstream repository is compromised—later workflow runs may retrieve different code without a change to the workflow file.</p>
+
+<p>GitHub recommends pinning actions to a full commit SHA and verifying that the SHA comes from the action’s upstream repository. A SHA pin makes the selected commit explicit; it does <strong>not</strong> prove that the commit is safe. Updates still need review.</p>
+
+<h2>What this scan does not prove</h2>
+
+<p>This result is an exposure signal, not evidence of a compromise. We did not measure whether individual tags were protected or immutable, whether any reference had actually moved, or what code executed at runtime. Nor is this nine-repository scan a representative estimate of all GitHub Actions workflows.</p>
+
+<p>A tenth candidate, <code>twentyhq/twenty</code>, could not be verified because its checkout was truncated. It was excluded from the denominator—not counted as clean.</p>
+
+<h2>A practical next step</h2>
+
+<p>Review every <code>uses:</code> reference, replace mutable names with verified full commit SHAs where appropriate, and make updates through a deliberate review process. Keep counts of affected workflow files separate from counts of individual references.</p>
+
+<p>For GitHub’s recommendations, see the <a href="https://docs.github.com/en/actions/reference/security/secure-use">secure-use guidance</a>. For commit-pinned, evidence-backed repository audits, explore <a href="https://alexisromtz-lab.github.io/la-auditora/en/">La Auditora</a>. <a href="https://github.com/alexisromtz-lab/git-preflight-gate">git-preflight-gate</a> addresses a different concern—integrity checks before AI agents write to a repository; it is not an Actions workflow scanner. Its GitHub Marketplace listing is <a href="https://github.com/marketplace/actions/ci-authority-gate">CI Authority Gate</a>.</p>
+
+<hr>
+
+<p>The RC5-only evidence package (finding-level data, workflow manifest, census, method, and SHA-256 checksums) is available in the <a href="https://github.com/alexisromtz-lab/platino-data-room/releases/tag/supply-chain-20261031-rc5-v1">public release</a>. It supports the RC5 counts above; it does not reproduce the 936-occurrence denominator across all seven rule categories.</p>
+
+    <section class="cta">
+      <p><strong>Everything on this page can be measured again.</strong></p>
+      <p>Every number travels with the command or the <code>file:line</code> that produces it. If something
+      does not add up, the answer is not an argument: it is the instrument, in
+      <a href="../../../auditoria-002-economia-contexto/">the reproducible report</a> (in Spanish) and in
+      <a href="https://github.com/alexisromtz-lab/la-auditora">the repository</a>.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>La Auditora · Platino Labs · <a href="../">more articles</a> · <a href="../../../">audits</a></p>
+  </footer>
+</div>
+</body>
+</html>
+

@@ -531,6 +531,12 @@ def canonicos(raiz: Path, clave_api: str, transporte) -> int:
             print("SIN_CANONICA  " + etiqueta)
             fallas += 1
             continue
+        if canonica == (a.get("url") or "").strip():
+            # Se mide antes del gemelo: el gemelo de un post es el mismo, asi que
+            # buscarlo primero etiquetaba de GEMELO lo que solo es el defecto por
+            # defecto de dev.to, y dejaba PROPIA inalcanzable.
+            print("PROPIA        " + etiqueta)
+            continue
         ruta, idioma_pagina = pagina_del_sitio(raiz, canonica)
         if ruta is not None:
             if not ruta.is_file():

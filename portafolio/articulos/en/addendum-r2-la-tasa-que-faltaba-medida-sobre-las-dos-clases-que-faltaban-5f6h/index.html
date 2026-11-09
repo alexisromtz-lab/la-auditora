@@ -1,0 +1,242 @@
+<!doctype html>
+<!-- HUELLA-PAGINA-ARTICULO-addendum-r2-la-tasa-que-faltaba-medida-sobre-las-dos-clases-que-faltaban-5f6h-20261108 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Addendum R2 — the missing rate, measured over the two missing classes | La Auditora</title>
+  <meta name="description" content="Addendum R2 — la tasa que faltaba, medida sobre las dos clases que faltaban    Este artículo...">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/addendum-r2-la-tasa-que-faltaba-medida-sobre-las-dos-clases-que-faltaban-5f6h/">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Addendum R2 — the missing rate, measured over the two missing classes">
+  <meta property="og:description" content="Addendum R2 — la tasa que faltaba, medida sobre las dos clases que faltaban    Este artículo...">
+  <meta property="og:url" content="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/addendum-r2-la-tasa-que-faltaba-medida-sobre-las-dos-clases-que-faltaban-5f6h/">
+  <meta property="og:locale" content="en_US">
+  <meta property="article:published_time" content="2026-10-31">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../../articulo.css">
+</head>
+<body>
+<a class="skip" href="#contenido">Skip to content</a>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../../../">La Auditora</a>
+    <nav>
+      <a href="../">Articles</a>
+      <a href="../../../">Audits</a>
+      <a href="../../../en/">Portfolio (EN)</a>
+      <a href="../../addendum-r2-la-tasa-que-faltaba-medida-sobre-las-dos-clases-que-faltaban-5f6h/articulo.en.md">Source .md</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <p class="eyebrow">Article · 2026-10-31</p>
+    <h1>Addendum R2 — the missing rate, measured over the two missing classes</h1>
+    <p class="lede">Addendum R2 — la tasa que faltaba, medida sobre las dos clases que faltaban    Este artículo...</p>
+    <div class="proof"><span>s</span><span>e</span><span>c</span><span>u</span><span>r</span><span>i</span><span>t</span><span>y</span><span>g</span><span>i</span><span>t</span><span>h</span><span>u</span><span>b</span><span>d</span><span>e</span><span>v</span><span>o</span><span>p</span><span>s</span><span>o</span><span>p</span><span>e</span><span>n</span><span>s</span><span>o</span><span>u</span><span>r</span><span>c</span><span>e</span></div>
+
+<blockquote><p><strong>This article replaces the previous one as a reading</strong> —"Addendum: I corrected my own instrument and the number went from 807 to 612": <code>https://dev.to/alexisromtz7/addendum-corregi-mi-propio-instrumento-y-el-numero-bajo-de-807-a-612-5172</code>— whose body was published <strong>without the Markdown it was written in</strong>: the platform stored the text and discarded the syntax. The content is the same; the form is not. It is republished so that what was measured can be read. <strong>The original is still alive and unedited</strong>, as a record of what the publishing environment did to it (§9).</p></blockquote>
+
+<p><strong>This document does not rewrite the previous one.</strong> The addendum published with <code>RC 2</code> and <code>RC 4</code> (<code>ADDENDUM_ARTICULO_20261030.md</code>, blob <code>723dda49</code>, alive on Dev.to) remains <strong>intact byte for byte</strong>, because a public act is not corrected by editing: it is corrected by addendum. What follows replaces <strong>only</strong> its section "The rate that was missing", and only in the part it left open.</p>
+
+<p>Fingerprint of this revision: <code>HUELLA-ADDENDUM-R2-TPR-RC1-RC5-20261030</code>. It is declared as code text and not as an HTML comment for the reason measured in §9.</p>
+
+<hr>
+
+<h2>1. What was left open, said with the figure next to it</h2>
+
+<p>The previous addendum closed the rate of <code>RC 2</code> and <code>RC 4</code>: <strong>33 cases, 100 % formal, 15.2 % substantive</strong>. And it declared its own residue on the same page: <code>RC 1</code> (60) and <code>RC 5</code> (308) still had <strong>no rate</strong>.</p>
+
+<p>That means <strong>368 of the 612 published observations — 60.1 % of the numerator — had no verdict</strong>. A client asking "what is your false-positive rate?" received an answer that held for 33 cases and was presented as if it held for 612. That was the weakness, and it was not hidden: it was written down.</p>
+
+<p><strong>It is no longer open.</strong></p>
+
+<hr>
+
+<h2>2. The measurement</h2>
+
+<p>Same discipline as last time, and in the same order: <strong>first the prediction, then the reading.</strong></p>
+
+<p>A pre-registration was written (<code>preregistro_tpr_rc1_rc5_20261030.json</code>, 129 lines, blob <code>05eaead8</code>) with the substantive classes, the declared bias and five falsifiers, <strong>before opening a single <code>run:</code> or a single <code>uses:</code></strong>. Then the <strong>163</strong> workflow files of the batch were re-downloaded by <code>blob SHA</code> from the GitHub API and their <code>sha256</code> verified against the manifest: <strong>163/163 identical, 0 failures</strong>. The engine reproduced the exact split: <code>RC 1</code> 60 · <code>RC 2</code> 30 · <code>RC 4</code> 3 · <code>RC 5</code> 308.</p>
+
+<table>
+<thead>
+<tr>
+<th>class</th>
+<th>reading</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><strong><code>RC 5</code> REF_MUTABLE</strong></td><td>does the cited <code>uses:</code> exist in the raw text and is its ref really floating?</td><td><strong>308/308</strong>, 0 false positives</td></tr>
+<tr><td><strong><code>RC 1</code> AUTORIDAD_CONTAMINADA</strong></td><td>does the job have write access and execute code on the same cited line?</td><td><strong>60/60</strong>, 0 false positives</td></tr>
+<tr><td><strong>Negative control <code>RC 5</code></strong></td><td>of 1321 <code>uses:</code>, <strong>1013</strong> are pinned to 40-character SHAs: how many does the engine flag?</td><td><strong>0 of 1013</strong></td></tr>
+<tr><td><strong>Negative control <code>RC 1</code></strong></td><td><strong>164</strong> jobs execute third-party code <strong>without</strong> a write scope: how many does it flag?</td><td><strong>0 of 164</strong></td></tr>
+</tbody>
+</table>
+
+<p>The two negative controls are the part that matters. An engine that flagged everything would have given 1321 instead of 308, and 174 instead of 60. It does not: <strong>it discriminates in both directions of the conjunction</strong>.</p>
+
+<hr>
+
+<h2>3. The substantive rate: this is where the number shrinks</h2>
+
+<p>Formal 100 % is not the figure that can be sold, and the previous addendum already said so for <code>RC 2</code>. For <code>RC 1</code> and <code>RC 5</code> the effect is larger, because these two classes <strong>are measured per occurrence and not per risk</strong>.</p>
+
+<h3><code>RC 5</code> — 308 occurrences are not 308 risks: they are <strong>31</strong></h3>
+
+<p>The <code>RC 5</code> sweep does not deduplicate. The same action repeated across twenty jobs yields twenty findings. In the 163 files there are <strong>1321</strong> <code>uses:</code> values, of which <strong>308</strong> are floating… and those 308 are only <strong>31 distinct references</strong>. Publishing 308 without saying so would be inflating the numerator through the back door.</p>
+
+<table>
+<thead>
+<tr>
+<th>class</th>
+<th>occurrences</th>
+<th>distinct</th>
+<th>what it is</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><strong>First party</strong> (<code>actions/*</code>)</td><td>239</td><td>17</td><td>movable tag from GitHub over GitHub code. Documented pattern</td></tr>
+<tr><td><strong>Third party, floating tag</strong></td><td>42</td><td>5</td><td><code>pnpm/action-setup@v6</code>, <code>dtolnay/rust-toolchain@stable</code>, <code>oven-sh/setup-bun@v2</code>, <code>rust-lang/crates-io-auth-action@v1</code>, <code>vercel/next.js/.github/actions/pr-auto-label@canary</code></td></tr>
+<tr><td><strong>Floating reusable workflow</strong></td><td>10</td><td>6</td><td>a <strong>whole</strong> workflow from another repo executed with this repo's token</td></tr>
+<tr><td><strong>Unsubstituted placeholder</strong></td><td>17</td><td>3</td><td>see §4 — a class the prediction did not have</td></tr>
+<tr><td><strong>Docker image without digest</strong></td><td><strong>0</strong></td><td>0</td><td>I predicted 8; there is not a single one in the 10 repos</td></tr>
+</tbody>
+</table>
+
+<p><strong>The real third-party surface: 52 occurrences and 11 distinct references</strong> — <strong>16.9 %</strong> of the occurrences and <strong>35.5 %</strong> of the distinct ones. The other 256 are split into 239 <code>actions/*</code>, which for a client is noise (control of the ref belongs to GitHub, not to the attacker the client fears), and 17 placeholders that do not resolve and are counted as their own class in §4, not as third party.</p>
+
+<blockquote><p><strong>Correction with a chain (<code>HUELLA-ADDENDUM-R2-CORRECCION-PORCENTAJE-TERCEROS-20261030</code>).</strong> The first version of this paragraph, written hours earlier and never published, said <strong>22.4 %</strong> and "the other 239". That percentage is correct for 69 occurrences, not for 52: the sentence had added to the numerator the 17 from <code>R7</code>, which are <code>$/.github/…</code> paths of the client's own repository and therefore are not third-party code. <strong>The table above never said 69; it said 42 + 10.</strong> The number in the prose and the one in its own table were not measuring the same thing, and nothing compared them. The wrong literal is kept in view because an addendum that corrects figures cannot be edited in silence — that is the same rule that brought it into being. The correction travels with the census: <code>INVESTIGACION/evidencia/censo_tpr_rc1_rc5_20261030.json</code>, field <code>superficie_de_terceros.correccion_con_cadena</code>.</p></blockquote>
+
+<h3><code>RC 1</code> — 60 findings, <strong>10</strong> uphold the name of the code</h3>
+
+<p><code>RC 1</code> is called <code>AUTORIDAD_CONTAMINADA</code>. The conjunction it measures — write <strong>and</strong> execution in the same job — is correct and yields 60/60 formal. But only a part of those 60 lines <strong>exercise or hand over</strong> the authority:</p>
+
+<table>
+<thead>
+<tr>
+<th>class</th>
+<th>n</th>
+<th>what it is</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><strong>A1 — remote write exercised</strong></td><td>9</td><td><code>gh run cancel</code>, <code>gh pr comment</code>, <code>gh api --method POST</code>: the token is the instrument of that same line</td></tr>
+<tr><td><strong>A2 — download to execution</strong></td><td>1</td><td>`curl https://rustwasm.github.io/…/init.sh -sSf \</td><td>sh<code> with </code>id-token: write`: code chosen at runtime, executed with the credential in the environment</td></tr>
+<tr><td><strong>A3 — inherits third party</strong></td><td>28</td><td><code>pnpm install</code>, <code>cargo build</code>, <code>npx -y firebase-tools@15.15.0</code>, <code>cargo binstall</code>, <code>gh</code> running with the token available</td></tr>
+<tr><td><strong>A4 — local mutation</strong></td><td>5</td><td><code>git config</code> without push: the authority is declared and not exercised</td></tr>
+<tr><td><strong>A5 — code of the repo itself</strong></td><td>11</td><td><code>pnpm run build</code>, <code>node scripts/…</code>: whoever sees the token is the owner of the repo</td></tr>
+<tr><td><strong>A7 — lexeme without execution</strong></td><td>6</td><td>see §4</td></tr>
+</tbody>
+</table>
+
+<p><strong>Authority exercised or handed over: 10 of 60 (16.7 %).</strong> That is the number the word "contaminated" can defend.</p>
+
+<hr>
+
+<h2>4. The two classes the prediction did not have</h2>
+
+<p>On two consecutive days, the same pattern: <strong>the taxonomy falls short and the new class shows up in the same place where the engine reads well.</strong> Yesterday it was <code>NO_SUMIDERO</code> (16 of 33). Today there are two, and both are declared instead of being forced into place.</p>
+
+<p><strong>R7 — unsubstituted placeholder: 17 occurrences, 3 literals, 3 repositories and 6 files.</strong> The raw bytes contain local references written with GitHub's template placeholder (<code>$/…</code>) that was never substituted: <code>$/.github/actions/setup</code> <strong>5 times, all in <code>sveltejs/svelte</code> <code>ci.yml</code></strong>; <code>$/.github/actions/issues-helper</code> <strong>11 times in <code>vitejs/vite</code></strong> —6 in <code>bot.yml</code>, 3 in <code>issue-labeled.yml</code>, 1 in <code>issue-close-require.yml</code>, 1 in <code>lock-closed-issues.yml</code>—; and <code>$/.github/workflows/notify-resolved-issues.yml</code> <strong>1 time in <code>nuxt/nuxt</code> <code>release.yml</code></strong>. The bytes are genuine from the origin: the <code>git hash-object</code> of the <strong>six</strong> files matches one by one the <code>blob_sha</code> declared by the manifest, so it is not an artefact of the download. <strong>Its severity stays <code>NOT_MEASURED</code></strong>, for the same reason as <code>NO_SUMIDERO</code>: <code>0</code> if one reads that a <code>uses</code> that does not resolve holds no custody, and "the strongest finding" if one reads that the file declares an intention it does not execute and whoever audits it will believe it is pinned. Resolving it requires knowing whether the repo generates that file or commits it as is, and the file does not say.</p>
+
+<blockquote><p><strong>Correction with a chain (<code>HUELLA-ADDENDUM-R2-R7-POR-ARCHIVO-20261030</code>).</strong> The previous version of this paragraph, written hours earlier and never published, named <code>facebook/react</code> as one of the repositories with placeholders. Measured over the 163 workflows already verified by <code>sha256</code>: <code>facebook/react</code> has <strong>26 workflows and zero occurrences</strong>, and the 17 are in <code>svelte</code> (5), <code>vite</code> (11) and <code>nuxt</code> (1). The count never changed — 17 occurrences, 3 literals — the attribution did. It is the third case of the same defect in the day: <strong>a structured field that is correct next to a sentence that is not derived from it</strong>, just like the 22.4 % in §5. The correction travels with the census, field <code>clase_no_prevista.correccion_con_cadena</code>.</p></blockquote>
+
+<p><strong>A7 — the lexeme matches while nothing is executed: 6 of 60.</strong> An <code>echo "  - NPM name: …"</code> matches the <code>npm</code> pattern. A <code>yq '.allowBuilds[]=false' -i pnpm-workspace.yaml</code> matches because the <strong>name of the file</strong> says <code>pnpm</code>. It is not a defect of the engine — its declared domain is lexical per line — but it is noise for a client, and that is why it is counted separately and published: <strong>it is how a false positive survives the correction of the engine.</strong></p>
+
+<hr>
+
+<h2>5. Four defects of the reader, found before publishing</h2>
+
+<p>The lesson from last time was applied with a will: <strong>the reader is wrong too, and when it is wrong it declares the correct instrument guilty.</strong> An independent desk reader, without the engine's parser, found four:</p>
+
+<ol>
+<li><code>permissions: {}</code> read as <code>{'{}': 'write'}</code> → <code>RC 1</code> inflated from 60 to <strong>121</strong> (61 false reds).</li>
+<li>The job <code>uses:</code> counted twice → <code>RC 5</code> inflated from 308 to <strong>319</strong> (11 false reds).</li>
+<li>Quoted permission values (<code>contents: 'read'</code>) keeping the quotes → a real job fell out: <strong>59 of 60</strong>.</li>
+<li><code>run:</code> folded over several lines read only on the first → a cited line appeared truncated.</li>
+</ol>
+
+<p><strong>All four were the reader's. The engine did not change a single line: its formal output holds 368/368.</strong></p>
+
+<hr>
+
+<h2>6. Prediction against measurement, without dressing it up</h2>
+
+<table>
+<thead>
+<tr>
+<th>prediction (pre-registered)</th>
+<th>measured</th>
+<th>verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>RC 5</code>: 308 TP, 0 FP, ±4</td><td>308 / 0</td><td>met</td></tr>
+<tr><td><code>RC 1</code>: 60 TP, 0 FP, ±6</td><td>60 / 0</td><td>met</td></tr>
+<tr><td><strong>31 to 60</strong> distinct literals, point estimate 45</td><td><strong>31</strong></td><td>met <strong>at the edge</strong>, by one literal</td></tr>
+<tr><td><code>RC 5</code> split: 240 / 55 / 8 / 3 / 2 / 0</td><td>239 / 42 / <strong>0</strong> / 10 / 0 / <strong>17</strong></td><td>right direction, three deviations</td></tr>
+<tr><td>Distinct third parties: 12 ± 6</td><td>11</td><td>met</td></tr>
+<tr><td><code>A1</code>+<code>A2</code>: <strong>9</strong> ± 6</td><td><strong>10</strong></td><td>met</td></tr>
+</tbody>
+</table>
+
+<p>Three deviations that are published because they were measured: <strong>the docker image without a digest does not exist</strong> in the 10 repos (I predicted 8), <strong>the floating reusable workflow is triple</strong> what was predicted (3 → 10, and it is the strongest class of the four), and <strong>a class that was not in the taxonomy appeared</strong> (R7, 17). Point estimate 45 against 31 is not a method failure: it is the difference between <strong>estimating how many occurrences there would be</strong> and <strong>counting how many distinct references there are</strong>.</p>
+
+<hr>
+
+<h2>7. What still has no rate, and why it is said</h2>
+
+<p><strong><code>SC1</code> — 211 observations, and they are not all the same thing.</strong> They are not from the gate: they are the substitution and chain count of the harness itself. This act measures <strong>368 of 612 observations (60.1 %)</strong> — but that denominator is not the one for <strong>findings</strong>, and confusing them is the defect this addendum already committed once with another figure. Of the 244 without a census, <strong>156 are <code>REVIEW</code> by contract design</strong> (<code>SC1_JOB_WRITE_SCOPE_REVIEW</code> 153 + <code>SC1_ROOT_READ_ALL_REVIEW</code> 3): they are inventory, not findings, and there is no rate to assign them because they do not assert a vulnerability. <strong>55 are a real conjunction</strong> (<code>SC1_ROOT_PERMISSIONS_MISSING</code> 36 + <code>SC1_ROOT_WRITE_INHERITED</code> 19). And <strong>33 are the corrected class</strong> (<code>RC 2</code> 30 + <code>RC 4</code> 3), validated by domain review with a chain, not by census. Over the denominator a CTO would want — the one for those that assert a vulnerability, <strong>456</strong> — the coverage is <strong>368/456 = 80.7 %</strong>, and what is left to census is <strong>55 cases, 9.0 % of the total</strong>, not 211. What is published as 60.1 % is still correct as long as the denominator is "observations"; it stops being so the moment the denominator is "findings".</p>
+
+<p><em>Fingerprint of this revision: <code>HUELLA-ADDENDUM-R2-DENOMINADOR-20261030</code> (MEDICIÓN CON UNIDAD, applied to its own statement: the 60.1 % was not wrong, it was measuring another population).</em></p>
+
+<p><strong>And three more residues, declared:</strong> <code>RC 5</code> emits <code>job: '-'</code>, so it does not say <em>which</em> job consumes the action and the per-job severity stays <code>NOT_MEASURED</code>; the engine's own residue still stands (<code>env:</code> with secrets + third-party execution only falls under <code>RC 1</code> if there are write scopes); and the substantive reading is a desk reading, over the YAML, without executing the workflows: it does not measure whether a third-party action is hostile today, it measures whether the ref is pinnable and whether the authority is exercised.</p>
+
+<hr>
+
+<h2>8. The sentence that can be published</h2>
+
+<blockquote><p><strong>612 observations, of which 456 assert a vulnerability. Census: 368 — 80.7 % of the findings and 60.1 % of the observations.</strong> Of the remaining 244: <strong>156 are <code>REVIEW</code> inventory</strong> by contract, <strong>55 are a real conjunction without a census</strong> and <strong>33 are the corrected class</strong>, validated by domain review. Formal TPR <strong>368/368</strong>. Negative control: <strong>1013</strong> pinned refs not flagged and <strong>164</strong> jobs without write not flagged. Substantive: <strong>10 of 60</strong> authority findings exercise or hand over the credential; <strong>11 distinct references</strong> of third parties across 308 floating-ref occurrences; <strong>17</strong> references that do not resolve — 5 in <code>sveltejs/svelte</code> <code>ci.yml</code>, 11 in <strong>four</strong> workflows of <code>vitejs/vite</code> (6 of them in <code>bot.yml</code>), 1 in <code>nuxt/nuxt</code> <code>release.yml</code> — with severity <code>NOT_MEASURED</code>.</p></blockquote>
+
+<p>There is no round number and there is not going to be one. What there is, is an instrument that was wrong 195 times, published it, corrected itself, measured its own rate, found four defects <strong>in its reader</strong> and published those too, and left in plain sight what it could not measure. That is what a CTO can audit. A "1000 vulnerabilities" is not.</p>
+
+<hr>
+
+<h2>9. Publishing note: the declared format and the executed format</h2>
+
+<p>The previous addendum was written in Markdown and published without it. Measured today against the public API (<code>GET /api/articles/4950016</code>, HTTP 200, <code>published_at 2026-10-31T00:18:48Z</code>): the <strong>stored</strong> <code>body_markdown</code> contains <strong>0</strong> <code>**</code>, <strong>0</strong> backticks, <strong>0</strong> <code>|</code> and <strong>0</strong> <code>##</code>. The loss is not in the render: it is in the source. That is why the format is not recovered by switching modes in the editor — the body has to be rewritten.</p>
+
+<p>And there is a detail that is a mechanism, not an accident: of the <strong>two</strong> HTML comments in the published body, the one that opened a line lost its <code>&lt;</code> (<code>!-- HUELLA-TPR-MEDIDA…</code>, visible as text) and the one that came inline behind the <code>--&gt;</code> survived intact (<code>&lt;!-- HUELLA-NO-SUMIDERO-MEDIDO…</code>). <strong>Falsifiable rule with <code>n=1</code> body: Dev.to removes the first <code>&lt;</code> of a line that starts with <code>&lt;</code>; the following ones on the same line survive.</strong> It is not "the start of the body", as was declared in the first reading: the body starts with text, not with <code>&lt;</code>. A single observation is not a rule: it is published with its <code>n</code> and its falsifier.</p>
+
+<p>Operational consequence, applied in this very document: <strong>no fingerprint of this revision travels as an HTML comment; they travel as code text</strong>, in the header and in the footer. It is the same defect this document measures in the others: a declared intention — the format, the fingerprint, the <code>permissions:</code> — that the execution environment does not execute.</p>
+
+<p>Fingerprint of this section: <code>HUELLA-ADDENDUM-R2-NOTA-FORMATO-20261030</code>.</p>
+
+<hr>
+
+<p><em>Source of truth for the figures: <code>INVESTIGACION/evidencia/censo_tpr_rc1_rc5_20261030.json</code> (blob <code>a2a7aa26</code>, after the two corrections with a chain of 30-Oct-2026) and <code>INVESTIGACION/evidencia/preregistro_tpr_rc1_rc5_20261030.json</code> (blob <code>05eaead8</code>), both over the same 163 workflow files with identity verified by <code>sha256</code> and <code>git hash-object</code>.</em></p>
+
+<p><em>Fingerprint of this revision: <code>HUELLA-ADDENDUM-R2-R7-LOCUS-20261030</code>.</em></p>
+
+<p><em>Fingerprint of this revision: <code>HUELLA-ADDENDUM-R2-R7-POR-ARCHIVO-20261030</code> and <code>HUELLA-ADDENDUM-R2-DENOMINADOR-20261030</code>. The six files with <code>R7</code> were verified one by one with <code>git hash-object</code> against the manifest; the denominator of 456 comes from <code>composicion</code> and from the <code>SC1</code> counts of the batch, not from the prose.</em></p>
+
+    <section class="cta">
+      <p><strong>Everything on this page can be measured again.</strong></p>
+      <p>Every number travels with the command or the <code>file:line</code> that produces it. If something
+      does not add up, the answer is not an argument: it is the instrument, in
+      <a href="../../../auditoria-002-economia-contexto/">the reproducible report</a> (in Spanish) and in
+      <a href="https://github.com/alexisromtz-lab/la-auditora">the repository</a>.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>La Auditora · Platino Labs · <a href="../">more articles</a> · <a href="../../../">audits</a></p>
+  </footer>
+</div>
+</body>
+</html>
+
