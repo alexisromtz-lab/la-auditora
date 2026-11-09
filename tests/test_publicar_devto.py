@@ -8,6 +8,7 @@ tabla que el articulo de origen.
 
 from __future__ import annotations
 
+import io
 import json
 import os
 import sys
@@ -71,6 +72,20 @@ class Payload(unittest.TestCase):
     def test_el_cuerpo_viaja_intacto(self):
         datos = pd.payload(self.encabezado, self.cuerpo, True)
         self.assertEqual(datos["article"]["body_markdown"], self.cuerpo)
+
+    def test_un_tag_ilegal_no_llega_a_la_api(self):
+        # dev.to responde 422 y aborta la publicacion entera por un solo guion.
+        encabezado = dict(self.encabezado, tags="devops, github-actions")
+        with self.assertRaises(pd.Config) as capturado:
+            pd.payload(encabezado, self.cuerpo, True)
+        self.assertIn("github-actions", str(capturado.exception))
+
+    def test_los_tags_de_la_proyeccion_son_legales(self):
+        tags = [t.strip() for t in self.encabezado["tags"].split(",") if t.strip()]
+        self.assertTrue(tags)
+        for tag in tags:
+            with self.subTest(tag=tag):
+                self.assertRegex(tag, r"^[a-z0-9]+$")
 
     def test_published_se_declara_y_no_se_hereda_del_archivo(self):
         self.assertEqual(self.encabezado["published"], "false")
@@ -262,6 +277,22 @@ class Envio(unittest.TestCase):
         with con_clave():
             rc = pd.main(["--raiz", str(RAIZ), "--slug", SLUG, "--enviar"], transporte=transporte)
         self.assertEqual(rc, 3)
+
+    def test_el_limite_de_tasa_es_transitorio_y_no_se_reintenta_solo(self):
+        # Un POST repetido a ciegas publica dos veces: se para y se avisa.
+        transporte = Transporte((429, {"error": "Rate limit reached, try again in 30 seconds"}))
+        with con_clave():
+            rc = pd.main(["--raiz", str(RAIZ), "--slug", SLUG, "--enviar"], transporte=transporte)
+        self.assertEqual(rc, 4)
+        self.assertEqual(transporte.metodos, ["POST"])
+
+    def test_el_limite_de_tasa_dice_cuanto_esperar(self):
+        salida = io.StringIO()
+        with mock.patch("sys.stderr", salida):
+            rc = pd.fallo_de_api(429, {"error": "Rate limit reached, try again in 45 seconds"})
+        self.assertEqual(rc, 4)
+        self.assertIn("45 s", salida.getvalue())
+        self.assertIn("No se reintenta solo", salida.getvalue())
 
 
 class Reparacion(unittest.TestCase):

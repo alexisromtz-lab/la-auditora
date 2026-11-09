@@ -234,6 +234,47 @@ class ProyeccionFalsable(unittest.TestCase):
         self.assertEqual(proc.returncode, 2, proc.stdout)
         self.assertIn("ENCABEZADO ILEGIBLE", proc.stderr)
 
+    # ── tags que la plataforma acepta ─────────────────────────────────────
+
+    def test_el_guion_de_un_tag_se_quita_en_la_proyeccion(self) -> None:
+        """dev.to devuelve 422 por `github-actions` y aborta la publicacion."""
+        self.origen.write_text(
+            self.origen.read_text(encoding="utf-8").replace(
+                "tags: fixture, markdown", "tags: devops, github-actions"
+            ),
+            encoding="utf-8",
+        )
+        self.correr()
+        proyeccion = self.destino.read_text(encoding="utf-8")
+        self.assertIn("tags: devops, githubactions", proyeccion)
+        self.assertNotIn("github-actions", proyeccion)
+
+    def test_ningun_tag_proyectado_lleva_guion_ni_mayusculas(self) -> None:
+        self.origen.write_text(
+            self.origen.read_text(encoding="utf-8").replace(
+                "tags: fixture, markdown", "tags: DevOps, supply-chain, C++"
+            ),
+            encoding="utf-8",
+        )
+        self.correr()
+        linea = [l for l in self.destino.read_text(encoding="utf-8").splitlines() if l.startswith("tags:")][0]
+        for tag in [t.strip() for t in linea[len("tags:"):].split(",")]:
+            with self.subTest(tag=tag):
+                self.assertRegex(tag, r"^[a-z0-9]+$")
+
+    def test_como_maximo_cuatro_tags_y_sin_repetidos(self) -> None:
+        self.origen.write_text(
+            self.origen.read_text(encoding="utf-8").replace(
+                "tags: fixture, markdown",
+                "tags: uno, dos, uno, tres, cuatro, cinco",
+            ),
+            encoding="utf-8",
+        )
+        self.correr()
+        linea = [l for l in self.destino.read_text(encoding="utf-8").splitlines() if l.startswith("tags:")][0]
+        tags = [t.strip() for t in linea[len("tags:"):].split(",")]
+        self.assertEqual(tags, ["uno", "dos", "tres", "cuatro"])
+
 
 if __name__ == "__main__":
     unittest.main()

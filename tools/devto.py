@@ -21,6 +21,7 @@ Uso:
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -29,6 +30,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from paginas_articulos import SITIO_EN, cosechar, leer_articulo  # noqa: E402
 
 NOMBRE = "devto.md"
+# dev.to acepta como maximo cuatro tags por articulo.
+MAX_TAGS = 4
 # Claves del encabezado del sitio que no significan nada para dev.to. Si alguna
 # se filtra, el archivo publicado declara un vocabulario que su lector no lee.
 CLAVES_AJENAS = ("lede", "fecha", "date", "fuente", "cola_slug", "lang")
@@ -49,6 +52,29 @@ def escalar(valor: str) -> str:
     return '"%s"' % valor.replace("\\", "\\\\").replace('"', '\\"')
 
 
+LEGAL = re.compile(r"[^a-z0-9]")
+
+
+def tag_legal(tag: str) -> str:
+    """El tag que dev.to acepta: solo letras y numeros.
+
+    Medido: `github-actions` devuelve 422 y aborta la publicacion entera. El
+    guion no lo pone el autor por gusto, asi que se quita en la proyeccion y el
+    archivo publicado declara lo que la plataforma va a aceptar.
+    """
+    return LEGAL.sub("", tag.strip().lower())
+
+
+def tags_legales(tags) -> list:
+    vistos, salida = set(), []
+    for tag in tags:
+        limpio = tag_legal(tag)
+        if limpio and limpio not in vistos:
+            vistos.add(limpio)
+            salida.append(limpio)
+    return salida[:MAX_TAGS]
+
+
 def proyectar(meta: dict) -> str:
     """El encabezado de dev.to mas el cuerpo intacto del articulo."""
     if meta["lang"] != "en":
@@ -61,7 +87,7 @@ def proyectar(meta: dict) -> str:
         "title: %s" % escalar(meta["title"]),
         "published: false",
         "description: %s" % escalar(meta["lede"]),
-        "tags: %s" % ", ".join(meta["tags"]),
+        "tags: %s" % ", ".join(tags_legales(meta["tags"])),
         "canonical_url: %s" % escalar(canonical(meta["slug"])),
         "---",
     ]

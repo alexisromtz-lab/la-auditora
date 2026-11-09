@@ -129,9 +129,20 @@ def separar(texto: str) -> tuple[dict, str]:
     return encabezado, cuerpo
 
 
+TAG_LEGAL = re.compile(r"^[a-z0-9]+$")
+
+
 def payload(encabezado: dict, cuerpo: str, publicado: bool) -> dict:
     """El cuerpo viaja intacto: es el unico campo que no se puede reconstruir."""
     tags = [t.strip() for t in encabezado.get("tags", "").split(",") if t.strip()]
+    ilegales = [t for t in tags if not TAG_LEGAL.match(t)]
+    if ilegales:
+        # dev.to corta la publicacion entera con 422 por un solo guion en un tag.
+        raise Config(
+            "tags ilegales para dev.to (solo minusculas y numeros): %s\n"
+            "  corre tools/devto.py --raiz . --aplicar para regenerar la proyeccion"
+            % ", ".join(ilegales)
+        )
     return {
         "article": {
             "title": encabezado["title"],
@@ -231,8 +242,7 @@ def publicar(raiz: Path, slug: str, clave_api: str, transporte, publicado: bool,
         return 0
     estado, respuesta = transporte("POST", API + "/articles", clave_api, datos)
     if estado not in (200, 201):
-        print("  API %d: %s" % (estado, json.dumps(respuesta)[:400]), file=sys.stderr)
-        return 3
+        return fallo_de_api(estado, respuesta)
     print("  PUBLICADO id=%s url=%s" % (respuesta.get("id"), respuesta.get("url")))
     return 0
 
@@ -258,6 +268,33 @@ def localizar(listado, encabezado: dict, slug: str):
             if (a.get("title") or "").strip() == titulo:
                 return a, "title"
     return None, ""
+
+
+SEGUNDOS = re.compile(r"try again in (\d+) seconds?")
+
+
+def fallo_de_api(estado: int, respuesta) -> int:
+    """El RC de una respuesta que no es 200/201. 429 no es lo mismo que un 422.
+
+    dev.to limita la creacion de articulos: el 429 es una condicion del
+    transporte y llega con los segundos que hay que esperar. Tratarlo como un
+    fallo del payload invita a reescribirlo, que es justo lo que no hay que
+    hacer. No se reintenta solo: un POST reintentado a ciegas puede publicar dos
+    veces.
+    """
+    texto = json.dumps(respuesta)[:400]
+    if estado == 429:
+        espera = SEGUNDOS.search(json.dumps(respuesta))
+        print(
+            "  LIMITE DE LA API (429): %s\n"
+            "  No se reintenta solo: un POST repetido a ciegas publica dos veces. "
+            "Espera %s s y vuelve a correr el mismo comando."
+            % (texto, espera.group(1) if espera else "unos 30"),
+            file=sys.stderr,
+        )
+        return 4
+    print("  API %d: %s" % (estado, texto), file=sys.stderr)
+    return 3
 
 
 def reparar(raiz: Path, slug: str, clave_api: str, transporte, publicado: bool, enviar: bool) -> int:
@@ -288,8 +325,7 @@ def reparar(raiz: Path, slug: str, clave_api: str, transporte, publicado: bool, 
     datos = payload(encabezado, cuerpo, publicado)
     estado, respuesta = transporte("PUT", "%s/articles/%s" % (API, remoto["id"]), clave_api, datos)
     if estado not in (200, 201):
-        print("  API %d: %s" % (estado, json.dumps(respuesta)[:400]), file=sys.stderr)
-        return 3
+        return fallo_de_api(estado, respuesta)
     print("  REPARADO id=%s url=%s" % (respuesta.get("id"), respuesta.get("url")))
     return 0
 
