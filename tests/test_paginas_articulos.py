@@ -243,3 +243,26 @@ class GeneradorFalsable(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+    def test_un_articulo_solo_en_ingles_se_genera_si_lo_declara(self) -> None:
+        """Un articulo que vive solo en ingles necesita pagina propia: su
+        canonica no puede ser dev.to para siempre."""
+        (self.root / "portafolio" / "articulos" / "un-articulo" / "articulo.md").unlink()
+        self.gemelo().write_text(FUENTE_EN + "", encoding="utf-8")
+        fuente = self.gemelo().read_text(encoding="utf-8").replace("lang: en", "lang: en\nsolo_en: si")
+        self.gemelo().write_text(fuente, encoding="utf-8")
+        proc = self.correr("--aplicar")
+        self.assertEqual(proc.returncode, 0, proc.stdout)
+        pagina_en = self.root / "portafolio" / "articulos" / "en" / "un-articulo" / "index.html"
+        self.assertTrue(pagina_en.is_file())
+        self.assertFalse(self.pagina.exists(), "no hay fuente ES: no puede haber pagina ES")
+        html_en = pagina_en.read_text(encoding="utf-8")
+        self.assertIn('rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/un-articulo/"', html_en)
+        self.assertNotIn("hreflang=", html_en, "sin gemelo ES no se declara alternate")
+
+    def test_solo_en_con_valor_que_no_es_si_sigue_siendo_error(self) -> None:
+        (self.root / "portafolio" / "articulos" / "un-articulo" / "articulo.md").unlink()
+        self.gemelo().write_text(FUENTE_EN.replace("lang: en", "lang: en\nsolo_en: no"), encoding="utf-8")
+        proc = self.correr("--aplicar")
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.assertIn("solo_en: si", proc.stdout)

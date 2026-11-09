@@ -1,0 +1,108 @@
+<!doctype html>
+<!-- HUELLA-PAGINA-ARTICULO-how-i-found-6-silent-security-gates-in-gnutls-and-why-ci-green-isnt-always-what-it-seems-145d-20261108 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How I found 6 silent security gates in GnuTLS (and why CI green isn&#x27;t always what it seems) | La Auditora</title>
+  <meta name="description" content="There is a dangerous assumption in modern software engineering: &quot;The pipeline is green, therefore the...">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/how-i-found-6-silent-security-gates-in-gnutls-and-why-ci-green-isnt-always-what-it-seems-145d/">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="How I found 6 silent security gates in GnuTLS (and why CI green isn&#x27;t always what it seems)">
+  <meta property="og:description" content="There is a dangerous assumption in modern software engineering: &quot;The pipeline is green, therefore the...">
+  <meta property="og:url" content="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/how-i-found-6-silent-security-gates-in-gnutls-and-why-ci-green-isnt-always-what-it-seems-145d/">
+  <meta property="og:locale" content="en_US">
+  <meta property="article:published_time" content="2026-11-06">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../../articulo.css">
+</head>
+<body>
+<a class="skip" href="#contenido">Skip to content</a>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../../../">La Auditora</a>
+    <nav>
+      <a href="../">Articles</a>
+      <a href="../../../">Audits</a>
+      <a href="../../../en/">Portfolio (EN)</a>
+      <a href="../../how-i-found-6-silent-security-gates-in-gnutls-and-why-ci-green-isnt-always-what-it-seems-145d/articulo.en.md">Source .md</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <p class="eyebrow">Article · 2026-11-06</p>
+    <h1>How I found 6 silent security gates in GnuTLS (and why CI green isn&#x27;t always what it seems)</h1>
+    <p class="lede">There is a dangerous assumption in modern software engineering: &quot;The pipeline is green, therefore the...</p>
+    <div class="proof"><span>d</span><span>e</span><span>v</span><span>o</span><span>p</span><span>s</span><span>g</span><span>i</span><span>t</span><span>l</span><span>a</span><span>b</span><span>s</span><span>e</span><span>c</span><span>u</span><span>r</span><span>i</span><span>t</span><span>y</span><span>o</span><span>p</span><span>e</span><span>n</span><span>s</span><span>o</span><span>u</span><span>r</span><span>c</span><span>e</span></div>
+
+<p>There is a dangerous assumption in modern software engineering: <strong>"The pipeline is green, therefore the code is safe."</strong></p>
+
+<p>But what if the pipeline is lying to you?</p>
+
+<p>I recently ran a static analysis on the GitLab CI configuration of <strong>GnuTLS</strong>, a foundational cryptographic library that secures a massive portion of the internet's TLS traffic.</p>
+
+<p>I found <strong>six test jobs that can fail without turning the pipeline red</strong>.</p>
+
+<p>Out of 15 jobs in the file that execute a test runner, 6 of them (40%) are configured with <code>allow_failure: true</code>. This means that if a test fails, GitLab still reports the pipeline as passed.</p>
+
+<p>Here is the breakdown of what I found, why it matters, and how it can be fixed in one line.</p>
+
+<h3>The 6 Silent Gates</h3>
+
+<table>
+<thead>
+<tr>
+<th>Job</th>
+<th><code>allow_failure</code> at</th>
+<th>What it runs</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>mingw64/test</code></td><td><code>.gitlab-ci.yml:127</code></td><td><code>mingw64-make -C tests check</code> under wine</td></tr>
+<tr><td><code>mingw32/test</code></td><td><code>.gitlab-ci.yml:127</code></td><td>same, 32-bit</td></tr>
+<tr><td><code>fedora-threadsan/test</code></td><td><code>.gitlab-ci.yml:480</code></td><td>ThreadSanitizer suite</td></tr>
+<tr><td><code>fedora-cross/aarch64-linux-gnu/test</code></td><td><code>.gitlab-ci.yml:614</code></td><td>full suite under qemu</td></tr>
+<tr><td><code>fedora-cross/ppc64le-linux-gnu/test</code></td><td><code>.gitlab-ci.yml:632</code></td><td>same (big-endian)</td></tr>
+<tr><td><code>fedora-cross/s390x-linux-gnu/test</code></td><td><code>.gitlab-ci.yml:650</code></td><td>same (big-endian)</td></tr>
+</tbody>
+</table>
+
+<p>For contrast, there are 9 other jobs in the same file (like <code>fedora/test</code> and <code>fedora-sanitizers/test</code>) that <em>do</em> hard-fail the pipeline. So the project clearly wants strict gates; these six are the exception.</p>
+
+<h3>Why is this dangerous?</h3>
+
+<p>Two of these jobs (<code>mingw*</code> and <code>fedora-threadsan</code>) have a comment that says:</p>
+
+<blockquote><p><code># FIXME: the above step doesn't work on a rootless container</code></p></blockquote>
+
+<p>The intention was to forgive <em>one specific step</em> (like a container setup). But in GitLab CI, <code>allow_failure: true</code> applies to the <strong>entire job</strong>. If a real data-race regression or a byte-order bug is introduced, the pipeline will stay green.</p>
+
+<p>Even worse, the four <code>fedora-cross</code> jobs have <em>no comments at all</em>. They carry no stated reason. The <code>ppc64le</code> and <code>s390x</code> jobs are the only ones testing big-endian architectures. A failure there could silently reach <code>master</code>.</p>
+
+<h3>The Surgical Fix</h3>
+
+<p>You don't need to remove the escape hatch entirely. If the runner is flaky (e.g., OOM or timeout), you can tell GitLab to forgive <em>only</em> infrastructure errors, while still failing the pipeline on actual assertion errors (exit code 2).</p>
+
+<p>Instead of:</p>
+
+<pre><code class="language-yaml">allow_failure: true
+</code></pre>
+
+    <section class="cta">
+      <p><strong>Everything on this page can be measured again.</strong></p>
+      <p>Every number travels with the command or the <code>file:line</code> that produces it. If something
+      does not add up, the answer is not an argument: it is the instrument, in
+      <a href="../../../auditoria-002-economia-contexto/">the reproducible report</a> (in Spanish) and in
+      <a href="https://github.com/alexisromtz-lab/la-auditora">the repository</a>.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>La Auditora · Platino Labs · <a href="../">more articles</a> · <a href="../../../">audits</a></p>
+  </footer>
+</div>
+</body>
+</html>
+

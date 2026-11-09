@@ -1,0 +1,81 @@
+<!doctype html>
+<!-- HUELLA-PAGINA-ARTICULO-why-99-of-your-llm-bill-is-context-overhead-and-how-to-measure-it-33j-20261108 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Why 99% of your LLM Bill is Context Overhead (and how to measure it) | La Auditora</title>
+  <meta name="description" content="The 99% is a measured share of token volume—not proof that 99% of dollars are wasted.  In one...">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/why-99-of-your-llm-bill-is-context-overhead-and-how-to-measure-it-33j/">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Why 99% of your LLM Bill is Context Overhead (and how to measure it)">
+  <meta property="og:description" content="The 99% is a measured share of token volume—not proof that 99% of dollars are wasted.  In one...">
+  <meta property="og:url" content="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/why-99-of-your-llm-bill-is-context-overhead-and-how-to-measure-it-33j/">
+  <meta property="og:locale" content="en_US">
+  <meta property="article:published_time" content="2026-10-31">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../../articulo.css">
+</head>
+<body>
+<a class="skip" href="#contenido">Skip to content</a>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../../../">La Auditora</a>
+    <nav>
+      <a href="../">Articles</a>
+      <a href="../../../">Audits</a>
+      <a href="../../../en/">Portfolio (EN)</a>
+      <a href="../../why-99-of-your-llm-bill-is-context-overhead-and-how-to-measure-it-33j/articulo.en.md">Source .md</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <p class="eyebrow">Article · 2026-10-31</p>
+    <h1>Why 99% of your LLM Bill is Context Overhead (and how to measure it)</h1>
+    <p class="lede">The 99% is a measured share of token volume—not proof that 99% of dollars are wasted.  In one...</p>
+    <div class="proof"><span>a</span><span>i</span><span>a</span><span>r</span><span>c</span><span>h</span><span>i</span><span>t</span><span>e</span><span>c</span><span>t</span><span>u</span><span>r</span><span>e</span><span>l</span><span>l</span><span>m</span><span>f</span><span>i</span><span>n</span><span>o</span><span>p</span><span>s</span></div>
+
+<p>The 99% is a measured share of token volume—not proof that 99% of dollars are wasted.</p>
+
+<p>In one five-day telemetry window, 99.13% of recorded model tokens were input tokens. That is a useful signal: the work surrounding a model’s response can dwarf the response itself.</p>
+
+<p>But input tokens are not automatically waste, and token share is not the same as bill share. To find what you can actually optimize, measure the parts separately.</p>
+
+<p>What the data says Across 32,546 model calls and 76 sessions with usage data, the measured totals were:</p>
+
+<p>Metric	Tokens Input	2,944,901,602 Output	25,895,776 Total	2,970,797,378 Input share	99.13% This is one measured corpus, not an industry benchmark. And input includes useful task content as well as instructions, tool definitions, and conversation history. The aggregate alone cannot tell us which input was necessary or redundant.</p>
+
+<p>Find the components before optimizing Tool definitions are one component we can measure directly. In the same telemetry report, the median tool-schema and input tokens differed by tool profile:</p>
+
+<p>Tools exposed	Calls	Median schema tokens	Median input tokens	Schema / input 73	19,729	22,501	84,926.96	26.5% 22	416	9,464	73,672.51	12.8% These are observational profiles, not a controlled before-and-after test. The difference does not prove that reducing a tool set caused a particular saving; the tasks and calls may differ. It does show why measuring the actual schema-token field is more informative than estimating from the number of tools.</p>
+
+<p>A practical way to measure context Choose a unit and window. Decide whether you’re measuring calls, sessions, or completed tasks, and record the time range. Collect provider-reported usage. Keep input and output tokens separate. Record cached-token counts separately when available. Break input into measurable components. Capture system instructions, tool schemas, task content, and conversation history where your instrumentation supports it. Mark anything inferred as an estimate. Compare like with like. To test a prompt or tool change, hold the workload and configuration constant, record both versions, and compare the same metrics. Convert tokens to money only with the applicable rates. Input, output, and cached tokens may have different prices. For a basic token-share calculation:</p>
+
+<p>input share = input tokens input tokens + output tokens input share= input tokens+output tokens input tokens ​</p>
+
+<p>That ratio describes token volume, not necessarily dollars. To estimate cost, apply the provider’s rates to each applicable token category. If the rates or cache treatment are unknown, report cost as unmeasured.</p>
+
+<p>The useful question “Can we use a smaller model?” is not the only optimization question. Ask what each request sends, which parts are repeated, and whether they need to be present for that task.</p>
+
+<p>The measurement here supports a narrow conclusion: input dominated token volume in this corpus. It does not establish that all input was overhead, that 99.13% of spend went to context, or that a particular reduction would preserve quality. Those require separate, controlled measurements.</p>
+
+<p>If you want to audit your own repository’s supply-chain security or cloud costs, check out our open-source tools at GitHub or reach out for a custom enterprise audit at La Auditora.</p>
+
+    <section class="cta">
+      <p><strong>Everything on this page can be measured again.</strong></p>
+      <p>Every number travels with the command or the <code>file:line</code> that produces it. If something
+      does not add up, the answer is not an argument: it is the instrument, in
+      <a href="../../../auditoria-002-economia-contexto/">the reproducible report</a> (in Spanish) and in
+      <a href="https://github.com/alexisromtz-lab/la-auditora">the repository</a>.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>La Auditora · Platino Labs · <a href="../">more articles</a> · <a href="../../../">audits</a></p>
+  </footer>
+</div>
+</body>
+</html>
+

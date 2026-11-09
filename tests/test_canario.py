@@ -400,3 +400,73 @@ class CanarioFalsable(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def cablear_solo_en(root: Path) -> None:
+    """Un articulo que solo existe en ingles: fuente EN, pagina EN, indice EN y
+    sitemap. No tiene fuente ES ni pagina ES."""
+    cablear_articulo(root)
+    pieza = root / "portafolio" / "articulos" / "solo-ingles"
+    pieza.mkdir(parents=True)
+    (pieza / "articulo.en.md").write_text(
+        "---\ntitle: Only EN\nlede: Fixture.\ndate: 2026-11-06\nlang: en\nsolo_en: si\n---\n\nText.\n",
+        encoding="utf-8",
+    )
+    en = root / "portafolio" / "articulos" / "en"
+    (en / "solo-ingles").mkdir(parents=True)
+    (en / "solo-ingles" / "index.html").write_text("<p>Only EN</p>\n", encoding="utf-8")
+    (en / "index.html").write_text('<a href="solo-ingles/">Only EN</a>\n', encoding="utf-8")
+    (root / "en" / "index.html").write_text(
+        '<a href="../portafolio/auditoria-001-sujeto/index.html">Audit 001</a>\n'
+        '<a href="../portafolio/articulos/index.html">Articles</a>\n'
+        '<a href="../portafolio/articulos/en/">Articles (EN)</a>\n',
+        encoding="utf-8",
+    )
+    sitemap = root / "sitemap.xml"
+    sitemap.write_text(
+        sitemap.read_text(encoding="utf-8").replace(
+            "</urlset>",
+            "  <url><loc>%sportafolio/articulos/en/</loc></url>\n"
+            "  <url><loc>%sportafolio/articulos/en/solo-ingles/</loc></url>\n</urlset>"
+            % (BASE_LOC, BASE_LOC),
+        ),
+        encoding="utf-8",
+    )
+
+
+class SoloEnIngles(unittest.TestCase):
+    """El universo del grafo es `todo directorio con fuente`, no `con fuente ES`:
+    un articulo solo en ingles tambien puede quedar huerfano."""
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.root = construir(Path(self._tmp.name) / "sitio")
+        cablear_solo_en(self.root)
+
+    def correr(self) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            [sys.executable, str(self.root / "tools" / "canario.py"), "--root", str(self.root)],
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+
+    def test_un_articulo_solo_en_ingles_bien_cableado_no_enciende_nada(self) -> None:
+        proc = self.correr()
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertIn("solo en ingles", proc.stdout)
+
+    def test_un_articulo_solo_en_ingles_fuera_del_sitemap_enciende_grafo(self) -> None:
+        sitemap = self.root / "sitemap.xml"
+        sitemap.write_text(
+            sitemap.read_text(encoding="utf-8").replace(
+                "<url><loc>%sportafolio/articulos/en/solo-ingles/</loc></url>\n" % BASE_LOC, ""
+            ),
+            encoding="utf-8",
+        )
+        proc = self.correr()
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.assertIn("grafo", proc.stdout)
+        self.assertIn("sitemap.xml no declara", proc.stdout)
+        self.assertIn("solo-ingles", proc.stdout)
