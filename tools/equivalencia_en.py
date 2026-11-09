@@ -8,6 +8,10 @@ saber ingles, que es justo lo que una traduccion puede romper en silencio:
   3. los bloques de codigo, identicos ignorando comentarios
   4. la forma: encabezados por nivel, vinetas, negritas y vallas
 
+Tambien expone el detector de idioma (`densidad_es`, `parece_espanol`) que usa
+el publicador para negarse a enviar un cuerpo en espanol. Vive aqui y no en el
+test que lo usa porque es una sola definicion para una sola pregunta.
+
 Uso:
     python3 tools/equivalencia_en.py ES.md EN.md      # RC 0 equivalente, RC 1 no
     python3 tools/equivalencia_en.py --self-test      # RC 0 si el falsador muerde
@@ -20,6 +24,31 @@ from pathlib import Path
 NUM = re.compile(r"\d+(?:[.,\s]\d+)*\s*%?")
 MILES = re.compile(r"[.,](?=\d{3}$)")
 URL = re.compile(r"https?://[^\s\)\]\">]+")
+
+# Palabras y marcas que el ingles no usa. Sirve para dos preguntas distintas:
+# cuanto espanol conserva un gemelo (relativo a su ES) y si un cuerpo suelto
+# esta en espanol (absoluto, sin necesidad de un gemelo con el que comparar).
+MARCADORES_ES = re.compile(
+    r"[ñáéíóú¿¡]|\b(?:que|para|del|los|las|con|una|por|como|esto|esta|más|pero|sin"
+    r"|entre|desde|cuando|porque|todo|todos|hay|es|son|fue|sin)\b",
+    re.IGNORECASE,
+)
+UMBRAL_EN = 0.2  # el gemelo conserva como maximo el 20 % de la densidad del ES
+# Medido el 9-Nov-2026 sobre los cuatro pares de portafolio/articulos: los
+# cuerpos EN dan 0.13, 0.22, 0.33 y 1.15 marcas por 1000 caracteres; los ES,
+# 19.61, 30.22, 32.37 y 33.27. El umbral queda a 4x del EN mas alto y a 4x del
+# ES mas bajo, asi que no es una constante elegida: es el hueco medido.
+UMBRAL_ES_ABSOLUTO = 5.0
+
+
+def densidad_es(texto):
+    """Marcas espanolas por 1000 caracteres. Independiente de la longitud."""
+    return len(MARCADORES_ES.findall(texto)) / max(len(texto), 1) * 1000
+
+
+def parece_espanol(texto):
+    """Un cuerpo suelto, sin gemelo con el que comparar."""
+    return densidad_es(texto) > UMBRAL_ES_ABSOLUTO
 
 
 def numeros(texto):
