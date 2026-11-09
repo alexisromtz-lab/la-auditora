@@ -18,13 +18,14 @@ resultado pertenece al commit que lo produjo, no a la rama móvil.
 La [muestra de diagnóstico FinOps](./portafolio/DIAGNOSTICO_FINOPS_EJECUTIVO.pdf) usa datos sintéticos. Sus cifras y su veredicto ilustran el formato: no corresponden a una cuenta real, no prueban ahorros y no validan el precio ni el coste operativo del servicio.
 <!-- HUELLA-LA-AUDITORA-FINOPS-LEADMAGNET-README-20261031 -->
 
-## Las cuatro superficies, y cuál manda
+## Las cinco superficies, y cuál manda
 
 | superficie | qué contiene | relación |
 |---|---|---|
 | `README.md` (este archivo) | índice completo, cohortes, comandos, licencia, contacto | **manda** |
-| `index.html` · `en/index.html` | seis resúmenes bilingües con commit-pin y un enlace al Data Room | resume este archivo |
+| `index.html` · `en/index.html` | seis resúmenes en prosa con commit-pin, los informes reproducibles 001 y 002, y un enlace al Data Room | resume este archivo |
 | Data Room (`platino-data-room`) | 23 snapshots JSON de imports: 10 con capa SCC canónica (`graph-input/1+scc/2`) y 13 adicionales sin capa SCC | es la evidencia pública; aquí solo se indexa |
+| depósito en Zenodo | el corpus versionado, con DOI de concepto | **citable**, y su lectura se mide del lado del servidor — ver [El corpus citable](#el-corpus-citable) |
 | metadatos del repo y del perfil | descripción, topics, `homepageUrl`, licencia, «Start here» | pendiente, ver [En progreso](#en-progreso) |
 
 ## Índice de auditorías publicadas con datos
@@ -204,6 +205,31 @@ que exige el archivo auditado fuera de este repositorio: desde un clon limpio de
 sin acceso a `platino-labs`. 001 es más fuerte como evidencia —ejecuta el objeto—; 002 lo es como
 reproducción. La compuerta de admisión de la tríada, en [CONTRIBUTING.md](./CONTRIBUTING.md), pide
 las dos cosas a partir del informe 003.
+
+### El corpus citable
+
+El framework de verificación del que salen estos informes se deposita versionado en Zenodo desde el
+2026-10-20. Este apartado **apunta lo que existe, declara lo que falta y nombra el instrumento**; no
+transcribe el depósito.
+
+| objeto | identificador | qué es |
+|---|---|---|
+| corpus · concepto | [`10.5281/zenodo.23459449`](https://doi.org/10.5281/zenodo.23459449) | el DOI que sobrevive a las versiones |
+| corpus · versión | [`10.5281/zenodo.23506724`](https://doi.org/10.5281/zenodo.23506724) | v0.1.2, 2026-10-20, Apache-2.0 |
+| estos informes | **sin depósito** | el hueco que este apartado declara |
+
+**La lectura se mide donde el contador es del servidor.** `GET https://zenodo.org/api/records/23506724`
+devuelve el campo `stats` sin credencial alguna. Medido el 2026-11-09T00:50Z, en el concepto: **48
+vistas / 19 únicas** y **3 descargas únicas**; la versión v0.1.2 aporta **8 / 7** y **1**. Ese mismo día,
+el contador propio de GitHub para este repositorio dio **13 vistas / 9 únicas** y **un solo referente,
+`github.com`** — es decir, cero referentes externos.
+
+**Lo que no se mide, y por qué.** `traffic/referrers` y `traffic/paths` responden 404: los endpoints
+públicos son `traffic/popular/referrers` y `traffic/popular/paths`. Y ninguno de los dos mira las
+páginas de GitHub Pages, solo rutas del repositorio. Por tanto **las vistas de los informes son
+`NO_MEDIDO`**: no hay instrumento, no hay un cero. Un depósito por informe convertiría cada página en
+un objeto con contador de servidor; la preparación de ese depósito —`CITATION.cff` y `.zenodo.json`—
+está en la raíz del repositorio, y la publicación la hace el dueño.
 
 ## En progreso
 

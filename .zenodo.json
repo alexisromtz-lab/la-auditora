@@ -1,0 +1,37 @@
+{
+  "title": "la-auditora: informes de auditoría reproducibles",
+  "description": "<p>Informes de auditoría técnica sobre proyectos de código abierto, publicados como <strong>artefacto ejecutable</strong>: cada informe trae un <code>reproduce.py</code> que vuelve a obtener el veredicto, un <code>ficha.json</code> legible por máquina y un <code>index.html</code> que lo narra.</p><p>El contrato de cada comando es explícito: RC 0 significa que las afirmaciones reproducen, RC 1 que alguna diverge, RC 2 que no se pudo medir. Ningún resultado se publica sin su control negativo ni sin declarar los límites de la medición; los resultados nulos se publican como resultados.</p><p>Código bajo licencia MIT; datos y texto de auditoría bajo CC BY 4.0.</p>",
+  "creators": [
+    {
+      "name": "Román Martínez, Jose Alexis",
+      "affiliation": "Platino Labs"
+    }
+  ],
+  "license": "cc-by-4.0",
+  "upload_type": "publication",
+  "publication_type": "report",
+  "access_right": "open",
+  "language": "spa",
+  "keywords": [
+    "reproducibility",
+    "software audit",
+    "static analysis",
+    "reachability",
+    "continuous integration"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "10.5281/zenodo.23459449",
+      "relation": "isPartOf",
+      "scheme": "doi",
+      "resource_type": "publication-other"
+    },
+    {
+      "identifier": "https://github.com/alexisromtz-lab/la-auditora",
+      "relation": "isSupplementTo",
+      "scheme": "url",
+      "resource_type": "software"
+    }
+  ],
+  "notes": "El código del sitio y de los scripts se distribuye bajo MIT (LICENSE); los datos y el texto de auditoría bajo CC BY 4.0 (LICENSE-DATA)."
+}
