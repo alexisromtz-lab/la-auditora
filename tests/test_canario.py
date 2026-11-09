@@ -20,6 +20,7 @@ RAIZ = Path(__file__).resolve().parent.parent
 CANARIO = RAIZ / "tools" / "canario.py"
 SITE_BASE = "https://alexisromtz-lab.github.io/la-auditora/"
 INFORME = "portafolio/auditoria-001-sujeto"
+BASE_LOC = "https://alexisromtz-lab.github.io/la-auditora/"
 
 SITEMAP = """<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -91,6 +92,45 @@ def ficha_actualizada(root: Path, **cambios) -> None:
     ficha = json.loads(ruta.read_text(encoding="utf-8"))
     ficha.update(cambios)
     ruta.write_text(json.dumps(ficha), encoding="utf-8")
+
+
+ARTICULO = "portafolio/articulos/un-articulo"
+
+
+def cablear_articulo(root: Path) -> None:
+    """Articulo sano: fuente, pagina y su indice -- las tres piezas del grafo."""
+    pieza = root / ARTICULO
+    pieza.mkdir(parents=True)
+    (pieza / "articulo.md").write_text(
+        "---\ntitle: Un articulo\nlede: Fixture.\ndate: 2026-11-06\n---\n\nTexto.\n",
+        encoding="utf-8",
+    )
+    (pieza / "index.html").write_text('<a href="../../../">Volver</a>\n', encoding="utf-8")
+    (root / "portafolio" / "articulos" / "index.html").write_text(
+        '<a href="un-articulo/">Un articulo</a>\n', encoding="utf-8"
+    )
+    locs = [
+        BASE_LOC,
+        BASE_LOC + "en/",
+        BASE_LOC + INFORME + "/",
+        BASE_LOC + "portafolio/articulos/",
+        BASE_LOC + ARTICULO + "/",
+    ]
+    (root / "sitemap.xml").write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "".join("  <url><loc>%s</loc></url>\n" % u for u in locs)
+        + "</urlset>\n",
+        encoding="utf-8",
+    )
+    for portada in ("index.html", "en/index.html"):
+        ruta = root / portada
+        ruta.write_text(
+            ruta.read_text(encoding="utf-8")
+            + '<a href="%sportafolio/articulos/">Articulos</a>\n'
+            % ("" if portada == "index.html" else "../"),
+            encoding="utf-8",
+        )
 
 
 class CanarioFalsable(unittest.TestCase):
@@ -203,6 +243,45 @@ class CanarioFalsable(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stdout)
         self.assertIn("NO_MEDIDO", proc.stdout)
         self.assertIn("CANARIO OK", proc.stdout)
+
+    def test_articulo_sano_cableado_es_verde(self) -> None:
+        cablear_articulo(self.root)
+        proc = self.correr()
+        self.assertEqual(proc.returncode, 0, proc.stdout)
+        self.assertIn("1 articulos", proc.stdout)
+
+    def test_articulo_fuera_del_sitemap_enciende_grafo(self) -> None:
+        cablear_articulo(self.root)
+        sitemap = self.root / "sitemap.xml"
+        sitemap.write_text(
+            sitemap.read_text(encoding="utf-8").replace(BASE_LOC + ARTICULO + "/", ""),
+            encoding="utf-8",
+        )
+        proc = self.correr()
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.exigir_rojo("grafo", proc.stdout)
+        self.assertIn("sitemap.xml no declara " + BASE_LOC + ARTICULO, proc.stdout)
+
+    def test_articulo_sin_enlace_desde_el_indice_enciende_grafo(self) -> None:
+        cablear_articulo(self.root)
+        (self.root / "portafolio" / "articulos" / "index.html").write_text(
+            "<p>Ningun enlace.</p>\n", encoding="utf-8"
+        )
+        proc = self.correr()
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.exigir_rojo("grafo", proc.stdout)
+        self.assertIn("no enlaza " + ARTICULO, proc.stdout)
+
+    def test_indice_de_articulos_sin_enlace_desde_portada_enciende_grafo(self) -> None:
+        cablear_articulo(self.root)
+        (self.root / "index.html").write_text(
+            '<a href="%s/">Informe 001</a>\n' % INFORME, encoding="utf-8"
+        )
+        proc = self.correr()
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.exigir_rojo("grafo", proc.stdout)
+        self.assertIn("no enlaza portafolio/articulos/index.html", proc.stdout)
+
 
     def test_raiz_sin_index_es_no_medido(self) -> None:
         ajeno = Path(self._tmp.name) / "ajeno"

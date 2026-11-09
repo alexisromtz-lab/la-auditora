@@ -1,0 +1,425 @@
+<!doctype html>
+<!-- HUELLA-PAGINA-ARTICULO-caza-mayor-50-repos-tasa-2-por-ciento-20261108 -->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Barrí 50 repositorios: dos defectos reales y una tasa del 2 % | La Auditora</title>
+  <meta name="description" content="Medí 765 archivos de workflow en 50 repos con más de 5 000 estrellas: 262 pasos invocan un runner de tests y 11 no pueden hacer fallar el workflow. La tasa de defectos defendibles es del 2 %, y el de mayor severidad está en el repositorio más muerto.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/caza-mayor-50-repos-tasa-2-por-ciento/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Barrí 50 repositorios: dos defectos reales y una tasa del 2 %">
+  <meta property="og:description" content="Medí 765 archivos de workflow en 50 repos con más de 5 000 estrellas: 262 pasos invocan un runner de tests y 11 no pueden hacer fallar el workflow. La tasa de defectos defendibles es del 2 %, y el de mayor severidad está en el repositorio más muerto.">
+  <meta property="og:url" content="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/caza-mayor-50-repos-tasa-2-por-ciento/">
+  <meta property="article:published_time" content="2026-11-06">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../articulo.css">
+</head>
+<body>
+<a class="skip" href="#contenido">Saltar al contenido</a>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../../">La Auditora</a>
+    <nav>
+      <a href="../">Articulos</a>
+      <a href="../../">Auditorias</a>
+      <a href="../../en/">English</a>
+      <a href="articulo.md">Fuente .md</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <p class="eyebrow">Articulo · 2026-11-06</p>
+    <h1>Barrí 50 repositorios: dos defectos reales y una tasa del 2 %</h1>
+    <p class="lede">Medí 765 archivos de workflow en 50 repos con más de 5 000 estrellas: 262 pasos invocan un runner de tests y 11 no pueden hacer fallar el workflow. La tasa de defectos defendibles es del 2 %, y el de mayor severidad está en el repositorio más muerto.</p>
+    <div class="proof"><span>devops</span><span>ci</span><span>github-actions</span><span>opensource</span></div>
+
+<h2>0 · Veredicto en una línea</h2>
+
+<p>De <strong>50</strong> repositorios de empresa con CI (≥ 5 000 ★, IA/DevTools/Fintech), <strong>1</strong> tiene hoy un defecto de señal de CI que yo firmaría con mi nombre en su repo; los otros dos blancos tienen defecto real pero condición distinta, y aquí se dice cuál es cuál en vez de vender los tres igual.</p>
+
+<h2>1 · La medición — el denominador, antes de la conclusión</h2>
+
+<table>
+<thead>
+<tr>
+<th>qué se midió</th>
+<th>magnitud</th>
+<th>cómo se obtuvo</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>cohorte</td><td><strong>50</strong> repos</td><td>273 candidatos de 12 búsquedas <code>gh search repos</code> → filtro de listas <code>awesome</code>/cursos/clones y &gt; 900 MB</td></tr>
+<tr><td>archivos de workflow leídos</td><td><strong>765</strong></td><td>descarga de <code>.github/workflows/*</code> por API, parseo con PyYAML</td></tr>
+<tr><td>pasos que invocan un runner de tests</td><td><strong>262</strong></td><td>regex de runners (<code>pytest</code>, <code>ctest</code>, <code>go test</code>, <code>npm test</code>, <code>tox</code>, <code>make test</code>, <code>dotnet test</code>, <code>bazel test</code>, …)</td></tr>
+<tr><td>pasos cuya caída <strong>no puede propagarse</strong> al resultado del workflow</td><td><strong>11 · 4,2 %</strong></td><td><code>continue-on-error</code> (paso o job) o `\</td><td>\</td><td>true<code> / </code>\</td><td>\</td><td>exit 0<code>, **sin** postcondición local **y** sin consumidor </code>needs:`</td></tr>
+<tr><td>repos distintos con al menos uno</td><td><strong>5 · 10 %</strong></td><td><code>livekit/agents</code>, <code>ggml-org/llama.cpp</code>, <code>PrefectHQ/prefect</code>, <code>raga-ai-hub/RagaAI-Catalyst</code>, <code>Arize-ai/phoenix</code></td></tr>
+<tr><td>de esos 5, con declaración explícita de intención</td><td><strong>3</strong></td><td>Prefect se llama <code>(advisory)</code> y lo comenta (<code>api-compatibility-tests.yaml:19-21</code>); llama.cpp deja el gate real en <code>e2e-tests</code>; Arize es un workflow de bot (<code>claude-daily-deps-upgrade.yml</code>)</td></tr>
+<tr><td>de los 2 restantes, repo <strong>vivo</strong></td><td><strong>1</strong></td><td><code>livekit/agents</code> publica commits hoy (<code>2026-11-06</code>); <code>RagaAI-Catalyst</code> no tiene commit desde <code>2025-05-16</code></td></tr>
+</tbody>
+</table>
+
+<p><strong>⇒ Tasa de blancos defendibles: 1/50 = 2 %.</strong> Para tres blancos vivos haría falta barrer ~150 repos.</p>
+
+<h3>1.1 · Auto-auditoría del instrumento (tres correcciones medidas en este turno)</h3>
+
+<ol>
+<li><strong>El primer clasificador era ciego a los gates por <code>needs:</code>.</strong> La v1 sólo miraba pasos posteriores <em>dentro del mismo job</em>. La v2 añadió consumidores <code>needs:</code> y guardas <code>needs.X.result</code> → mismo resultado (10 vs 10). El número sobrevivió, pero el argumento no estaba probado hasta que se probó.</li>
+<li><strong>La regex de runners era corta.</strong> No veía <code>make test</code>, <code>dotnet test</code>, <code>bazel test</code>, <code>phpunit</code>, <code>rspec</code>. Ampliada: 262 pasos, <strong>+1 repo</strong> (<code>Arize-ai/phoenix</code>, workflow de bot). La tasa se movió de 4/50 a 5/50 y la de blancos defendibles <strong>no</strong> se movió.</li>
+<li><strong>El ranking de «dolor de CI» del rastreo estaba contaminado y se descarta.</strong> Contaba corridas de ramas de fork y <code>action_required</code> (workflow que nunca llegó a ejecutarse) como fallos. Medido en <code>openai/evals</code>: <strong>11 de 15</strong> corridas recientes son <code>action_required</code> — de ahí el <code>0.99</code> de la primera pasada. Un repo con CI sana puede producir esa cifra. <strong>El ranking se retira</strong>; no se usa en ninguna decisión de este documento.</li>
+</ol>
+
+<h2>2 · Los tres blancos</h2>
+
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>repo</th>
+<th>★</th>
+<th>pin medido</th>
+<th>defecto</th>
+<th>locus</th>
+<th>severidad</th>
+<th>repo vivo</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>1</td><td><code>livekit/agents</code></td><td>15 107</td><td><code>055744e1505b</code></td><td>la suite STT no puede fallar (doble capa)</td><td><code>test-stt.yml:201</code></td><td><strong>MEDIA</strong></td><td><strong>sí</strong> (commit hoy)</td></tr>
+<tr><td>2</td><td><code>raga-ai-hub/RagaAI-Catalyst</code></td><td>16 185</td><td><code>ab6789331089</code></td><td>el pipeline entero es asesorativo + salida muerta</td><td><code>ci.yml:12,41,93</code></td><td><strong>ALTA</strong></td><td><strong>no</strong> (último commit 2025-05-16)</td></tr>
+<tr><td>3</td><td><code>ggml-org/llama.cpp</code></td><td>133 519</td><td><code>4b77dee0524c</code></td><td>unit/client tests asesorativos mientras E2E sí gatea</td><td><code>ui.yml:55</code> · <code>build-sanitize.yml:40</code></td><td>BAJA</td><td>sí (commit hoy)</td></tr>
+</tbody>
+</table>
+
+<p><strong>El blanco de mayor severidad está en el repo más muerto.</strong> n=2 no permite afirmar correlación: se publica como observación, no como ley.</p>
+
+<h2>3 · Blanco 1 — <code>livekit/agents</code> (el único que firmo)</h2>
+
+<h3>El defecto, verbatim en <code>test-stt.yml@055744e1505b:201</code></h3>
+
+<pre><code class="language-yaml">- name: Run STT tests
+  run: |
+    uv run pytest -n 3 -v --stt --tb=long --junitxml=test-results.xml 2&gt;&amp;1 | tee test-output.txt || true</code></pre>
+
+<p>Dos capas independientes borran el resultado:</p>
+
+<ol>
+<li><code>|| true</code> convierte cualquier salida distinta de cero en 0.</li>
+<li>Aunque se quite <code>|| true</code>, la tubería termina en <code>tee</code>, y en el bash por defecto (sin <code>pipefail</code>) el estado del paso es el de <code>tee</code>, que es 0 siempre que pueda escribir el archivo. <strong>Borrar <code>|| true</code> a secas no restaura la guarda</strong> — esto es lo que separa una lectura superficial de una medición.</li>
+</ol>
+
+<h3>Por qué probablemente no es lo que se quiso</h3>
+
+<p>Los pasos posteriores ya están escritos para correr pase lo que pase (<code>Generate test summary</code> y <code>Post results to PR</code> llevan <code>if: always()</code>), y <code>pytest --junitxml</code> escribe el XML también al fallar. El <code>|| true</code> <strong>no es necesario para que exista el reporte</strong>: <code>always()</code> ya lo compraba. Lo único que compra es que una suite STT roja sea indistinguible de una verde en la lista de checks.</p>
+
+<h3>El contraste que hace creíble el reporte</h3>
+
+<p>El mismo repositorio ya implementa el patrón correcto en <code>ci.yml:34-43</code>: <code>continue-on-error: true</code> sobre <code>ruff</code> <strong>más</strong> un paso <code>Report ruff errors</code> con <code>if: steps.ruff-check.outcome == 'failure' || …</code> que hace <code>exit 1</code>. Es decir: la casa sabe cerrar una guarda. <code>test-stt.yml</code> es una inconsistencia, no una filosofía.</p>
+
+<h3>Texto del Issue — listo para pegar</h3>
+
+<blockquote><p><strong>Título:</strong> <code>ci: Test STT reports green on a failing suite —</code> || true<code>plus a</code>tee<code> pipeline erase the exit code</code>  <strong>Body:</strong>  ## What  <code>.github/workflows/test-stt.yml:201</code> cannot fail:  ``<code>yaml - name: Run STT tests   run: |     uv run pytest -n 3 -v --stt --tb=long --junitxml=test-results.xml 2&gt;&amp;1 | tee test-output.txt || true </code>`<code>  Two independent layers erase the result:  1. </code>|| true<code> turns any non-zero exit into 0. 2. Even without </code>|| true<code>, the pipeline ends in </code>tee<code>; with the default bash (no </code>pipefail<code>) the step's    status is </code>tee<code>'s, which is 0 as long as it can write the file. So deleting </code>|| true<code> alone does    **not** restore the gate.  Measured at </code>livekit/agents@055744e1505b1489976d06ca029b3001bc91ea55<code>.  ## Why it is probably not what you meant  The steps after it already run regardless of the test outcome (</code>Generate test summary<code> and </code>Post results to PR<code> both carry </code>if: always()<code>), and </code>pytest --junitxml<code> writes the XML on failure too. The </code>|| true<code> is not needed for the report to exist — </code>always()<code> already buys that. What it buys is that a red STT suite looks exactly like a green one in the checks list.  ## Why it matters  </code>Test STT<code> triggers on </code>pull_request<code> for changes to </code>tests/test_stt.py<code> and to its own workflow — the PRs most likely to break STT. The PR comment lists per-provider results, but nothing in the merge UI does. If this workflow is advisory by design, its name and a comment should say so; if it is a gate, it does not gate.  ## Reproduction  </code>`<code>bash git clone --depth 1 https://github.com/livekit/agents &amp;&amp; cd agents git fetch --depth 1 origin 055744e1505b1489976d06ca029b3001bc91ea55 git checkout 055744e1505b1489976d06ca029b3001bc91ea55 sed -n '201p' .github/workflows/test-stt.yml  bash -c 'false | tee out.txt || true';            echo "exit=$?"   # 0  &lt;- || true bash -c 'false | tee out.txt';                    echo "exit=$?"   # 0  &lt;- tee, no pipefail bash -c 'set -o pipefail; false | tee out.txt';   echo "exit=$?"   # 1  &lt;- lo que falta </code>`<code>  ## Proposal, cheapest first  1. **Keep the report, restore the signal:** drop </code>|| true<code> and run the step with </code>set -o pipefail<code>    (job-level </code>defaults.run.shell: bash -eo pipefail {0}<code>, or </code>set -o pipefail<code> inside the </code>run<code>).    </code>tee<code> still writes the log; the step now exits with pytest's status. 2. **If providers legitimately cannot run on forks without secrets,** skip them explicitly    (</code>pytest.mark.skipif(not os.getenv("DEEPGRAM_API_KEY"), …)<code>) instead of letting the whole suite exit    non-zero. A skip is honest; </code>|| true<code> is not. 3. **If the workflow is advisory by contract,** rename it (</code>Test STT (advisory)`) and leave a one-line    comment at line 201 saying so, so the next reader does not "fix" it in the wrong direction.  Happy to send (1) as a PR if that is the direction — I did not want to change CI semantics in a repo where the reporting steps clearly have intent.</p></blockquote>
+
+<h2>4 · Blanco 2 — <code>RagaAI-Catalyst</code> (defecto grave, repo dormido)</h2>
+
+<p><code>ci.yml@ab6789331089</code>, un solo workflow para todo el repo:</p>
+
+<ul>
+<li><code>:12</code> <code>code-quality</code> con <code>continue-on-error: true</code>, y sus pasos son <code>ruff format .</code> + <code>ruff check --fix .</code>: <strong>arregla y no commitea</strong>, sobre un checkout desechable. El job no puede fallar ni dejar rastro.</li>
+<li><code>:41</code> el job <code>test</code> también con <code>continue-on-error: true</code>.</li>
+<li><code>:40</code> el único <code>needs:</code> es <code>test → code-quality</code>. <strong>Nadie necesita <code>test</code></strong> ⇒ el estado terminal del workflow es asesorativo.</li>
+<li><code>:49</code> declara <code>outputs.test_summary</code> desde <code>steps.pytest.outputs.test_summary</code>, que se produce en <code>:94</code>. <code>grep -rn test_summary .github/</code> devuelve <strong>sólo esas dos líneas</strong>: la salida se declara y no la lee nadie.</li>
+<li><code>:93</code> <code>pytest tests/ -v --junitxml=test-results/junit.xml | tee test-output.txt</code> — sin <code>pipefail</code> en ningún workflow del repo (<code>grep -rn pipefail</code> = 0). Aunque se quite el <code>coe</code>, el paso sigue verde.</li>
+</ul>
+
+<p><strong>Diagnóstico honesto del porqué:</strong> <code>tests/</code> incluye pruebas de integración que exigen ~20 secretos; en forks no pueden pasar. La respuesta correcta es separar marcadores (<code>-m "not integration"</code> para la guarda, integración asesorativa), no volver asesorativo el pipeline entero.</p>
+
+<p><strong>Y la condición del repo:</strong> último commit <code>2025-05-16</code>. Un issue aquí <strong>no produce conversación</strong>; produce un artefacto de auditoría. Se entrega como tal, sin contarlo como pitch.</p>
+
+<h2>5 · Blanco 3 — <code>llama.cpp</code> (defecto leve en repo vivo)</h2>
+
+<p><code>ui.yml:55</code> marca asesorativo el job <code>ui-checks</code> completo, que incluye <code>Run Client tests</code> y <code>Run Unit tests</code> (<code>ui.yml:100</code>, <code>:105</code>); <code>build-sanitize.yml:40</code> hace lo mismo con <code>ctest</code>. Pero <code>e2e-tests</code> en el mismo archivo <strong>no</strong> lleva <code>continue-on-error</code>: hay un gate real para E2E, no para unit/cliente ni para sanitizers.</p>
+
+<p>Se publica como <strong>pregunta de diseño</strong> («¿es intencional que unit/cliente sean asesorativos mientras E2E gatea?»), no como acusación. En un repo de 133 519 ★ y 2 584 issues abiertos, un issue de severidad baja compite contra ruido.</p>
+
+<h2>6 · Controles negativos — lo que NO es defecto</h2>
+
+<table>
+<thead>
+<tr>
+<th>repo</th>
+<th>locus</th>
+<th>por qué no es defecto</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>PrefectHQ/prefect</code></td><td><code>api-compatibility-tests.yaml:19-21</code></td><td>el job se llama <code>Cloud API compatibility (advisory)</code> y lleva el comentario «Keep compatibility and harness failures advisory for contributors»</td></tr>
+<tr><td><code>LMCache/LMCache</code></td><td><code>cpu_device.yml:366</code></td><td>el archivo <strong>declara</strong> que no hay <code>continue-on-error</code>; todos los `\</td><td>\</td><td>true<code> son limpieza de docker/</code>df`</td></tr>
+<tr><td><code>Arize-ai/phoenix</code></td><td><code>claude-daily-deps-upgrade.yml</code></td><td>workflow de bot sobre PRs propias</td></tr>
+<tr><td><code>vibrantlabsai/ragas</code></td><td><code>ci.yaml:126,129</code></td><td>sólo corre <code>tests/unit</code>; <code>tests/e2e</code> son <strong>32 rutas</strong> en <code>HEAD</code> y ningún workflow las invoca (<code>grep -rn e2e</code> sobre sus 8 workflows = 0) — <strong>hueco de cobertura, no fail-open</strong>, y el repo no tiene commit desde <code>2026-02-24</code>, así que no se propone</td></tr>
+</tbody>
+</table>
+
+<h2>7 · El hallazgo caro: el canal no está vacío, está ocupado</h2>
+
+<p><code>livekit/agents#8231</code> (2026-10-29, «unit tests pin Python 3.12 while the package advertises 3.14 support») es un issue de fuera, con loci y propuesta — exactamente el formato de este documento. Cronología medida:</p>
+
+<table>
+<thead>
+<tr>
+<th>cuándo</th>
+<th>qué</th>
+<th>firma</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>2026-10-29</td><td>se abre <code>#8231</code></td><td><code>kcncb</code>, <code>author_association: NONE</code></td></tr>
+<tr><td>2026-10-29 13:17</td><td>alguien lo toma y declara «Slai Agent Runtime assisted»</td><td><code>huong8373tt-beep</code>, <code>NONE</code></td></tr>
+<tr><td>2026-10-30 02:19</td><td>el autor original contesta (13 h) — <strong>de fuera a fuera</strong></td><td><code>kcncb</code></td></tr>
+<tr><td>2026-10-30 03:10</td><td>se abre <code>#8252</code></td><td><code>huong8373tt-beep</code></td></tr>
+<tr><td>2026-11-05 22:45</td><td><code>#8252</code> <strong>cerrado sin merge, por su propio autor</strong></td><td><code>huong8373tt-beep</code></td></tr>
+</tbody>
+</table>
+
+<p>Revisión registrada en <code>#8252</code>: <code>devin-ai-integration[bot]</code> y <code>kcncb</code>. <strong>Cero revisión de mantenedor.</strong></p>
+
+<p>⇒ El canal de «audito tu CI y te lo cuento» <strong>tiene conversación y no tiene conversión</strong>, y el que contesta suele ser otro agente de fuera. n=1: se publica como observación con su falsador — si en 5 issues propios en repos vivos no aparece <strong>una</strong> respuesta de mantenedor, la observación se sostiene.</p>
+
+<h2>8 · La estrategia corregida</h2>
+
+<p><strong>«El Francotirador»</strong> (buscar el defecto oculto en 50 repos y disparar) midió <strong>2 %</strong> de blancos vivos. Su costo real no es el escaneo: es que 49 de cada 50 intentos no producen nada y el disparo se gasta en un repo muerto o en un defecto que el dueño declaró a propósito.</p>
+
+<p><strong>«El Interlocutor»</strong> invierte la carga: no se busca el defecto, se entra donde <strong>el dolor ya está escrito</strong> y se lleva la medición que el autor no tiene. El dolor lo declara el cliente; el instrumento es lo único que se aporta. Aplica al mismo canal, con la misma firma pública y un costo por intento mucho menor.</p>
+
+<p>Regla de entrada, una: <strong>no se comenta sin una medición que el autor del issue no tenga ya</strong>. Si el comentario se puede escribir sin correr nada, no se escribe.</p>
+
+<p>Cola concreta medida (issues abiertos, sin respuesta, sobre CI/tests):</p>
+
+<table>
+<thead>
+<tr>
+<th>repo</th>
+<th>issue</th>
+<th>estado</th>
+<th>qué se aportaría</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>vibrantlabsai/ragas</code></td><td>#2989 «CI: check-docs fails on every fork PR — pull_request_target»: <code>claude-docs-check.yml</code> cae a los ~6 s <strong>en el paso de checkout</strong>, antes de analizar nada</td><td>abierto, <strong>0 comentarios</strong></td><td>confirmar el bloqueo contra <code>actions/checkout</code> y entregar el diff mínimo con permisos recortados</td></tr>
+<tr><td><code>ggml-org/llama.cpp</code></td><td>#30281 <code>test-backend-ops</code> debería salir 1 cuando falta backend</td><td>abierto, 0 comentarios</td><td>confirmar con una corrida y proponer el <code>exit</code></td></tr>
+<tr><td><code>PrefectHQ/prefect</code></td><td>#16404 / #16310 / #15558 flaky tests</td><td>abiertos desde 2024</td><td>medir la tasa de flake por test antes de opinar</td></tr>
+</tbody>
+</table>
+
+<p><strong>Nota:</strong> <code>ragas#2989</code> describe corridas de septiembre de 2026 sobre un repo cuyo último commit es <code>2026-02-24</code>. Antes de comentar hay que comprobar que el workflow sigue existiendo en ese pin; si no, el issue es de otro objeto y comentarlo quema la firma.</p>
+
+<h2>9 · DMs</h2>
+
+<p><strong>LiveKit — David Zhao.</strong> Verificado: <code>davidzhao</code> · name «David Zhao» · company <code>@livekit</code> · X <code>davidzh</code>. No se usa ningún otro handle: <code>russdsa</code> devuelve <strong>404</strong> y no se inventa.</p>
+
+<blockquote><p>Hi David — I spent a day auditing CI signal across 50 company repos in the voice-AI / infra space, and one finding landed in <code>livekit/agents</code>. <code>.github/workflows/test-stt.yml:201</code> can't fail: <code>|| true</code> plus a <code>tee</code> pipeline (no <code>pipefail</code>) erase pytest's exit code, so a red STT suite and a green one look identical in the checks list. Your ruff steps at <code>ci.yml:34-43</code> already do the opposite — they gate via a <code>steps.*.outcome</code> postcondition — which is why it reads as an inconsistency rather than a philosophy. Three-line fix, happy to send it as an issue or a PR, whichever you prefer. I run Platino Labs: we audit CI for fail-open guards like this one. No pitch attached — the finding is yours either way.</p></blockquote>
+
+<p><strong>RagaAI — <code>NO_MEDIDO</code>.</strong> No hay handle de fundador verificado; no se fabrica un nombre. El hallazgo del §4 se entrega como artefacto, no como DM.</p>
+
+<h2>10 · Punteros</h2>
+
+<table>
+<thead>
+<tr>
+<th>pieza</th>
+<th>qué es</th>
+<th>ruta</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>instrumento de censo</td><td>censo de guardas fail-open sobre cohorte pinneada</td><td>`<code>tools/correr_censo.py</code>`</td></tr>
+<tr><td>sonda de nivel 6</td><td>el motor de auditoría del corpus</td><td>`<code>tools/sonda_nivel_6.py</code>`</td></tr>
+<tr><td>gate de pre-escritura</td><td>A2.1</td><td>`<code>tools/gate_pre_escritura.sh</code>`</td></tr>
+<tr><td>receta de artículo</td><td>cómo un hallazgo pasa a nota pública</td><td><code>ARTICULO_DEVTO_AUDITORIA_LITELLM_46923_PUBLICO.md</code></td></tr>
+<tr><td>red de publicación</td><td>cómo una nota pasa a encolada</td><td><code>PUBLICAR_EN_RED.md</code></td></tr>
+<tr><td>canal medido</td><td><code>Canal público</code> sin alcance · <code>Canal empresa</code> con <code>Sent</code> = 0</td><td><code>_PLAN.md</code> §2 · `<code>_REGISTRO.md</code>` fila 25</td></tr>
+</tbody>
+</table>
+
+<p><strong>Nota de duplicación:</strong> otro carril del árbol tiene en vuelo <code>tools/auditar_fail_open_universal.py</code> (34 896 B, 2026-11-06T00:49) y <code>tools/auditar_soft_fail_buildkite.py</code>. El clasificador usado aquí fue ad-hoc en <code>/tmp/caza/</code> <strong>antes</strong> de encontrar <code>tools/correr_censo.py</code> en `<code>INVENTARIO_INSTRUMENTOS.md</code><code>. Los números de este documento se reconcilian contra </code>correr_censo.py --planificar<code> (pines de 29/50 repos, estado </code>PARCIAL<code> por HTTP 403); los demás pines se tomaron con </code>gh api repos/{n}/commits?per_page=1`.</p>
+
+<h2>11 · Los disparos, ejecutados (2026-11-06)</h2>
+
+<p>Los dos actos públicos de este documento salieron. No hay un tercero: <code>llama.cpp</code> y <code>RagaAI-Catalyst</code> quedaron como artefacto interno y no se publican (§6 y §9 dicen por qué).</p>
+
+<h3>11.1 · <code>vibrantlabsai/ragas#2989</code> — comentario técnico publicado</h3>
+
+<p>&lt;https://github.com/vibrantlabsai/ragas/issues/2989#issuecomment-6679331106&gt;</p>
+
+<p>El issue seguía <strong>abierto, 0 comentarios, sin editar desde <code>2026-09-02T15:16:45Z</code></strong>: el comentario es el primero. Se verificó que el workflow existe en el pin citado antes de escribir (§8 lo exigía).</p>
+
+<p><strong>Lo que el autor no tenía —medido en <code>298b68274234c060deacab3cf5fb52aa3a20e885</code>— y se le entregó:</strong></p>
+
+<table>
+<thead>
+<tr>
+<th>medición</th>
+<th>valor</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>workflows que declaran <code>pull_request_target</code></td><td><strong>3 de 8</strong>, y <strong>2</strong> hacen checkout del código del fork: el issue nombra <strong>1</strong></td></tr>
+<tr><td>el segundo, <code>claude-docs-apply.yml:21-22</code></td><td>el más expuesto: <code>permissions: contents: write</code> (<code>:12</code>), token `CLAUDE_CODE_PAT \</td><td>\</td><td>GITHUB_TOKEN<code> (</code>:24`)</td></tr>
+<tr><td>por qué ese segundo está inalcanzable hoy</td><td>el rojo de <code>check-docs</code> mata el checkout <strong>antes</strong> del paso que pone <code>needs-doc-update</code>, y esa etiqueta es el único disparador de <code>apply-docs</code></td></tr>
+<tr><td>corridas de <code>Claude Docs Apply</code> (<code>216244931</code>) en toda su historia</td><td><strong>0</strong></td></tr>
+<tr><td><code>allow-unsafe-pr-checkout</code> en <code>actions/checkout</code></td><td>ausente en v4.1.7 · v4.2.0 · v4.2.1 · v4.2.2 · v4.3.0 · v4.3.1; <strong>primera aparición v4.4.0</strong> (<code>action.yml:101</code>)</td></tr>
+<tr><td>corridas de <code>Claude Docs Check</code> (<code>216244933</code>)</td><td><strong>391</strong>, todas de forks: 142 éxito · 223 fallo · 26 canceladas</td></tr>
+<tr><td>último éxito</td><td><code>2026-07-20T11:26:10Z</code></td></tr>
+<tr><td>racha roja vigente</td><td><strong>162 fallos consecutivos, 0 éxitos</strong> desde <code>2026-07-20T16:54:58Z</code></td></tr>
+<tr><td>publicación de <code>actions/checkout</code> v4.4.0</td><td><code>2026-07-20T15:36:10Z</code> — <strong>78 minutos antes</strong> del primer fallo de la racha</td></tr>
+<tr><td>límite de honestidad</td><td>logs anteriores a ~<code>2026-08-08</code> caducados (<code>HTTP 410</code>) ⇒ la causa del <strong>primer</strong> fallo es <code>NO_MEDIDO</code>; la de todos los legibles, la guarda de checkout</td></tr>
+</tbody>
+</table>
+
+<p>El comentario no vende, no enlaza este repo y no menciona servicios: firma con <code>@alexisromtz-lab</code> al pie y declara el pin. La lección que deja: <strong>el issue describía la mitad del patrón</strong>, y esa mitad no se veía sin correr el censo sobre el pin — no sin leer el issue.</p>
+
+<h3>11.2 · <code>livekit/agents</code> — Issue publicado</h3>
+
+<p>&lt;https://github.com/livekit/agents/issues/8417&gt;</p>
+
+<p>Título: <code>ci: Test STT cannot fail — || true and a tee pipeline erase the exit code</code>. Cuerpo íntegro de §3. Re-verificado antes de disparar: en <code>055744e1505b1489976d06ca029b3001bc91ea55</code>, <code>test-stt.yml:201</code> es</p>
+
+<pre><code>uv run pytest -n 3 -v --stt --tb=long --junitxml=test-results.xml 2&gt;&amp;1 | tee test-output.txt || true</code></pre>
+
+<p>Sin duplicado: <code>gh issue list -R livekit/agents --author @me --state all</code> devolvía <strong>0</strong> issues antes del alta. El reporte sobrevive a los bots del canal (§7) porque no compite por atención: aporta tres líneas de <code>bash</code> que el lector puede correr para ver el <code>exit=0</code> con sus propios ojos.</p>
+
+<h3>11.3 · El censo que hizo posible el §11.1</h3>
+
+<p><code>tools/correr_censo.py</code> moría en <strong>29 pines de 50</strong> porque no tenía modo autenticado: <code>token()</code> solo leía <code>GITHUB_TOKEN</code>/<code>GH_TOKEN</code>, ambas ausentes, mientras <code>gh auth status</code> estaba verde — 60 peticiones por hora sin credencial, 2 por repo = <strong>30 repos por hora</strong>, exactamente el techo donde se detuvo. Corregido en <code>6a56efa0</code> con <code>gh auth token</code> como tercera fuente, fuente publicada y ausencia tipada. Medido en el acto, misma cohorte: <strong><code>PARCIAL</code> 29/50 → <code>RESUELTA</code> 50/50</strong> con <code>autenticacion.fuente = gh:auth-token</code>. Sin ese arreglo, la tabla de §11.1 se habría quedado en la mitad de sus filas.</p>
+
+<hr>
+
+<hr>
+
+<h2>12. Lo que el mundo contestó — censo de interacciones (2026-11-06)</h2>
+
+<p>Medido con <code>gh api "search/issues?q=commenter:alexisromtz-lab"</code> (39 hilos) leyendo los comentarios de cada hilo, no contando notificaciones. Ventana del censo: hasta <code>2026-11-06T18:15Z</code>.</p>
+
+<h3>12.1 La huella, medida</h3>
+
+<table>
+<thead>
+<tr>
+<th>repos ajenos</th>
+<th>hilos donde comentamos</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>tenstorrent/tt-metal</code></td><td><strong>14</strong></td></tr>
+<tr><td><code>vllm-project/vllm-omni</code></td><td><strong>7</strong></td></tr>
+<tr><td><code>BerriAI/litellm</code></td><td>3</td></tr>
+<tr><td><code>vllm-project/vllm</code> · <code>huggingface/transformers</code> · <code>huggingface/smolagents</code> · <code>astral-sh/uv</code> · <code>duetosymmetry/qnm</code> · <code>vibrantlabsai/ragas</code></td><td>1 cada uno</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>30 hilos ajenos</strong> (39 con los 9 propios)</td></tr>
+</tbody>
+</table>
+
+<p>De esos 30, <strong>13</strong> recibieron actividad humana posterior y <strong>6</strong> recibieron una respuesta <strong>dirigida a nuestro comentario</strong>, no actividad vecina.</p>
+
+<h3>12.2 Los humanos que contestaron</h3>
+
+<table>
+<thead>
+<tr>
+<th>hilo</th>
+<th>quién</th>
+<th>qué dijo</th>
+<th>veredicto</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>livekit/agents#8417</code></td><td><code>iamdgarcia</code> (CONTRIBUTOR, 6 PRs en el repo)</td><td>verificó el hallazgo, aportó 2 datos propios y ofreció el PR</td><td><strong>conversión</strong></td></tr>
+<tr><td><code>vllm-project/vllm-omni#9086</code></td><td><code>hsliuustc0106</code></td><td><code>APPROVED</code>, 4 checks en verde</td><td><strong>aprobado, sin mergear</strong></td></tr>
+<tr><td><code>vllm-project/vllm-omni#9096</code></td><td><code>hsliuustc0106</code></td><td><code>APPROVED</code>, 4 checks en verde</td><td><strong>aprobado, sin mergear</strong></td></tr>
+<tr><td><code>vllm-project/vllm-omni#9129</code></td><td><code>Big2Wheel</code></td><td>validación en hardware real: Ascend 910B3, imagen <code>96fa…</code></td><td><strong>validación externa</strong></td></tr>
+<tr><td><code>duetosymmetry/qnm#22</code></td><td><code>duetosymmetry</code> (maintainer)</td><td>«Alexis — I'll happily review a PR that you submit fixing the bug you found»</td><td><strong>invitación</strong> → <code>qnm#45</code></td></tr>
+<tr><td><code>BerriAI/litellm#47340</code></td><td><code>Mrun25</code></td><td>«Thanks for digging into this, alexisromtz-lab. The TTL-plumbing analysis is a real adjacent gap»</td><td><strong>crédito técnico</strong></td></tr>
+<tr><td><code>vllm-project/vllm#62322</code></td><td><code>mosafariuk</code></td><td>corrigió nuestra medición con el wheel publicado</td><td><strong>corrección aceptada</strong></td></tr>
+<tr><td><code>BerriAI/litellm#46923</code></td><td><code>shaikn6</code></td><td>«<code>_has_pre_deployment_request_rewriters</code> doesn't exist anywhere»</td><td><strong>cita fantasma</strong></td></tr>
+<tr><td><code>tenstorrent/tt-metal#53639</code></td><td><code>kinginu</code> (autor del PR)</td><td>«ignore comments from @alexisromtz-lab… could you block @alexisromtz-lab from this repo»</td><td><strong>daño público</strong></td></tr>
+</tbody>
+</table>
+
+<p><strong>11 personas distintas</strong> interactuaron: 6 en comentarios y 5 en reviews o validación de hardware.</p>
+
+<h3>12.3 La tasa de interacción, contra su línea base</h3>
+
+<table>
+<thead>
+<tr>
+<th>métrica</th>
+<th>valor</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>hilos ajenos con respuesta dirigida a nosotros</td><td><strong>6 / 30 = 20 %</strong></td></tr>
+<tr><td>hilos ajenos con cualquier actividad humana posterior</td><td>13 / 30 = 43 %</td></tr>
+<tr><td>línea base de Caza Mayor (issue frío, genuino, vivo)</td><td><strong>1 / 50 = 2 %</strong></td></tr>
+<tr><td>factor</td><td><strong>≈10×</strong></td></tr>
+</tbody>
+</table>
+
+<p>La estrategia del Interlocutor se sostiene con el dato: comentar donde ya hay un humano midiendo rinde diez veces más que abrir un issue frío. Lo que el dato <strong>no</strong> sostiene es que todo comentario rinda: <strong>1 de cada 6 respuestas fue hostilidad</strong>, y <strong>2 de 9 humanos acusaron a la cuenta de citar objetos que no existen</strong>. Las dos acusaciones son del mismo defecto, y el defecto es nuestro.</p>
+
+<h3>12.4 El daño, medido y fechado</h3>
+
+<p><code>tenstorrent/tt-metal#53639</code>, comentarios de <code>kinginu</code> del <code>2026-10-20T03:15:49Z</code> (1 325 car.) y del <code>2026-10-21T02:51:12Z</code> (244 car.):</p>
+
+<blockquote><p>«Please ignore comments from @alexisromtz-lab. I dont have any connections with this bot.»  «@jberkowitzTT could you block @alexisromtz-lab from this repo, or hide their comments as off topic? I have no connection with that bot, and it keeps stepping into the review conversation.»</p></blockquote>
+
+<p><strong>Después de esa petición publicamos dos comentarios más</strong> en el mismo hilo: <code>2026-10-27T22:23:48Z</code> (6 077 car.) y <code>2026-10-27T22:51:14Z</code> (1 790 car.). Un humano pidió que nos fuéramos del hilo y respondimos con 7 867 caracteres. Eso no es un fallo de contenido: es un fallo de <strong>escucha</strong>, y es el único de esta lista que no se arregla con una medición.</p>
+
+<h3>12.5 Las dos citas fantasma</h3>
+
+<table>
+<thead>
+<tr>
+<th>hilo</th>
+<th>cita que se hizo</th>
+<th>lo que el humano midió</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>BerriAI/litellm#46923</code></td><td><code>_has_pre_deployment_request_rewriters</code>, <code>router.py:1062</code></td><td>0 ocurrencias repo-wide en <code>d7620c77a1</code>; <code>router.py:1062</code> es <code>_exact_base_model_max_input_tokens()</code></td></tr>
+<tr><td><code>duetosymmetry/qnm#22</code></td><td><code>medicion_qnm_cf_tol.py</code> en el registro Zenodo</td><td>«I can not find <code>medicion_qnm_cf_tol.py</code> at the Zenodo record you pointed to»</td></tr>
+</tbody>
+</table>
+
+<p>Las dos se retiraron — <code>litellm#46923@2026-10-20T13:55:38Z</code> retira el mecanismo, y <code>qnm#45@2026-10-21T14:59:54Z</code> registra la errata del DOI — pero <strong>se retiraron después de que un humano las encontrara</strong>, no antes de publicarlas. Es exactamente la clase que el corpus ya nombra (<code>MEDICIÓN CON BLOB</code>, <code>SIN_OBJETO</code> en <code>tools/verificar_cita_publicable.py</code>, A2.2): un objeto citado que no existe en el destino.</p>
+
+<h3>12.6 Los dos bucles que se cerraron hoy</h3>
+
+<ol>
+<li><strong><code>livekit/agents#8417@2026-11-06T18:14:59Z</code></strong> (1 881 car.) — respuesta a <code>iamdgarcia</code>. Confirma sus dos puntos contra <code>main@055744e1505b</code> (<code>pipefail</code> 0 apariciones en 271 líneas; <code>:201</code> es la única invocación de <code>pytest</code> por <code>tee</code>; los tres pasos siguientes llevan <code>if: always()</code>), corrige el arreglo mínimo — <strong>borrar <code>|| true</code> solo no hace nada</strong>, porque sin <code>pipefail</code> el estado del pipe es el de <code>tee</code>, que es <code>0</code> — y le cede el PR. Verificado por lectura de vuelta: 2 comentarios en el hilo, el segundo es nuestro.</li>
+<li><strong><code>vllm-project/vllm#62322@2026-11-06T18:15:00Z</code></strong> (1 475 car.) — <strong>retirada</strong> de la mitad 1 de nuestro comentario del <code>2026-10-19</code>. Nuestro arnés instalaba un wheel sintético <strong>por ruta de archivo</strong>; <code>mosafariuk</code> resuelve por nombre con <code>--extra-index-url</code>, que es la única rama donde <code>uv</code> rechaza un <code>Requires-Dist</code> con URL. Lo que medimos fue nuestra reconstrucción de METADATA, no el artefacto que la gente instala. El <code>triton @</code> de <code>requirements/cpu.txt:25-26</code> gated por <code>platform_machine == "x86_64"</code> explica la asimetría x86_64/aarch64 sin nada más. Verificado por lectura de vuelta: 3 comentarios, el tercero es nuestro.</li>
+</ol>
+
+<h3>12.7 Política que sale de esta jornada</h3>
+
+<ul>
+<li><strong><code>tenstorrent/tt-metal</code>: cero escrituras.</strong> Un autor de PR pidió que se bloqueara la cuenta en ese repo. La resolución no es un mensaje — cualquier mensaje nuevo es la conducta que motivó la petición. Se deja el hilo como está y no se vuelve.</li>
+<li><strong>Ningún comentario ajeno se publica con un símbolo, una ruta o un archivo que no se haya leído en el repo destino y en el commit declarado.</strong> Las dos citas fantasma se habrían detenido con la misma sonda que ya corre sobre nuestros commits (A2.2), que hoy no tiene autoridad sobre la boca.</li>
+<li><strong>Los bucles abiertos se cierran o se declaran.</strong> Queda uno declarado: <code>BerriAI/litellm#47340</code>, repro de <code>Mrun25</code> del <code>2026-10-20T04:25:18Z</code>, sin respuesta nuestra.</li>
+</ul>
+
+    <section class="cta">
+      <p><strong>Todo lo que hay aqui se puede medir otra vez.</strong></p>
+      <p>Las cifras viajan con el comando o el <code>archivo:linea</code> que las produce. Si algo no cuadra,
+      la respuesta no es un argumento: es el instrumento, en
+      <a href="../../auditoria-002-economia-contexto/">el informe reproducible</a> y en
+      <a href="https://github.com/alexisromtz-lab/la-auditora">el repositorio</a>.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>La Auditora · Platino Labs · <a href="../">mas articulos</a> · <a href="../../">auditorias</a></p>
+  </footer>
+</div>
+</body>
+</html>
+

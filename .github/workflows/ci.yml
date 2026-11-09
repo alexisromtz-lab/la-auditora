@@ -19,6 +19,12 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_monitor_auditora.py' -v
       - name: Test site canary falsifiers
         run: python3 -m unittest discover -s tests -p 'test_canario.py' -v
+      - name: Test article page generator falsifiers
+        run: python3 -m unittest discover -s tests -p 'test_paginas_articulos.py' -v
+      # Las paginas de articulo son una proyeccion del markdown: si alguien edita
+      # la fuente y no regenera, la pagina publica miente. Esta compuerta lo niega.
+      - name: Article pages match their markdown source
+        run: python3 tools/paginas_articulos.py --raiz . --check
       - name: Validate local portfolio contact
         run: bash tests/test_portafolio_contacto.sh
       # El canario mide lo que ninguna otra comprobacion mira: enlaces relativos

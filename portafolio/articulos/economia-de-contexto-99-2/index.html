@@ -1,0 +1,207 @@
+<!doctype html>
+<!-- HUELLA-PAGINA-ARTICULO-economia-de-contexto-99-2-20261108 -->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Economía de contexto — el 99.2 % | La Auditora</title>
+  <meta name="description" content="El 99.2 % del coste de un agente es input, no output. Medido sobre dos generaciones del mismo panel: el total se mueve 28.19 % entre corridas, la proporción se mueve 0.06 puntos. Por eso lo que se vende es una razón, no un recibo.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/economia-de-contexto-99-2/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Economía de contexto — el 99.2 %">
+  <meta property="og:description" content="El 99.2 % del coste de un agente es input, no output. Medido sobre dos generaciones del mismo panel: el total se mueve 28.19 % entre corridas, la proporción se mueve 0.06 puntos. Por eso lo que se vende es una razón, no un recibo.">
+  <meta property="og:url" content="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/economia-de-contexto-99-2/">
+  <meta property="article:published_time" content="2026-11-06">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../articulo.css">
+</head>
+<body>
+<a class="skip" href="#contenido">Saltar al contenido</a>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../../">La Auditora</a>
+    <nav>
+      <a href="../">Articulos</a>
+      <a href="../../">Auditorias</a>
+      <a href="../../en/">English</a>
+      <a href="articulo.md">Fuente .md</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <p class="eyebrow">Articulo · 2026-11-06</p>
+    <h1>Economía de contexto — el 99.2 %</h1>
+    <p class="lede">El 99.2 % del coste de un agente es input, no output. Medido sobre dos generaciones del mismo panel: el total se mueve 28.19 % entre corridas, la proporción se mueve 0.06 puntos. Por eso lo que se vende es una razón, no un recibo.</p>
+    <div class="proof"><span>ai</span><span>llm</span><span>productivity</span><span>opensource</span></div>
+
+<p><strong>Regla de este documento:</strong> ninguna cifra se escribe a mano. Cada una lleva el comando o el <code>archivo:línea</code> que la produce, y la que no tiene denominador declarado no se publica.</p>
+
+<hr>
+
+<h2>1 · La tesis en una frase</h2>
+
+<p><strong>El coste de un agente no está en lo que el modelo escribe; está en lo que la llamada arrastra.</strong> Medido sobre 28 971 llamadas reales de 5 días: el <code>output</code> es el <strong>0.89 %</strong> del consumo. El <strong>99.11 %</strong> es <code>input</code> (<code>REPORTE_TOKENS.md:130</code>).</p>
+
+<p>De ahí el corolario incómodo: optimizar el modelo, el prompt o la temperatura mueve menos del 1 % de la factura. <strong>El 99 % restante lo decide cuántas veces se reenvía la historia.</strong></p>
+
+<h2>2 · El número del negocio: coste por tarea verificada</h2>
+
+<p>No coste por llamada — coste por <strong>tarea</strong>, que es la unidad en la que se factura y en la que se decide.</p>
+
+<table>
+<thead>
+<tr>
+<th>métrica (mediana por tarea)</th>
+<th>valor</th>
+<th>n</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>consumo total de la tarea (<code>input</code> + <code>output</code>)</td><td><strong>18 024 682.50</strong> tok</td><td>10</td></tr>
+<tr><td>de eso, <code>output</code> del modelo</td><td><strong>141 574.50</strong> tok</td><td>10</td></tr>
+<tr><td>llamadas al modelo que hizo falta encadenar</td><td>217.50</td><td>10</td></tr>
+<tr><td>tokens reenviados <strong>por cada</strong> llamada (arrastre)</td><td>80 032.00</td><td>10</td></tr>
+</tbody>
+</table>
+
+<p>locus: <code>REPORTE_TOKENS.md:185-188 @ blob 1c09a667 (213 l)</code> — correcto para la generación que §2 congela; en la generación viva la tabla vive en <code>:188-197 @ blob bc67c4c5</code> (ver §8.1).</p>
+
+<p><strong>Una tarea cuesta 18.02 M tokens. De ellos, 141.6 k —el 0.79 %— es lo que el modelo produjo.</strong> El resto es la misma historia contada otra vez doscientas diecisiete veces.</p>
+
+<p>Arrastre = <code>1 − 141 574.50 / 18 024 682.50</code> = <strong>99.215 %</strong>.</p>
+
+<blockquote><p>No es un 95 %. Es un 99.2 %. La diferencia importa: un 95 % todavía admite la fantasía de que el 5 % restante —«el trabajo real»— sea donde está la palanca. Un 99.2 % dice que no hay tal 5 %.</p></blockquote>
+
+<h2>3 · Cómo se reproduce (esto es la parte que se cobra)</h2>
+
+<p>El reporte no es una opinión con tablas. Es un instrumento determinista sobre evidencia del propio disco:</p>
+
+<pre><code class="language-bash">git cat-file blob bb7190b0 &gt; /tmp/ttr.json           # el crudo de atribución, congelado por blob
+.venv/bin/python tools/reporte_tokens.py --ttr /tmp/ttr.json --md-out /tmp/panel.md   # RC 150 = nominal</code></pre>
+
+<p>La corrida de verificación del 30-Oct-2026 reproduce <code>18 024 682.50</code> y <code>141 574.50</code> <strong>exactamente</strong>, desde el blob <code>bb7190b0</code> y no desde un archivo temporal perdido. Un lector tercero puede hacer lo mismo sin pedirnos nada.</p>
+
+<p><strong>Por qué esto es la parte comercial y no la técnica:</strong> cualquier proveedor puede decir «optimizamos tu contexto». Lo que casi nadie puede hacer es entregar el comando con el que el cliente comprueba la cifra en su propia máquina.</p>
+
+<h2>4 · La trampa del porcentaje: tres denominadores, tres verdades</h2>
+
+<p>Aquí está el hallazgo que convierte el artículo en algo que no existe en la literatura de agentes: <strong>el mismo ahorro mide tres cifras distintas según contra qué se divida</strong>, y casi todo el material publicado no declara el denominador.</p>
+
+<p>Caso medido: recortar el bloque de esquemas de herramientas del perfil de 73 a 22 herramientas.</p>
+
+<table>
+<thead>
+<tr>
+<th>contra qué se divide</th>
+<th>cifra</th>
+<th>lectura honesta</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>el bloque de esquemas del perfil que lo protagoniza</td><td><strong>57.9 %</strong></td><td>«recorté el bloque un 58 %»</td></tr>
+<tr><td>el <code>input</code> de ese mismo perfil</td><td><strong>15.4 %</strong></td><td>«ahorré el 15 % del input»</td></tr>
+<tr><td>el <code>input</code> de <strong>todo</strong> el corpus</td><td><strong>8.73 %</strong></td><td>«ahorré el 8.7 % del gasto»</td></tr>
+</tbody>
+</table>
+
+<p>Las tres son ciertas. Solo la tercera es «del total», y es la más pequeña. Un proveedor que publica la primera como si fuera la tercera está vendiendo un número con el sujeto cambiado — y ese error es indistinguible de una mentira en el contrato, aunque no haya intención.</p>
+
+<p>El tax ponderado real del bloque de esquemas es <strong>730 356 952 / 2 472 640 471 = 29.54 %</strong> del input (<code>REPORTE_TOKENS.md:142-160</code>, suma sobre llamadas). Casi un tercio del dinero se va en declarar herramientas.</p>
+
+<h2>5 · Y la poda no es lineal: el tax depende del conjunto, no del número</h2>
+
+<p>La intuición de mercado —«menos herramientas, menos coste»— es <strong>falsa</strong>, y se refuta con el mismo panel:</p>
+
+<table>
+<thead>
+<tr>
+<th>herramientas expuestas</th>
+<th><code>tool_tokens</code> por llamada</th>
+<th>n</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>98</td><td>26 109.00</td><td>343</td></tr>
+<tr><td>97</td><td><strong>25 818.00</strong></td><td>933</td></tr>
+<tr><td>94</td><td><strong>32 768.00</strong></td><td>1</td></tr>
+<tr><td>22</td><td>9 464.00</td><td>416</td></tr>
+<tr><td>21</td><td><strong>9 173.88</strong></td><td>205</td></tr>
+</tbody>
+</table>
+
+<p>locus: <code>REPORTE_TOKENS.md:147-160</code>.</p>
+
+<p>Menos herramientas (94) cuestan <strong>26.9 % más</strong> que más herramientas (97). Y una herramienta menos que 22 (o sea 21) cuesta <strong>3.07 % menos</strong>. El tax lo fija el <strong>contenido</strong> del bloque —qué esquemas, con qué descripción y qué esquema JSON—, no su longitud en unidades.</p>
+
+<p>Consecuencia para quien vaya a comprar esto: la pregunta correcta no es «¿a cuántas herramientas podamos?» sino <strong>«¿qué conjunto, medido, para qué tarea?»</strong>. Un contrato que prometa un porcentaje por umbral de cardinal está prometiendo algo que el corpus no sostiene.</p>
+
+<h2>6 · Lo que este artículo NO afirma (y por qué decirlo lo hace vendible)</h2>
+
+<ol>
+<li><strong>No afirma coste por fila.</strong> El 99.2 % es la <strong>mediana de un panel de 200 commits evaluados</strong>, con 10 tareas atribuidas. La atribución por enlace existe pero es residual: <code>por_enlace = 1</code>, <code>por_ventana = 199</code> (<code>REPORTE_TOKENS.md:69</code>). <strong>No podemos decirle a un cliente «tu tarea cuesta X»</strong>. Podemos decirle «la tarea mediana de este panel cuesta 18.02 M». Es un dashboard de flota, no un recibo por servicio, y el recibo es el producto que falta.</li>
+<li><strong>No afirma ahorro monetario.</strong> El campo <code>cost</code> del runtime viaja con <code>isByok: true</code>: un <code>0.0</code> ahí significa «no facturado a esta cuenta», no «gratis». Sin tarifas no hay euros (<code>REPORTE_TOKENS.md</code> §8).</li>
+<li><strong>No afirma routing.</strong> La comparación de modelos por coste está <code>NO_MEDIDO</code> por la misma razón.</li>
+</ol>
+
+<p>Publicar los límites no debilita el artículo: <strong>es la única forma de que las tres cifras que sí se afirman sean creíbles.</strong></p>
+
+<h2>7 · Cierre</h2>
+
+<p>El sector mide tokens como quien mide gasolina: litros consumidos. La diferencia entre eso y economía es saber <strong>cuántos de esos litros movieron el coche y cuántos se quemaron en el semáforo</strong>. En un agente, el semáforo es el contexto reenviado, y en esta medición son <strong>99.2 de cada 100 litros</strong>.</p>
+
+<p>Quien no mide el arrastre no está optimizando un agente: está eligiendo un motor más pequeño para un coche que no avanza.</p>
+
+<hr>
+
+<p><strong>Evidencia completa y reproducible:</strong> <code>REPORTE_TOKENS.md</code> · <strong>Instrumento:</strong> <code>tools/reporte_tokens.py</code> (RC 150 nominal) · <strong>Crudo congelado:</strong> <code>crudos/reporte_ttr_20261030.json @ bb7190b0</code>.</p>
+
+<h2>8 · La cifra tiene fecha (y la razón no)</h2>
+
+<p>Este artículo se escribió sobre una <strong>generación</strong> del crudo, y hay que decirlo con número porque el defecto es la especialidad de la casa: el productor escanea el <code>session-state</code> del host, que <strong>crece mientras se escribe</strong>, así que dos corridas del mismo comando el mismo día <strong>no</strong> dan las mismas medianas.</p>
+
+<table>
+<thead>
+<tr>
+<th>generación</th>
+<th>blob del crudo</th>
+<th><code>T_total</code> mediana</th>
+<th><code>T_completion</code> mediana</th>
+<th>llamadas</th>
+<th>arrastre</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>§2 de este artículo</td><td><code>bb7190b0</code></td><td>18 024 682.50</td><td>141 574.50</td><td>217.50</td><td><strong>99.215 %</strong></td></tr>
+<tr><td>vigente, en el repo</td><td><code>03e9072b</code></td><td>23 105 392.50</td><td>167 397.00</td><td>276.50</td><td><strong>99.276 %</strong></td></tr>
+<tr><td>salto entre las dos</td><td>—</td><td><strong>+28.19 %</strong></td><td>+18.24 %</td><td>+27.13 %</td><td><strong>+0.061 pp</strong></td></tr>
+</tbody>
+</table>
+
+<p><strong>Esa fila del salto es la tesis del artículo medida contra sí misma.</strong> El absoluto se mueve un <strong>28.19 %</strong> según cuándo se corra el comando; la <strong>razón se mueve 0.061 puntos porcentuales</strong>. Es exactamente por esto que el número que se vende es una proporción y no un total: <strong>una proporción sobrevive a la regeneración, un total no.</strong> Las dos generaciones dan <strong>99.2 %</strong> y <strong>99.3 %</strong> — y en ningún caso el <strong>95 %</strong> que circulaba. Una de las cuatro columnas de §2, <code>tokens por llamada = 80 032.00</code>, es idéntica en las dos generaciones: la mediana de una razón se queda quieta aunque sus dos operandos se muevan.</p>
+
+<p>Dos consecuencias que no se esconden:</p>
+
+<ol>
+<li><strong><code>REPORTE_TOKENS.md:185-188</code> quedó superado por su propio sidecar, y ya se corrigió allí.</strong> El sidecar del crudo (<code>crudos/reporte_ttr_20261030.meta.json</code>) declaró, en el mismo árbol, que «la primera generación publicó <code>18024682.5 / 141574.5</code> y esta publica <code>23105392.5 / 167397.0</code>» y que «la cifra que vale es la del crudo con su blob». La tabla §7 del reporte publicaba la primera: se midió y se corrigió en <code>REPORTE_TOKENS.md</code> (<strong>commit <code>45917cec</code></strong>), donde hoy vive en <code>:188-197 @ blob bc67c4c5</code> y publica <code>23 105 392.50 / 167 397.00</code>. El locus de §2 no estaba mal escrito: era correcto para el blob que cita —<code>1c09a667</code>, 213 líneas— y lo desplazó el commit vecino <code>6d74da06</code>, que movió la tabla a <code>189-192</code> antes de que la corrección la dejara en <code>190-193</code>. <strong>Este apartado no reescribe §2</strong>: §2 se deja tal como se escribió, con su generación congelada y su blob, para que la diferencia entre las dos sea auditable en vez de invisible. Es <strong>adenda, no reemplazo</strong> — ahora con el cierre fechado, no con la deuda abierta.</li>
+<li><strong>Quien corra el comando hoy obtendrá una tercera cifra.</strong> La cifra no es el producto; <strong>el comando lo es</strong>. Por eso §3 entrega el comando y el blob, no la tabla.</li>
+</ol>
+
+<p><code>HUELLA-ARTICULO-ECONOMIA-CONTEXTO-VIGENCIA-20261030 </code>HUELLA-ARTICULO-COLATERAL-M7-CERRADO-20261030``</p>
+
+    <section class="cta">
+      <p><strong>Todo lo que hay aqui se puede medir otra vez.</strong></p>
+      <p>Las cifras viajan con el comando o el <code>archivo:linea</code> que las produce. Si algo no cuadra,
+      la respuesta no es un argumento: es el instrumento, en
+      <a href="../../auditoria-002-economia-contexto/">el informe reproducible</a> y en
+      <a href="https://github.com/alexisromtz-lab/la-auditora">el repositorio</a>.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>La Auditora · Platino Labs · <a href="../">mas articulos</a> · <a href="../../">auditorias</a></p>
+  </footer>
+</div>
+</body>
+</html>
+
