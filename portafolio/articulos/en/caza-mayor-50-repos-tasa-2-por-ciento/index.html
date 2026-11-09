@@ -1,0 +1,430 @@
+<!doctype html>
+<!-- HUELLA-PAGINA-ARTICULO-caza-mayor-50-repos-tasa-2-por-ciento-20261108 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>I swept 50 repositories: two real defects and a 2 % hit rate | La Auditora</title>
+  <meta name="description" content="I measured 765 workflow files in 50 repos with more than 5 000 stars: 262 steps invoke a test runner and 11 cannot make the workflow fail. The defensible-defect rate is 2 %, and the most severe one sits in the deadest repository.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/caza-mayor-50-repos-tasa-2-por-ciento/">
+  <link rel="alternate" hreflang="es" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/caza-mayor-50-repos-tasa-2-por-ciento/">
+  <link rel="alternate" hreflang="en" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/caza-mayor-50-repos-tasa-2-por-ciento/">
+  <link rel="alternate" hreflang="x-default" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/caza-mayor-50-repos-tasa-2-por-ciento/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="I swept 50 repositories: two real defects and a 2 % hit rate">
+  <meta property="og:description" content="I measured 765 workflow files in 50 repos with more than 5 000 stars: 262 steps invoke a test runner and 11 cannot make the workflow fail. The defensible-defect rate is 2 %, and the most severe one sits in the deadest repository.">
+  <meta property="og:url" content="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/caza-mayor-50-repos-tasa-2-por-ciento/">
+  <meta property="og:locale" content="en_US">
+  <meta property="article:published_time" content="2026-11-06">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../../articulo.css">
+</head>
+<body>
+<a class="skip" href="#contenido">Skip to content</a>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../../../">La Auditora</a>
+    <nav>
+      <a href="../">Articles</a>
+      <a href="../../../">Audits</a>
+      <a href="../../../en/">Portfolio (EN)</a>
+      <a href="../../caza-mayor-50-repos-tasa-2-por-ciento/" hreflang="es" lang="es">Leer en espanol</a>
+      <a href="../../caza-mayor-50-repos-tasa-2-por-ciento/articulo.en.md">Source .md</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <p class="eyebrow">Article · 2026-11-06</p>
+    <h1>I swept 50 repositories: two real defects and a 2 % hit rate</h1>
+    <p class="lede">I measured 765 workflow files in 50 repos with more than 5 000 stars: 262 steps invoke a test runner and 11 cannot make the workflow fail. The defensible-defect rate is 2 %, and the most severe one sits in the deadest repository.</p>
+    <div class="proof"><span>devops</span><span>ci</span><span>github-actions</span><span>opensource</span></div>
+
+<h2>0 · Verdict in one line</h2>
+
+<p>Of <strong>50</strong> company repositories with CI (≥ 5 000 ★, AI/DevTools/Fintech), <strong>1</strong> today has a CI-signal defect that I would sign with my name in their repo; the other two targets have a real defect but a different condition, and here I say which is which instead of selling all three the same.</p>
+
+<h2>1 · The measurement — the denominator, before the conclusion</h2>
+
+<table>
+<thead>
+<tr>
+<th>what was measured</th>
+<th>magnitude</th>
+<th>how it was obtained</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>cohort</td><td><strong>50</strong> repos</td><td>273 candidates from 12 <code>gh search repos</code> queries → filter of <code>awesome</code>/course/clone lists and &gt; 900 MB</td></tr>
+<tr><td>workflow files read</td><td><strong>765</strong></td><td>download of <code>.github/workflows/*</code> via the API, parsed with PyYAML</td></tr>
+<tr><td>steps that invoke a test runner</td><td><strong>262</strong></td><td>runner regex (<code>pytest</code>, <code>ctest</code>, <code>go test</code>, <code>npm test</code>, <code>tox</code>, <code>make test</code>, <code>dotnet test</code>, <code>bazel test</code>, …)</td></tr>
+<tr><td>steps whose failure <strong>cannot propagate</strong> to the workflow result</td><td><strong>11 · 4,2 %</strong></td><td><code>continue-on-error</code> (step or job) or `\</td><td>\</td><td>true<code> / </code>\</td><td>\</td><td>exit 0<code>, **without** a local postcondition **and** without a </code>needs:` consumer</td></tr>
+<tr><td>distinct repos with at least one</td><td><strong>5 · 10 %</strong></td><td><code>livekit/agents</code>, <code>ggml-org/llama.cpp</code>, <code>PrefectHQ/prefect</code>, <code>raga-ai-hub/RagaAI-Catalyst</code>, <code>Arize-ai/phoenix</code></td></tr>
+<tr><td>of those 5, with an explicit declaration of intent</td><td><strong>3</strong></td><td>Prefect calls it <code>(advisory)</code> and comments on it (<code>api-compatibility-tests.yaml:19-21</code>); llama.cpp leaves the real gate in <code>e2e-tests</code>; Arize is a bot workflow (<code>claude-daily-deps-upgrade.yml</code>)</td></tr>
+<tr><td>of the remaining 2, a <strong>live</strong> repo</td><td><strong>1</strong></td><td><code>livekit/agents</code> publishes commits today (<code>2026-11-06</code>); <code>RagaAI-Catalyst</code> has no commit since <code>2025-05-16</code></td></tr>
+</tbody>
+</table>
+
+<p><strong>⇒ Defensible-target rate: 1/50 = 2 %.</strong> Three live targets would require sweeping ~150 repos.</p>
+
+<h3>1.1 · Self-audit of the instrument (three corrections measured in this turn)</h3>
+
+<ol>
+<li><strong>The first classifier was blind to <code>needs:</code> gates.</strong> v1 only looked at later steps <em>within the same job</em>. v2 added <code>needs:</code> consumers and <code>needs.X.result</code> guards → same result (10 vs 10). The number survived, but the argument was not proven until it was tested.</li>
+<li><strong>The runner regex was short.</strong> It did not see <code>make test</code>, <code>dotnet test</code>, <code>bazel test</code>, <code>phpunit</code>, <code>rspec</code>. Extended: 262 steps, <strong>+1 repo</strong> (<code>Arize-ai/phoenix</code>, bot workflow). The rate moved from 4/50 to 5/50 and the defensible-target rate <strong>did not</strong> move.</li>
+<li><strong>The crawl's «CI pain» ranking was contaminated and is discarded.</strong> It counted runs from fork branches and <code>action_required</code> (a workflow that never actually executed) as failures. Measured in <code>openai/evals</code>: <strong>11 of 15</strong> recent runs are <code>action_required</code> — hence the <code>0.99</code> of the first pass. A repo with healthy CI can produce that figure. <strong>The ranking is withdrawn</strong>; it is used in no decision in this document.</li>
+</ol>
+
+<h2>2 · The three targets</h2>
+
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>repo</th>
+<th>★</th>
+<th>measured pin</th>
+<th>defect</th>
+<th>locus</th>
+<th>severity</th>
+<th>live repo</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>1</td><td><code>livekit/agents</code></td><td>15 107</td><td><code>055744e1505b</code></td><td>the STT suite cannot fail (two layers)</td><td><code>test-stt.yml:201</code></td><td><strong>MEDIUM</strong></td><td><strong>yes</strong> (commit today)</td></tr>
+<tr><td>2</td><td><code>raga-ai-hub/RagaAI-Catalyst</code></td><td>16 185</td><td><code>ab6789331089</code></td><td>the whole pipeline is advisory + dead output</td><td><code>ci.yml:12,41,93</code></td><td><strong>HIGH</strong></td><td><strong>no</strong> (last commit 2025-05-16)</td></tr>
+<tr><td>3</td><td><code>ggml-org/llama.cpp</code></td><td>133 519</td><td><code>4b77dee0524c</code></td><td>unit/client tests advisory while E2E does gate</td><td><code>ui.yml:55</code> · <code>build-sanitize.yml:40</code></td><td>LOW</td><td>yes (commit today)</td></tr>
+</tbody>
+</table>
+
+<p><strong>The highest-severity target is in the deadest repo.</strong> n=2 does not allow asserting a correlation: it is published as an observation, not as a law.</p>
+
+<h2>3 · Target 1 — <code>livekit/agents</code> (the only one I sign)</h2>
+
+<h3>The defect, verbatim in <code>test-stt.yml@055744e1505b:201</code></h3>
+
+<pre><code class="language-yaml">- name: Run STT tests
+  run: |
+    uv run pytest -n 3 -v --stt --tb=long --junitxml=test-results.xml 2&gt;&amp;1 | tee test-output.txt || true</code></pre>
+
+<p>Two independent layers erase the result:</p>
+
+<ol>
+<li><code>|| true</code> turns any non-zero exit into 0.</li>
+<li>Even if <code>|| true</code> is removed, the pipeline ends in <code>tee</code>, and in the default bash (no <code>pipefail</code>) the step status is <code>tee</code>'s, which is 0 as long as it can write the file. <strong>Deleting <code>|| true</code> outright does not restore the gate</strong> — this is what separates a superficial reading from a measurement.</li>
+</ol>
+
+<h3>Why it is probably not what you meant</h3>
+
+<p>The later steps are already written to run no matter what (<code>Generate test summary</code> and <code>Post results to PR</code> carry <code>if: always()</code>), and <code>pytest --junitxml</code> writes the XML on failure too. The <code>|| true</code> <strong>is not needed for the report to exist</strong>: <code>always()</code> already bought that. The only thing it buys is that a red STT suite is indistinguishable from a green one in the checks list.</p>
+
+<h3>The contrast that makes the report credible</h3>
+
+<p>The same repository already implements the correct pattern in <code>ci.yml:34-43</code>: <code>continue-on-error: true</code> on <code>ruff</code> <strong>plus</strong> a <code>Report ruff errors</code> step with <code>if: steps.ruff-check.outcome == 'failure' || …</code> that does <code>exit 1</code>. That is: the house knows how to close a gate. <code>test-stt.yml</code> is an inconsistency, not a philosophy.</p>
+
+<h3>Issue text — ready to paste</h3>
+
+<blockquote><p><strong>Título:</strong> <code>ci: Test STT reports green on a failing suite —</code> || true<code>plus a</code>tee<code> pipeline erase the exit code</code>  <strong>Body:</strong>  ## What  <code>.github/workflows/test-stt.yml:201</code> cannot fail:  ``<code>yaml - name: Run STT tests   run: |     uv run pytest -n 3 -v --stt --tb=long --junitxml=test-results.xml 2&gt;&amp;1 | tee test-output.txt || true </code>`<code>  Two independent layers erase the result:  1. </code>|| true<code> turns any non-zero exit into 0. 2. Even without </code>|| true<code>, the pipeline ends in </code>tee<code>; with the default bash (no </code>pipefail<code>) the step's    status is </code>tee<code>'s, which is 0 as long as it can write the file. So deleting </code>|| true<code> alone does    **not** restore the gate.  Measured at </code>livekit/agents@055744e1505b1489976d06ca029b3001bc91ea55<code>.  ## Why it is probably not what you meant  The steps after it already run regardless of the test outcome (</code>Generate test summary<code> and </code>Post results to PR<code> both carry </code>if: always()<code>), and </code>pytest --junitxml<code> writes the XML on failure too. The </code>|| true<code> is not needed for the report to exist — </code>always()<code> already buys that. What it buys is that a red STT suite looks exactly like a green one in the checks list.  ## Why it matters  </code>Test STT<code> triggers on </code>pull_request<code> for changes to </code>tests/test_stt.py<code> and to its own workflow — the PRs most likely to break STT. The PR comment lists per-provider results, but nothing in the merge UI does. If this workflow is advisory by design, its name and a comment should say so; if it is a gate, it does not gate.  ## Reproduction  </code>`<code>bash git clone --depth 1 https://github.com/livekit/agents &amp;&amp; cd agents git fetch --depth 1 origin 055744e1505b1489976d06ca029b3001bc91ea55 git checkout 055744e1505b1489976d06ca029b3001bc91ea55 sed -n '201p' .github/workflows/test-stt.yml  bash -c 'false | tee out.txt || true';            echo "exit=$?"   # 0  &lt;- || true bash -c 'false | tee out.txt';                    echo "exit=$?"   # 0  &lt;- tee, no pipefail bash -c 'set -o pipefail; false | tee out.txt';   echo "exit=$?"   # 1  &lt;- lo que falta </code>`<code>  ## Proposal, cheapest first  1. **Keep the report, restore the signal:** drop </code>|| true<code> and run the step with </code>set -o pipefail<code>    (job-level </code>defaults.run.shell: bash -eo pipefail {0}<code>, or </code>set -o pipefail<code> inside the </code>run<code>).    </code>tee<code> still writes the log; the step now exits with pytest's status. 2. **If providers legitimately cannot run on forks without secrets,** skip them explicitly    (</code>pytest.mark.skipif(not os.getenv("DEEPGRAM_API_KEY"), …)<code>) instead of letting the whole suite exit    non-zero. A skip is honest; </code>|| true<code> is not. 3. **If the workflow is advisory by contract,** rename it (</code>Test STT (advisory)`) and leave a one-line    comment at line 201 saying so, so the next reader does not "fix" it in the wrong direction.  Happy to send (1) as a PR if that is the direction — I did not want to change CI semantics in a repo where the reporting steps clearly have intent.</p></blockquote>
+
+<h2>4 · Target 2 — <code>RagaAI-Catalyst</code> (serious defect, sleeping repo)</h2>
+
+<p><code>ci.yml@ab6789331089</code>, a single workflow for the whole repo:</p>
+
+<ul>
+<li><code>:12</code> <code>code-quality</code> with <code>continue-on-error: true</code>, and its steps are <code>ruff format .</code> + <code>ruff check --fix .</code>: <strong>it fixes and does not commit</strong>, on a disposable checkout. The job can neither fail nor leave a trace.</li>
+<li><code>:41</code> the <code>test</code> job also with <code>continue-on-error: true</code>.</li>
+<li><code>:40</code> the only <code>needs:</code> is <code>test → code-quality</code>. <strong>Nobody needs <code>test</code></strong> ⇒ the workflow's terminal state is advisory.</li>
+<li><code>:49</code> declares <code>outputs.test_summary</code> from <code>steps.pytest.outputs.test_summary</code>, which is produced at <code>:94</code>. <code>grep -rn test_summary .github/</code> returns <strong>only those two lines</strong>: the output is declared and nobody reads it.</li>
+<li><code>:93</code> <code>pytest tests/ -v --junitxml=test-results/junit.xml | tee test-output.txt</code> — without <code>pipefail</code> in any workflow of the repo (<code>grep -rn pipefail</code> = 0). Even if the <code>coe</code> is removed, the step stays green.</li>
+</ul>
+
+<p><strong>Honest diagnosis of the why:</strong> <code>tests/</code> includes integration tests that require ~20 secrets; on forks they cannot pass. The correct answer is to separate markers (<code>-m "not integration"</code> for the gate, integration advisory), not to turn the whole pipeline advisory.</p>
+
+<p><strong>And the state of the repo:</strong> last commit <code>2025-05-16</code>. An issue here <strong>produces no conversation</strong>; it produces an audit artifact. It is delivered as such, without counting it as a pitch.</p>
+
+<h2>5 · Target 3 — <code>llama.cpp</code> (mild defect in a live repo)</h2>
+
+<p><code>ui.yml:55</code> marks the whole <code>ui-checks</code> job advisory, which includes <code>Run Client tests</code> and <code>Run Unit tests</code> (<code>ui.yml:100</code>, <code>:105</code>); <code>build-sanitize.yml:40</code> does the same with <code>ctest</code>. But <code>e2e-tests</code> in the same file does <strong>not</strong> carry <code>continue-on-error</code>: there is a real gate for E2E, not for unit/client nor for sanitizers.</p>
+
+<p>It is published as a <strong>design question</strong> («is it intentional that unit/client are advisory while E2E gates?»), not as an accusation. In a repo with 133 519 ★ and 2 584 open issues, a low-severity issue competes against noise.</p>
+
+<h2>6 · Negative controls — what is NOT a defect</h2>
+
+<table>
+<thead>
+<tr>
+<th>repo</th>
+<th>locus</th>
+<th>why it is not a defect</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>PrefectHQ/prefect</code></td><td><code>api-compatibility-tests.yaml:19-21</code></td><td>the job is called <code>Cloud API compatibility (advisory)</code> and carries the comment «Keep compatibility and harness failures advisory for contributors»</td></tr>
+<tr><td><code>LMCache/LMCache</code></td><td><code>cpu_device.yml:366</code></td><td>the file <strong>declares</strong> that there is no <code>continue-on-error</code>; all the `\</td><td>\</td><td>true<code> are docker/</code>df` cleanup</td></tr>
+<tr><td><code>Arize-ai/phoenix</code></td><td><code>claude-daily-deps-upgrade.yml</code></td><td>bot workflow over its own PRs</td></tr>
+<tr><td><code>vibrantlabsai/ragas</code></td><td><code>ci.yaml:126,129</code></td><td>it only runs <code>tests/unit</code>; <code>tests/e2e</code> are <strong>32 paths</strong> in <code>HEAD</code> and no workflow invokes them (<code>grep -rn e2e</code> over its 8 workflows = 0) — <strong>coverage gap, not fail-open</strong>, and the repo has no commit since <code>2026-02-24</code>, so nothing is proposed</td></tr>
+</tbody>
+</table>
+
+<h2>7 · The expensive finding: the channel is not empty, it is busy</h2>
+
+<p><code>livekit/agents#8231</code> (2026-10-29, «unit tests pin Python 3.12 while the package advertises 3.14 support») is an outsider's issue, with loci and a proposal — exactly the format of this document. Measured chronology:</p>
+
+<table>
+<thead>
+<tr>
+<th>when</th>
+<th>what</th>
+<th>signer</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>2026-10-29</td><td><code>#8231</code> is opened</td><td><code>kcncb</code>, <code>author_association: NONE</code></td></tr>
+<tr><td>2026-10-29 13:17</td><td>someone takes it and declares «Slai Agent Runtime assisted»</td><td><code>huong8373tt-beep</code>, <code>NONE</code></td></tr>
+<tr><td>2026-10-30 02:19</td><td>the original author answers (13 h) — <strong>outsider to outsider</strong></td><td><code>kcncb</code></td></tr>
+<tr><td>2026-10-30 03:10</td><td><code>#8252</code> is opened</td><td><code>huong8373tt-beep</code></td></tr>
+<tr><td>2026-11-05 22:45</td><td><code>#8252</code> <strong>closed without merge, by its own author</strong></td><td><code>huong8373tt-beep</code></td></tr>
+</tbody>
+</table>
+
+<p>Review recorded on <code>#8252</code>: <code>devin-ai-integration[bot]</code> and <code>kcncb</code>. <strong>Zero maintainer review.</strong></p>
+
+<p>⇒ The «I audit your CI and tell you about it» channel <strong>has conversation and no conversion</strong>, and whoever answers is usually another outsider agent. n=1: it is published as an observation with its falsifier — if across 5 issues of our own in live repos <strong>not one</strong> maintainer reply appears, the observation holds.</p>
+
+<h2>8 · The corrected strategy</h2>
+
+<p><strong>«The Sniper»</strong> (find the hidden defect in 50 repos and shoot) measured <strong>2 %</strong> live targets. Its real cost is not the scan: it is that 49 out of every 50 attempts produce nothing and the shot is spent on a dead repo or on a defect the owner declared on purpose.</p>
+
+<p><strong>«The Interlocutor»</strong> inverts the load: you do not look for the defect, you enter where <strong>the pain is already written</strong> and bring the measurement the author does not have. The client declares the pain; the instrument is the only thing contributed. It applies to the same channel, with the same public signature and a much lower cost per attempt.</p>
+
+<p>One entry rule: <strong>no comment without a measurement the issue author does not already have</strong>. If the comment can be written without running anything, it is not written.</p>
+
+<p>Concrete measured queue (open issues, unanswered, about CI/tests):</p>
+
+<table>
+<thead>
+<tr>
+<th>repo</th>
+<th>issue</th>
+<th>state</th>
+<th>what would be contributed</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>vibrantlabsai/ragas</code></td><td>#2989 «CI: check-docs fails on every fork PR — pull_request_target»: <code>claude-docs-check.yml</code> falls at ~6 s <strong>in the checkout step</strong>, before analysing anything</td><td>open, <strong>0 comments</strong></td><td>confirm the block against <code>actions/checkout</code> and deliver the minimal diff with trimmed permissions</td></tr>
+<tr><td><code>ggml-org/llama.cpp</code></td><td>#30281 <code>test-backend-ops</code> should exit 1 when a backend is missing</td><td>open, 0 comments</td><td>confirm with a run and propose the <code>exit</code></td></tr>
+<tr><td><code>PrefectHQ/prefect</code></td><td>#16404 / #16310 / #15558 flaky tests</td><td>open since 2024</td><td>measure the per-test flake rate before opining</td></tr>
+</tbody>
+</table>
+
+<p><strong>Note:</strong> <code>ragas#2989</code> describes September 2026 runs on a repo whose last commit is <code>2026-02-24</code>. Before commenting you must check that the workflow still exists at that pin; if it does not, the issue is about another object and commenting on it burns the signature.</p>
+
+<h2>9 · DMs</h2>
+
+<p><strong>LiveKit — David Zhao.</strong> Verified: <code>davidzhao</code> · name «David Zhao» · company <code>@livekit</code> · X <code>davidzh</code>. No other handle is used: <code>russdsa</code> returns <strong>404</strong> and is not invented.</p>
+
+<blockquote><p>Hi David — I spent a day auditing CI signal across 50 company repos in the voice-AI / infra space, and one finding landed in <code>livekit/agents</code>. <code>.github/workflows/test-stt.yml:201</code> can't fail: <code>|| true</code> plus a <code>tee</code> pipeline (no <code>pipefail</code>) erase pytest's exit code, so a red STT suite and a green one look identical in the checks list. Your ruff steps at <code>ci.yml:34-43</code> already do the opposite — they gate via a <code>steps.*.outcome</code> postcondition — which is why it reads as an inconsistency rather than a philosophy. Three-line fix, happy to send it as an issue or a PR, whichever you prefer. I run Platino Labs: we audit CI for fail-open guards like this one. No pitch attached — the finding is yours either way.</p></blockquote>
+
+<p><strong>RagaAI — <code>NO_MEDIDO</code>.</strong> There is no verified founder handle; a name is not fabricated. The §4 finding is delivered as an artifact, not as a DM.</p>
+
+<h2>10 · Pointers</h2>
+
+<table>
+<thead>
+<tr>
+<th>piece</th>
+<th>what it is</th>
+<th>path</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>census instrument</td><td>census of fail-open guards over a pinned cohort</td><td>`<code>tools/correr_censo.py</code>`</td></tr>
+<tr><td>level-6 probe</td><td>the corpus audit engine</td><td>`<code>tools/sonda_nivel_6.py</code>`</td></tr>
+<tr><td>pre-write gate</td><td>A2.1</td><td>`<code>tools/gate_pre_escritura.sh</code>`</td></tr>
+<tr><td>article recipe</td><td>how a finding becomes a public note</td><td><code>ARTICULO_DEVTO_AUDITORIA_LITELLM_46923_PUBLICO.md</code></td></tr>
+<tr><td>publication network</td><td>how a note becomes queued</td><td><code>PUBLICAR_EN_RED.md</code></td></tr>
+<tr><td>measured channel</td><td><code>Canal público</code> with no reach · <code>Canal empresa</code> with <code>Sent</code> = 0</td><td><code>_PLAN.md</code> §2 · `<code>_REGISTRO.md</code>` row 25</td></tr>
+</tbody>
+</table>
+
+<p><strong>Duplication note:</strong> another lane of the tree has <code>tools/auditar_fail_open_universal.py</code> in flight (34 896 B, 2026-11-06T00:49) and <code>tools/auditar_soft_fail_buildkite.py</code>. The classifier used here was ad-hoc in <code>/tmp/caza/</code> <strong>before</strong> finding <code>tools/correr_censo.py</code> in `<code>INVENTARIO_INSTRUMENTOS.md</code><code>. The numbers in this document are reconciled against </code>correr_censo.py --planificar<code> (pins of 29/50 repos, state </code>PARCIAL<code> due to HTTP 403); the remaining pins were taken with </code>gh api repos/{n}/commits?per_page=1`.</p>
+
+<h2>11 · The shots, executed (2026-11-06)</h2>
+
+<p>The two public acts of this document went out. There is no third: <code>llama.cpp</code> and <code>RagaAI-Catalyst</code> remained as an internal artifact and are not published (§6 and §9 say why).</p>
+
+<h3>11.1 · <code>vibrantlabsai/ragas#2989</code> — technical comment published</h3>
+
+<p>&lt;https://github.com/vibrantlabsai/ragas/issues/2989#issuecomment-6679331106&gt;</p>
+
+<p>The issue was still <strong>open, 0 comments, unedited since <code>2026-09-02T15:16:45Z</code></strong>: the comment is the first one. The workflow was verified to exist at the cited pin before writing (§8 demanded it).</p>
+
+<p><strong>What the author did not have —measured at <code>298b68274234c060deacab3cf5fb52aa3a20e885</code>— and was delivered to him:</strong></p>
+
+<table>
+<thead>
+<tr>
+<th>measurement</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>workflows that declare <code>pull_request_target</code></td><td><strong>3 of 8</strong>, and <strong>2</strong> check out the fork's code: the issue names <strong>1</strong></td></tr>
+<tr><td>the second one, <code>claude-docs-apply.yml:21-22</code></td><td>the most exposed: <code>permissions: contents: write</code> (<code>:12</code>), token `CLAUDE_CODE_PAT \</td><td>\</td><td>GITHUB_TOKEN<code> (</code>:24`)</td></tr>
+<tr><td>why that second one is unreachable today</td><td>the <code>check-docs</code> red kills the checkout <strong>before</strong> the step that sets <code>needs-doc-update</code>, and that label is the only trigger of <code>apply-docs</code></td></tr>
+<tr><td>runs of <code>Claude Docs Apply</code> (<code>216244931</code>) in its entire history</td><td><strong>0</strong></td></tr>
+<tr><td><code>allow-unsafe-pr-checkout</code> in <code>actions/checkout</code></td><td>absent in v4.1.7 · v4.2.0 · v4.2.1 · v4.2.2 · v4.3.0 · v4.3.1; <strong>first appearance v4.4.0</strong> (<code>action.yml:101</code>)</td></tr>
+<tr><td>runs of <code>Claude Docs Check</code> (<code>216244933</code>)</td><td><strong>391</strong>, all from forks: 142 success · 223 failure · 26 cancelled</td></tr>
+<tr><td>last success</td><td><code>2026-07-20T11:26:10Z</code></td></tr>
+<tr><td>current red streak</td><td><strong>162 consecutive failures, 0 successes</strong> since <code>2026-07-20T16:54:58Z</code></td></tr>
+<tr><td>release of <code>actions/checkout</code> v4.4.0</td><td><code>2026-07-20T15:36:10Z</code> — <strong>78 minutes before</strong> the first failure of the streak</td></tr>
+<tr><td>honesty limit</td><td>logs older than ~<code>2026-08-08</code> expired (<code>HTTP 410</code>) ⇒ the cause of the <strong>first</strong> failure is <code>NO_MEDIDO</code>; the cause of all readable ones is the checkout guard</td></tr>
+</tbody>
+</table>
+
+<p>The comment sells nothing, does not link this repo and mentions no services: it signs with <code>@alexisromtz-lab</code> at the foot and declares the pin. The lesson it leaves: <strong>the issue described half the pattern</strong>, and that half was not visible without running the census on the pin — not without reading the issue.</p>
+
+<h3>11.2 · <code>livekit/agents</code> — Issue published</h3>
+
+<p>&lt;https://github.com/livekit/agents/issues/8417&gt;</p>
+
+<p>Title: <code>ci: Test STT cannot fail — || true and a tee pipeline erase the exit code</code>. Full body of §3. Re-verified before firing: at <code>055744e1505b1489976d06ca029b3001bc91ea55</code>, <code>test-stt.yml:201</code> is</p>
+
+<pre><code>uv run pytest -n 3 -v --stt --tb=long --junitxml=test-results.xml 2&gt;&amp;1 | tee test-output.txt || true</code></pre>
+
+<p>No duplicate: <code>gh issue list -R livekit/agents --author @me --state all</code> returned <strong>0</strong> issues before the filing. The report survives the channel's bots (§7) because it does not compete for attention: it contributes three lines of <code>bash</code> the reader can run to see the <code>exit=0</code> with their own eyes.</p>
+
+<h3>11.3 · The census that made §11.1 possible</h3>
+
+<p><code>tools/correr_censo.py</code> died at <strong>29 pins of 50</strong> because it had no authenticated mode: <code>token()</code> only read <code>GITHUB_TOKEN</code>/<code>GH_TOKEN</code>, both absent, while <code>gh auth status</code> was green — 60 requests per hour without credentials, 2 per repo = <strong>30 repos per hour</strong>, exactly the ceiling where it stopped. Fixed in <code>6a56efa0</code> with <code>gh auth token</code> as a third source, published source and typed absence. Measured in the act, same cohort: <strong><code>PARCIAL</code> 29/50 → <code>RESUELTA</code> 50/50</strong> with <code>autenticacion.fuente = gh:auth-token</code>. Without that fix, the §11.1 table would have stayed at half its rows.</p>
+
+<hr>
+
+<hr>
+
+<h2>12. What the world answered — interaction census (2026-11-06)</h2>
+
+<p>Measured with <code>gh api "search/issues?q=commenter:alexisromtz-lab"</code> (39 threads) by reading the comments of each thread, not counting notifications. Census window: up to <code>2026-11-06T18:15Z</code>.</p>
+
+<h3>12.1 The footprint, measured</h3>
+
+<table>
+<thead>
+<tr>
+<th>foreign repos</th>
+<th>threads where we commented</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>tenstorrent/tt-metal</code></td><td><strong>14</strong></td></tr>
+<tr><td><code>vllm-project/vllm-omni</code></td><td><strong>7</strong></td></tr>
+<tr><td><code>BerriAI/litellm</code></td><td>3</td></tr>
+<tr><td><code>vllm-project/vllm</code> · <code>huggingface/transformers</code> · <code>huggingface/smolagents</code> · <code>astral-sh/uv</code> · <code>duetosymmetry/qnm</code> · <code>vibrantlabsai/ragas</code></td><td>1 each</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>30 foreign threads</strong> (39 with our own 9)</td></tr>
+</tbody>
+</table>
+
+<p>Of those 30, <strong>13</strong> received later human activity and <strong>6</strong> received a reply <strong>addressed to our comment</strong>, not neighbouring activity.</p>
+
+<h3>12.2 The humans who answered</h3>
+
+<table>
+<thead>
+<tr>
+<th>thread</th>
+<th>who</th>
+<th>what they said</th>
+<th>verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>livekit/agents#8417</code></td><td><code>iamdgarcia</code> (CONTRIBUTOR, 6 PRs in the repo)</td><td>verified the finding, contributed 2 data points of their own and offered the PR</td><td><strong>conversion</strong></td></tr>
+<tr><td><code>vllm-project/vllm-omni#9086</code></td><td><code>hsliuustc0106</code></td><td><code>APPROVED</code>, 4 checks green</td><td><strong>approved, not merged</strong></td></tr>
+<tr><td><code>vllm-project/vllm-omni#9096</code></td><td><code>hsliuustc0106</code></td><td><code>APPROVED</code>, 4 checks green</td><td><strong>approved, not merged</strong></td></tr>
+<tr><td><code>vllm-project/vllm-omni#9129</code></td><td><code>Big2Wheel</code></td><td>validation on real hardware: Ascend 910B3, image <code>96fa…</code></td><td><strong>external validation</strong></td></tr>
+<tr><td><code>duetosymmetry/qnm#22</code></td><td><code>duetosymmetry</code> (maintainer)</td><td>«Alexis — I'll happily review a PR that you submit fixing the bug you found»</td><td><strong>invitation</strong> → <code>qnm#45</code></td></tr>
+<tr><td><code>BerriAI/litellm#47340</code></td><td><code>Mrun25</code></td><td>«Thanks for digging into this, alexisromtz-lab. The TTL-plumbing analysis is a real adjacent gap»</td><td><strong>technical credit</strong></td></tr>
+<tr><td><code>vllm-project/vllm#62322</code></td><td><code>mosafariuk</code></td><td>corrected our measurement with the published wheel</td><td><strong>correction accepted</strong></td></tr>
+<tr><td><code>BerriAI/litellm#46923</code></td><td><code>shaikn6</code></td><td>«<code>_has_pre_deployment_request_rewriters</code> doesn't exist anywhere»</td><td><strong>ghost citation</strong></td></tr>
+<tr><td><code>tenstorrent/tt-metal#53639</code></td><td><code>kinginu</code> (PR author)</td><td>«ignore comments from @alexisromtz-lab… could you block @alexisromtz-lab from this repo»</td><td><strong>public damage</strong></td></tr>
+</tbody>
+</table>
+
+<p><strong>11 distinct people</strong> interacted: 6 in comments and 5 in reviews or hardware validation.</p>
+
+<h3>12.3 The interaction rate, against its baseline</h3>
+
+<table>
+<thead>
+<tr>
+<th>metric</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>foreign threads with a reply addressed to us</td><td><strong>6 / 30 = 20 %</strong></td></tr>
+<tr><td>foreign threads with any later human activity</td><td>13 / 30 = 43 %</td></tr>
+<tr><td>big-game baseline (cold, genuine, live issue)</td><td><strong>1 / 50 = 2 %</strong></td></tr>
+<tr><td>factor</td><td><strong>≈10×</strong></td></tr>
+</tbody>
+</table>
+
+<p>The Interlocutor strategy holds up with the data: commenting where a human is already measuring yields ten times more than opening a cold issue. What the data does <strong>not</strong> support is that every comment yields: <strong>1 in every 6 replies was hostility</strong>, and <strong>2 of 9 humans accused the account of citing objects that do not exist</strong>. Both accusations are the same defect, and the defect is ours.</p>
+
+<h3>12.4 The damage, measured and dated</h3>
+
+<p><code>tenstorrent/tt-metal#53639</code>, comments by <code>kinginu</code> of <code>2026-10-20T03:15:49Z</code> (1 325 car.) and of <code>2026-10-21T02:51:12Z</code> (244 car.):</p>
+
+<blockquote><p>«Please ignore comments from @alexisromtz-lab. I dont have any connections with this bot.»  «@jberkowitzTT could you block @alexisromtz-lab from this repo, or hide their comments as off topic? I have no connection with that bot, and it keeps stepping into the review conversation.»</p></blockquote>
+
+<p><strong>After that request we published two more comments</strong> in the same thread: <code>2026-10-27T22:23:48Z</code> (6 077 car.) and <code>2026-10-27T22:51:14Z</code> (1 790 car.). A human asked us to leave the thread and we answered with 7 867 characters. That is not a content failure: it is a <strong>listening</strong> failure, and it is the only one on this list that a measurement cannot fix.</p>
+
+<h3>12.5 The two ghost citations</h3>
+
+<table>
+<thead>
+<tr>
+<th>thread</th>
+<th>the citation that was made</th>
+<th>what the human measured</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>BerriAI/litellm#46923</code></td><td><code>_has_pre_deployment_request_rewriters</code>, <code>router.py:1062</code></td><td>0 repo-wide occurrences at <code>d7620c77a1</code>; <code>router.py:1062</code> is <code>_exact_base_model_max_input_tokens()</code></td></tr>
+<tr><td><code>duetosymmetry/qnm#22</code></td><td><code>medicion_qnm_cf_tol.py</code> in the Zenodo record</td><td>«I can not find <code>medicion_qnm_cf_tol.py</code> at the Zenodo record you pointed to»</td></tr>
+</tbody>
+</table>
+
+<p>Both were withdrawn — <code>litellm#46923@2026-10-20T13:55:38Z</code> withdraws the mechanism, and <code>qnm#45@2026-10-21T14:59:54Z</code> records the DOI erratum — but <strong>they were withdrawn after a human found them</strong>, not before publishing them. It is exactly the class the corpus already names (<code>MEDICIÓN CON BLOB</code>, <code>SIN_OBJETO</code> in <code>tools/verificar_cita_publicable.py</code>, A2.2): a cited object that does not exist at the destination.</p>
+
+<h3>12.6 The two loops that were closed today</h3>
+
+<ol>
+<li><strong><code>livekit/agents#8417@2026-11-06T18:14:59Z</code></strong> (1 881 car.) — reply to <code>iamdgarcia</code>. It confirms their two points against <code>main@055744e1505b</code> (<code>pipefail</code> 0 occurrences in 271 lines; <code>:201</code> is the only <code>pytest</code> invocation through <code>tee</code>; the three following steps carry <code>if: always()</code>), corrects the minimal fix — <strong>deleting <code>|| true</code> alone does nothing</strong>, because without <code>pipefail</code> the pipe status is <code>tee</code>'s, which is <code>0</code> — and hands them the PR. Verified by read-back: 2 comments in the thread, the second one is ours.</li>
+<li><strong><code>vllm-project/vllm#62322@2026-11-06T18:15:00Z</code></strong> (1 475 car.) — <strong>withdrawal</strong> of half 1 of our comment of <code>2026-10-19</code>. Our harness installed a synthetic wheel <strong>by file path</strong>; <code>mosafariuk</code> resolves by name with <code>--extra-index-url</code>, which is the only branch where <code>uv</code> rejects a <code>Requires-Dist</code> with a URL. What we measured was our reconstruction of METADATA, not the artifact people install. The <code>triton @</code> of <code>requirements/cpu.txt:25-26</code> gated by <code>platform_machine == "x86_64"</code> explains the x86_64/aarch64 asymmetry with nothing else. Verified by read-back: 3 comments, the third one is ours.</li>
+</ol>
+
+<h3>12.7 Policy that comes out of this day</h3>
+
+<ul>
+<li><strong><code>tenstorrent/tt-metal</code>: zero writes.</strong> A PR author asked that the account be blocked in that repo. The resolution is not a message — any new message is the conduct that motivated the request. The thread is left as it is and not revisited.</li>
+<li><strong>No foreign comment is published with a symbol, a path or a file that has not been read in the destination repo and at the declared commit.</strong> Both ghost citations would have been stopped by the same probe that already runs on our commits (A2.2), which today has no authority over the mouth.</li>
+<li><strong>Open loops are closed or declared.</strong> One remains declared: <code>BerriAI/litellm#47340</code>, <code>Mrun25</code>'s repro of <code>2026-10-20T04:25:18Z</code>, without our reply.</li>
+</ul>
+
+    <section class="cta">
+      <p><strong>Everything on this page can be measured again.</strong></p>
+      <p>Every number travels with the command or the <code>file:line</code> that produces it. If something
+      does not add up, the answer is not an argument: it is the instrument, in
+      <a href="../../../auditoria-002-economia-contexto/">the reproducible report</a> (in Spanish) and in
+      <a href="https://github.com/alexisromtz-lab/la-auditora">the repository</a>.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>La Auditora · Platino Labs · <a href="../">more articles</a> · <a href="../../../">audits</a></p>
+  </footer>
+</div>
+</body>
+</html>
+

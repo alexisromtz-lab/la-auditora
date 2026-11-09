@@ -1,0 +1,212 @@
+<!doctype html>
+<!-- HUELLA-PAGINA-ARTICULO-economia-de-contexto-99-2-20261108 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Context economics — the 99.2 % | La Auditora</title>
+  <meta name="description" content="99.2 % of an agent&#x27;s cost is input, not output. Measured across two generations of the same panel: the total moves 28.19 % between runs, the ratio moves 0.06 points. That is why what is sold is a ratio and not a receipt.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/economia-de-contexto-99-2/">
+  <link rel="alternate" hreflang="es" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/economia-de-contexto-99-2/">
+  <link rel="alternate" hreflang="en" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/economia-de-contexto-99-2/">
+  <link rel="alternate" hreflang="x-default" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/economia-de-contexto-99-2/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Context economics — the 99.2 %">
+  <meta property="og:description" content="99.2 % of an agent&#x27;s cost is input, not output. Measured across two generations of the same panel: the total moves 28.19 % between runs, the ratio moves 0.06 points. That is why what is sold is a ratio and not a receipt.">
+  <meta property="og:url" content="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/economia-de-contexto-99-2/">
+  <meta property="og:locale" content="en_US">
+  <meta property="article:published_time" content="2026-11-06">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../../articulo.css">
+</head>
+<body>
+<a class="skip" href="#contenido">Skip to content</a>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../../../">La Auditora</a>
+    <nav>
+      <a href="../">Articles</a>
+      <a href="../../../">Audits</a>
+      <a href="../../../en/">Portfolio (EN)</a>
+      <a href="../../economia-de-contexto-99-2/" hreflang="es" lang="es">Leer en espanol</a>
+      <a href="../../economia-de-contexto-99-2/articulo.en.md">Source .md</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <p class="eyebrow">Article · 2026-11-06</p>
+    <h1>Context economics — the 99.2 %</h1>
+    <p class="lede">99.2 % of an agent&#x27;s cost is input, not output. Measured across two generations of the same panel: the total moves 28.19 % between runs, the ratio moves 0.06 points. That is why what is sold is a ratio and not a receipt.</p>
+    <div class="proof"><span>ai</span><span>llm</span><span>productivity</span><span>opensource</span></div>
+
+<p><strong>Rule for this document:</strong> no figure is written by hand. Each one carries the command or the <code>archivo:línea</code> that produces it, and any figure without a declared denominator is not published.</p>
+
+<hr>
+
+<h2>1 · The thesis in one sentence</h2>
+
+<p><strong>The cost of an agent is not in what the model writes; it is in what the call drags along.</strong> Measured over 28 971 real calls across 5 days: <code>output</code> is <strong>0.89 %</strong> of consumption. <strong>99.11 %</strong> is <code>input</code> (<code>REPORTE_TOKENS.md:130</code>).</p>
+
+<p>Hence the uncomfortable corollary: optimising the model, the prompt or the temperature moves less than 1 % of the bill. <strong>The remaining 99 % is decided by how many times the history is resent.</strong></p>
+
+<h2>2 · The business number: cost per verified task</h2>
+
+<p>Not cost per call — cost per <strong>task</strong>, which is the unit in which it is billed and in which the decision is made.</p>
+
+<table>
+<thead>
+<tr>
+<th>metric (median per task)</th>
+<th>value</th>
+<th>n</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>total consumption of the task (<code>input</code> + <code>output</code>)</td><td><strong>18 024 682.50</strong> tok</td><td>10</td></tr>
+<tr><td>of that, model <code>output</code></td><td><strong>141 574.50</strong> tok</td><td>10</td></tr>
+<tr><td>model calls that had to be chained</td><td>217.50</td><td>10</td></tr>
+<tr><td>tokens resent <strong>per</strong> call (carry-over)</td><td>80 032.00</td><td>10</td></tr>
+</tbody>
+</table>
+
+<p>locus: <code>REPORTE_TOKENS.md:185-188 @ blob 1c09a667 (213 l)</code> — correct for the generation that §2 freezes; in the live generation the table lives at <code>:188-197 @ blob bc67c4c5</code> (see §8.1).</p>
+
+<p><strong>A task costs 18.02 M tokens. Of those, 141.6 k —0.79 %— is what the model produced.</strong> The rest is the same story told again two hundred and seventeen times.</p>
+
+<p>Carry-over = <code>1 − 141 574.50 / 18 024 682.50</code> = <strong>99.215 %</strong>.</p>
+
+<blockquote><p>It is not 95 %. It is 99.2 %. The difference matters: 95 % still allows the fantasy that the remaining 5 % —«the real work»— is where the lever is. 99.2 % says there is no such 5 %.</p></blockquote>
+
+<h2>3 · How it is reproduced (this is the part that gets billed)</h2>
+
+<p>The report is not an opinion with tables. It is a deterministic instrument over evidence from the machine's own disk:</p>
+
+<pre><code class="language-bash">git cat-file blob bb7190b0 &gt; /tmp/ttr.json           # el crudo de atribución, congelado por blob
+.venv/bin/python tools/reporte_tokens.py --ttr /tmp/ttr.json --md-out /tmp/panel.md   # RC 150 = nominal</code></pre>
+
+<p>The verification run of 30-Oct-2026 reproduces <code>18 024 682.50</code> and <code>141 574.50</code> <strong>exactly</strong>, from blob <code>bb7190b0</code> and not from a lost temporary file. A third-party reader can do the same without asking us for anything.</p>
+
+<p><strong>Why this is the commercial part and not the technical one:</strong> any vendor can say «we optimise your context». What almost nobody can do is hand over the command with which the client checks the figure on their own machine.</p>
+
+<h2>4 · The percentage trap: three denominators, three truths</h2>
+
+<p>Here is the finding that turns the article into something that does not exist in the agents literature: <strong>the same saving measures three different figures depending on what it is divided against</strong>, and almost all published material does not declare the denominator.</p>
+
+<p>Measured case: cutting the profile's tool-schema block from 73 to 22 tools.</p>
+
+<table>
+<thead>
+<tr>
+<th>what it is divided against</th>
+<th>figure</th>
+<th>honest reading</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>the schema block of the profile that features it</td><td><strong>57.9 %</strong></td><td>«I cut the block by 58 %»</td></tr>
+<tr><td>the <code>input</code> of that same profile</td><td><strong>15.4 %</strong></td><td>«I saved 15 % of the input»</td></tr>
+<tr><td>the <code>input</code> of the <strong>whole</strong> corpus</td><td><strong>8.73 %</strong></td><td>«I saved 8.7 % of the spend»</td></tr>
+</tbody>
+</table>
+
+<p>All three are true. Only the third is «of the total», and it is the smallest. A vendor that publishes the first as if it were the third is selling a number with a swapped subject — and that error is indistinguishable from a lie in the contract, even when there is no intent.</p>
+
+<p>The real weighted tax of the schema block is <strong>730 356 952 / 2 472 640 471 = 29.54 %</strong> of the input (<code>REPORTE_TOKENS.md:142-160</code>, sum over calls). Almost a third of the money goes into declaring tools.</p>
+
+<h2>5 · And pruning is not linear: the tax depends on the set, not on the count</h2>
+
+<p>The market intuition —«fewer tools, less cost»— is <strong>false</strong>, and the same panel refutes it:</p>
+
+<table>
+<thead>
+<tr>
+<th>tools exposed</th>
+<th><code>tool_tokens</code> per call</th>
+<th>n</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>98</td><td>26 109.00</td><td>343</td></tr>
+<tr><td>97</td><td><strong>25 818.00</strong></td><td>933</td></tr>
+<tr><td>94</td><td><strong>32 768.00</strong></td><td>1</td></tr>
+<tr><td>22</td><td>9 464.00</td><td>416</td></tr>
+<tr><td>21</td><td><strong>9 173.88</strong></td><td>205</td></tr>
+</tbody>
+</table>
+
+<p>locus: <code>REPORTE_TOKENS.md:147-160</code>.</p>
+
+<p>Fewer tools (94) cost <strong>26.9 % more</strong> than more tools (97). And one tool fewer than 22 (that is, 21) costs <strong>3.07 % less</strong>. The tax is set by the <strong>content</strong> of the block —which schemas, with which description and which JSON schema—, not by its length in units.</p>
+
+<p>Consequence for whoever is going to buy this: the right question is not «how far can we prune?» but <strong>«which set, measured, for which task?»</strong>. A contract that promises a percentage per cardinality threshold is promising something the corpus does not support.</p>
+
+<h2>6 · What this article does NOT claim (and why saying it makes it sellable)</h2>
+
+<ol>
+<li><strong>It does not claim cost per row.</strong> The 99.2 % is the <strong>median of a panel of 200 evaluated commits</strong>, with 10 attributed tasks. Attribution by link exists but is residual: <code>por_enlace = 1</code>, <code>por_ventana = 199</code> (<code>REPORTE_TOKENS.md:69</code>). <strong>We cannot tell a client «your task costs X»</strong>. We can tell them «the median task of this panel costs 18.02 M». It is a fleet dashboard, not a per-service receipt, and the receipt is the missing product.</li>
+<li><strong>It does not claim monetary savings.</strong> The runtime's <code>cost</code> field travels with <code>isByok: true</code>: a <code>0.0</code> there means «not billed to this account», not «free». Without rates there are no euros (<code>REPORTE_TOKENS.md</code> §8).</li>
+<li><strong>It does not claim routing.</strong> The comparison of models by cost is <code>NO_MEDIDO</code> for the same reason.</li>
+</ol>
+
+<p>Publishing the limits does not weaken the article: <strong>it is the only way the three figures that are claimed can be credible.</strong></p>
+
+<h2>7 · Closing</h2>
+
+<p>The sector measures tokens the way one measures petrol: litres consumed. The difference between that and economics is knowing <strong>how many of those litres moved the car and how many burned at the traffic light</strong>. In an agent, the traffic light is the resent context, and in this measurement it is <strong>99.2 of every 100 litres</strong>.</p>
+
+<p>Whoever does not measure the carry-over is not optimising an agent: they are choosing a smaller engine for a car that does not move.</p>
+
+<hr>
+
+<p><strong>Full reproducible evidence:</strong> <code>REPORTE_TOKENS.md</code> · <strong>Instrument:</strong> <code>tools/reporte_tokens.py</code> (RC 150 nominal) · <strong>Frozen raw data:</strong> <code>crudos/reporte_ttr_20261030.json @ bb7190b0</code>.</p>
+
+<h2>8 · The figure has a date (and the ratio does not)</h2>
+
+<p>This article was written on one <strong>generation</strong> of the raw data, and it has to be said with a number because the defect is the house speciality: the producer scans the host's <code>session-state</code>, which <strong>grows while it is being written</strong>, so two runs of the same command on the same day do <strong>not</strong> give the same medians.</p>
+
+<table>
+<thead>
+<tr>
+<th>generation</th>
+<th>raw blob</th>
+<th><code>T_total</code> median</th>
+<th><code>T_completion</code> median</th>
+<th>calls</th>
+<th>carry-over</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>§2 of this article</td><td><code>bb7190b0</code></td><td>18 024 682.50</td><td>141 574.50</td><td>217.50</td><td><strong>99.215 %</strong></td></tr>
+<tr><td>live, in the repo</td><td><code>03e9072b</code></td><td>23 105 392.50</td><td>167 397.00</td><td>276.50</td><td><strong>99.276 %</strong></td></tr>
+<tr><td>jump between the two</td><td>—</td><td><strong>+28.19 %</strong></td><td>+18.24 %</td><td>+27.13 %</td><td><strong>+0.061 pp</strong></td></tr>
+</tbody>
+</table>
+
+<p><strong>That jump row is the article's thesis measured against itself.</strong> The absolute moves <strong>28.19 %</strong> depending on when the command is run; the <strong>ratio moves 0.061 percentage points</strong>. This is exactly why the number being sold is a proportion and not a total: <strong>a proportion survives regeneration, a total does not.</strong> Both generations give <strong>99.2 %</strong> and <strong>99.3 %</strong> — and in no case the <strong>95 %</strong> that was circulating. One of the four columns of §2, <code>tokens por llamada = 80 032.00</code>, is identical in both generations: the median of a ratio stays put even when both its operands move.</p>
+
+<p>Two consequences that are not hidden:</p>
+
+<ol>
+<li><strong><code>REPORTE_TOKENS.md:185-188</code> was overtaken by its own sidecar, and it has already been corrected there.</strong> The sidecar of the raw data (<code>crudos/reporte_ttr_20261030.meta.json</code>) declared, in the same tree, that «la primera generación publicó <code>18024682.5 / 141574.5</code> y esta publica <code>23105392.5 / 167397.0</code>» and that «la cifra que vale es la del crudo con su blob». The report's §7 table published the first one: it was measured and corrected in <code>REPORTE_TOKENS.md</code> (<strong>commit <code>45917cec</code></strong>), where today it lives at <code>:188-197 @ blob bc67c4c5</code> and publishes <code>23 105 392.50 / 167 397.00</code>. The locus of §2 was not miswritten: it was correct for the blob it cites —<code>1c09a667</code>, 213 lines— and the neighbouring commit <code>6d74da06</code> displaced it, moving the table to <code>189-192</code> before the correction left it at <code>190-193</code>. <strong>This section does not rewrite §2</strong>: §2 is left as it was written, with its frozen generation and its blob, so that the difference between the two is auditable instead of invisible. It is an <strong>addendum, not a replacement</strong> — now with the dated closing, not with the open debt.</li>
+<li><strong>Whoever runs the command today will get a third figure.</strong> The figure is not the product; <strong>the command is</strong>. That is why §3 hands over the command and the blob, not the table.</li>
+</ol>
+
+<p><code>HUELLA-ARTICULO-ECONOMIA-CONTEXTO-VIGENCIA-20261030 </code>HUELLA-ARTICULO-COLATERAL-M7-CERRADO-20261030``</p>
+
+    <section class="cta">
+      <p><strong>Everything on this page can be measured again.</strong></p>
+      <p>Every number travels with the command or the <code>file:line</code> that produces it. If something
+      does not add up, the answer is not an argument: it is the instrument, in
+      <a href="../../../auditoria-002-economia-contexto/">the reproducible report</a> (in Spanish) and in
+      <a href="https://github.com/alexisromtz-lab/la-auditora">the repository</a>.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>La Auditora · Platino Labs · <a href="../">more articles</a> · <a href="../../../">audits</a></p>
+  </footer>
+</div>
+</body>
+</html>
+

@@ -133,6 +133,41 @@ def cablear_articulo(root: Path) -> None:
         )
 
 
+def cablear_gemelo(root: Path) -> None:
+    """Gemelo EN sano: fuente, pagina espejo, indice EN y los dos enlaces cruzados."""
+    en = root / "portafolio" / "articulos" / "en"
+    (en / "un-articulo").mkdir(parents=True)
+    (root / ARTICULO / "articulo.en.md").write_text(
+        "---\ntitle: An article\nlede: Fixture.\ndate: 2026-11-06\nlang: en\n---\n\nText.\n",
+        encoding="utf-8",
+    )
+    (en / "un-articulo" / "index.html").write_text(
+        '<a href="../../un-articulo/">Leer en espanol</a>\n', encoding="utf-8"
+    )
+    (en / "index.html").write_text('<a href="un-articulo/">An article</a>\n', encoding="utf-8")
+    portada_en = root / "en" / "index.html"
+    portada_en.write_text(
+        portada_en.read_text(encoding="utf-8")
+        + '<a href="../portafolio/articulos/en/">Articles (EN)</a>\n',
+        encoding="utf-8",
+    )
+    es = root / ARTICULO / "index.html"
+    es.write_text(
+        es.read_text(encoding="utf-8") + '<a href="../en/un-articulo/">English</a>\n',
+        encoding="utf-8",
+    )
+    sitemap = root / "sitemap.xml"
+    sitemap.write_text(
+        sitemap.read_text(encoding="utf-8").replace(
+            "</urlset>",
+            "  <url><loc>%sportafolio/articulos/en/</loc></url>\n"
+            "  <url><loc>%sportafolio/articulos/en/un-articulo/</loc></url>\n</urlset>"
+            % (BASE_LOC, BASE_LOC),
+        ),
+        encoding="utf-8",
+    )
+
+
 class CanarioFalsable(unittest.TestCase):
     def setUp(self) -> None:
         self._tmp = tempfile.TemporaryDirectory()
@@ -281,6 +316,77 @@ class CanarioFalsable(unittest.TestCase):
         self.assertEqual(proc.returncode, 1, proc.stdout)
         self.exigir_rojo("grafo", proc.stdout)
         self.assertIn("no enlaza portafolio/articulos/index.html", proc.stdout)
+
+    # ── el gemelo ingles en el grafo ──────────────────────────────────────
+
+    def test_gemelo_en_cableado_es_verde(self) -> None:
+        cablear_articulo(self.root)
+        cablear_gemelo(self.root)
+        proc = self.correr()
+        self.assertEqual(proc.returncode, 0, proc.stdout)
+        self.assertIn("1 con gemelo EN", proc.stdout)
+
+    def test_gemelo_en_fuera_del_sitemap_enciende_grafo(self) -> None:
+        cablear_articulo(self.root)
+        cablear_gemelo(self.root)
+        sitemap = self.root / "sitemap.xml"
+        sitemap.write_text(
+            sitemap.read_text(encoding="utf-8").replace(
+                BASE_LOC + "portafolio/articulos/en/un-articulo/", ""
+            ),
+            encoding="utf-8",
+        )
+        proc = self.correr()
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.exigir_rojo("grafo", proc.stdout)
+        self.assertIn("sitemap.xml no declara " + BASE_LOC + "portafolio/articulos/en/un-articulo", proc.stdout)
+
+    def test_gemelo_en_sin_pagina_enciende_grafo(self) -> None:
+        cablear_articulo(self.root)
+        cablear_gemelo(self.root)
+        (self.root / "portafolio" / "articulos" / "en" / "un-articulo" / "index.html").unlink()
+        proc = self.correr()
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.exigir_rojo("grafo", proc.stdout)
+        self.assertIn("gemelo de " + ARTICULO, proc.stdout)
+
+    def test_gemelo_en_sin_enlace_reciproco_enciende_grafo(self) -> None:
+        cablear_articulo(self.root)
+        cablear_gemelo(self.root)
+        (self.root / "portafolio" / "articulos" / "en" / "un-articulo" / "index.html").write_text(
+            "<p>Sin vuelta atras.</p>\n", encoding="utf-8"
+        )
+        proc = self.correr()
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.exigir_rojo("grafo", proc.stdout)
+        self.assertIn("no enlaza su fuente", proc.stdout)
+
+    def test_gemelo_en_sin_enlace_desde_el_indice_en_enciende_grafo(self) -> None:
+        cablear_articulo(self.root)
+        cablear_gemelo(self.root)
+        (self.root / "portafolio" / "articulos" / "en" / "index.html").write_text(
+            "<p>Ningun enlace.</p>\n", encoding="utf-8"
+        )
+        proc = self.correr()
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.exigir_rojo("grafo", proc.stdout)
+        self.assertIn("portafolio/articulos/en/index.html no enlaza", proc.stdout)
+
+
+    def test_la_portada_en_sin_enlace_al_indice_en_enciende_grafo(self) -> None:
+        cablear_articulo(self.root)
+        cablear_gemelo(self.root)
+        portada = self.root / "en" / "index.html"
+        portada.write_text(
+            portada.read_text(encoding="utf-8").replace(
+                '<a href="../portafolio/articulos/en/">Articles (EN)</a>\n', ""
+            ),
+            encoding="utf-8",
+        )
+        proc = self.correr()
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.exigir_rojo("grafo", proc.stdout)
+        self.assertIn("en/index.html no enlaza portafolio/articulos/en/index.html", proc.stdout)
 
 
     def test_raiz_sin_index_es_no_medido(self) -> None:
