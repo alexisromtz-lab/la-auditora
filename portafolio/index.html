@@ -76,6 +76,7 @@
     <header>
       <a class="brand" href="/la-auditora/portafolio/">Platino Labs · La Auditora</a>
       <nav aria-label="Navegación principal">
+        <a href="#informes">Informes</a>
         <a href="#auditorias">Auditorías</a>
         <a href="#metodo">Método</a>
         <a href="https://arquitectocuantico.com/">Libros</a>
@@ -89,6 +90,29 @@
         <p class="lede">Auditorías reproducibles de software: grafos de importación en Python, ciclos eager, descubrimiento de tests y señales de CI. Cada resultado queda atado a un objeto y a un alcance concreto.</p>
         <div class="proof" aria-label="Principios de trabajo">
           <span>Sin claims fuera del alcance</span><span>Controles negativos</span><span>Resultados positivos y nulos</span>
+        </div>
+      </section>
+
+      <section class="section" id="informes" aria-labelledby="informes-titulo">
+        <h2 id="informes-titulo">Informes con script de reproducción</h2>
+        <p class="intro">Cada informe se publica como ejecutable: un script determinista, sin red y sin dependencias, que vuelve a obtener el mismo veredicto. El código habla primero; la prosa lo acompaña.</p>
+        <div class="grid">
+          <article>
+            <span class="tag">medición propia · economía de contexto · reproducibilidad</span>
+            <h3>El 99 % que se paga antes de la primera palabra</h3>
+            <p class="metric">población ×1.90 · volumen ×3.076 · fracción 99.16 % – 99.28 %</p>
+            <p>Tres generaciones del mismo instrumento sobre el mismo corpus, en crecimiento. La población pasó de 10 a 19 tareas y el volumen por tarea se triplicó, mientras la fracción de tokens que se reenvía como contexto se movió 0.1145 puntos porcentuales y el cociente entre tokens totales y llamadas al modelo se movió 0.018 %. La cifra absoluta responde al tamaño del corpus; la razón responde al instrumento.</p>
+            <p><strong>Límite:</strong> no atribuye coste a un modelo —la fuente registra cuál corrió, nunca por qué—; son tres puntos, dos de ellos con 18 minutos de separación, y no se leen como tendencia; los denominadores son 10, 10 y 19 tareas.</p>
+            <p class="source"><code>python3 reproduce.py</code> · RC 0 con 7/7 · <a href="auditoria-002-economia-contexto/">informe y script</a></p>
+          </article>
+          <article>
+            <span class="tag">litellm · CI · fail-closed</span>
+            <h3>Un job en verde que no corrió ningún test</h3>
+            <p class="metric">3 salidas <code>exit 0</code> sin ejecutar pytest · 2 reproducidas en el acto</p>
+            <p>En el commit auditado, el paso que corre el shard de tests termina en éxito si la selección del matrix llega vacía, si ninguno de los paths de la selección existe en disco, y si pytest devuelve 5 —su código documentado para «cero tests recogidos»—. Un renombrado de directorio de tests deja el job verde, y el único rastro es una anotación en un log que nadie abre cuando está verde.</p>
+            <p><strong>Límite:</strong> mide un step de un workflow en un commit fijado; no se leyó el historial de Actions, así que no se afirma que haya ocurrido en una corrida concreta.</p>
+            <p class="source"><a href="https://github.com/BerriAI/litellm/commit/d947ec1f7d672883afbf8b79574be9ac8a44b43d" target="_blank" rel="noopener noreferrer">BerriAI/litellm · d947ec1f</a> · <code>python3 reproduce.py &lt;test-unit.yml&gt;</code> · <a href="auditoria-001-litellm/">informe y script</a></p>
+          </article>
         </div>
       </section>
 
