@@ -330,6 +330,85 @@ def reparar(raiz: Path, slug: str, clave_api: str, transporte, publicado: bool, 
     return 0
 
 
+NUMERO = re.compile(r"\d+(?:[.,\s]\d+)*\s*%?")
+MILES = re.compile(r"[.,](?=\d{3}$)")
+
+
+def _canonico(hallado: str) -> str:
+    """Una cifra sin su formato: '1 015' y '1,015' son el mismo numero."""
+    limpio = hallado.replace(" ", "")
+    limpio = MILES.sub("", limpio)
+    return limpio.replace(",", ".")
+
+
+def numeros(texto: str) -> dict:
+    """El multiconjunto de cifras de un cuerpo. Una traduccion no puede cambiarlo."""
+    cuenta: dict = {}
+    for hallado in NUMERO.findall(texto):
+        clave = _canonico(hallado)
+        cuenta[clave] = cuenta.get(clave, 0) + 1
+    return cuenta
+
+
+def sustituir(
+    identificador: str,
+    cuerpo_nuevo: Path,
+    clave_api: str,
+    transporte,
+    enviar: bool,
+    titulo: str | None = None,
+    excusa: str | None = None,
+) -> int:
+    """Reemplaza el cuerpo de un articulo vivo. Rechaza una traduccion que mueva una cifra."""
+    nuevo = cuerpo_nuevo.read_text(encoding="utf-8")
+    estado, listado = transporte("GET", API + "/articles/me/all?per_page=1000", clave_api, None)
+    if estado != 200:
+        print("API %d al listar: %s" % (estado, json.dumps(listado)[:400]), file=sys.stderr)
+        return 3
+    remoto = next((a for a in listado if str(a.get("id")) == str(identificador)), None)
+    if remoto is None:
+        print("no hay articulo con id %s" % identificador, file=sys.stderr)
+        return 3
+    viejo = remoto.get("body_markdown") or ""
+    print("id=%s titulo remoto: %s" % (remoto["id"], remoto.get("title")))
+    print("  cuerpo remoto %d B -> nuevo %d B" % (len(viejo.encode("utf-8")), len(nuevo.encode("utf-8"))))
+    if normalizar(viejo) == normalizar(nuevo):
+        print("  sin cambio (sha256:%s)" % huella(nuevo))
+        return 0
+    antes, despues = numeros(viejo), numeros(nuevo)
+    if antes != despues and not excusa:
+        solo_viejo = {k: v for k, v in antes.items() if despues.get(k) != v}
+        solo_nuevo = {k: v for k, v in despues.items() if antes.get(k) != v}
+        print("  NO SE ENVIA: las cifras no coinciden.", file=sys.stderr)
+        print("    solo en el remoto: %s" % solo_viejo, file=sys.stderr)
+        print("    solo en el nuevo:   %s" % solo_nuevo, file=sys.stderr)
+        print("  Si el cambio de cifra es el proposito, dilo: --excusa \"<razon>\"", file=sys.stderr)
+        return 5
+    if excusa:
+        print("  EXCUSA declarada: %s" % excusa)
+    datos: dict = {"body_markdown": nuevo}
+    if titulo:
+        datos["title"] = titulo
+    if not enviar:
+        print("  SECO: no se envio nada. --enviar para sustituir.")
+        return 0
+    estado, respuesta = transporte("PUT", "%s/articles/%s" % (API, remoto["id"]), clave_api, {"article": datos})
+    if estado not in (200, 201):
+        return fallo_de_api(estado, respuesta)
+    print("  SUSTITUIDO id=%s url=%s" % (respuesta.get("id"), respuesta.get("url")))
+    guardado = respuesta.get("body_markdown") or ""
+    print(
+        "  guardado %d B | vallas=%d | h2=%d | vinetas=%d"
+        % (
+            len(guardado.encode("utf-8")),
+            guardado.count("```") // 2,
+            len(re.findall(r"^## ", guardado, re.M)),
+            len(re.findall(r"^[-*] ", guardado, re.M)),
+        )
+    )
+    return 0
+
+
 def listar(clave_api: str, transporte) -> int:
     estado, listado = transporte("GET", API + "/articles/me/all?per_page=1000", clave_api, None)
     if estado != 200:
@@ -348,6 +427,10 @@ def main(argv=None, transporte=transporte_urllib) -> int:
     p.add_argument("--enviar", action="store_true", help="sin esta bandera no se hace ninguna peticion")
     p.add_argument("--listar", action="store_true", help="lista lo que ya vive en dev.to")
     p.add_argument("--reparar", metavar="SLUG", help="PUT idempotente sobre el articulo ya publicado")
+    p.add_argument("--sustituir", metavar="ID", help="reemplaza el cuerpo de un articulo vivo por --cuerpo")
+    p.add_argument("--cuerpo", help="archivo con el cuerpo nuevo (para --sustituir)")
+    p.add_argument("--titulo", help="titulo nuevo (para --sustituir)")
+    p.add_argument("--excusa", help="razon por la que las cifras cambian; sin ella, se rechaza")
     p.add_argument("--borrador", action="store_true", help="publicar como borrador en vez de publico")
     p.add_argument("--clave-archivo", help="archivo con la clave (por defecto, la variable de entorno)")
     try:
@@ -357,8 +440,10 @@ def main(argv=None, transporte=transporte_urllib) -> int:
     publicado = not args.borrador
     # `--reparar` necesita la clave aun en seco: comparar contra el cuerpo remoto
     # exige una lectura. Publicar en seco no abre ninguna conexion.
-    necesita_clave = args.enviar or args.listar or bool(args.reparar)
+    necesita_clave = args.enviar or args.listar or bool(args.reparar) or bool(args.sustituir)
     try:
+        if args.sustituir and not args.cuerpo:
+            raise Config("--sustituir exige --cuerpo <archivo>")
         if necesita_clave:
             valor, origen = clave(args.clave_archivo)
             print("clave %s %s" % (origen, describir_clave(valor)))
@@ -367,6 +452,16 @@ def main(argv=None, transporte=transporte_urllib) -> int:
             print("SECO: se imprime el payload, no se abre ninguna conexion.")
         if args.listar:
             return listar(valor, transporte)
+        if args.sustituir:
+            return sustituir(
+                args.sustituir,
+                Path(args.cuerpo).expanduser(),
+                valor,
+                transporte,
+                args.enviar,
+                args.titulo,
+                args.excusa,
+            )
         raiz = Path(args.raiz).resolve()
         if args.reparar:
             return reparar(raiz, args.reparar, valor, transporte, publicado, args.enviar)
