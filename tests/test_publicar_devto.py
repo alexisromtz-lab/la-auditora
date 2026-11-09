@@ -555,3 +555,136 @@ class Canonica(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def proyectar(raiz, slug, cuerpo, canonica=CANONICA):
+    """Escribe una proyeccion minima: lo que el publicador espera leer."""
+    carpeta = Path(raiz) / "portafolio" / "articulos" / slug
+    carpeta.mkdir(parents=True, exist_ok=True)
+    (carpeta / pd.NOMBRE).write_text(
+        '---\ntitle: "Titulo"\ncanonical_url: "%s"\ntags: "audit"\n---\n\n%s'
+        % (canonica, cuerpo),
+        encoding="utf-8",
+    )
+
+
+class PreVuelo(unittest.TestCase):
+    """?Puede esta maquina publicar? Se responde antes, no despues.
+
+    El pre-vuelo es lo que un operario corre al abrir la cuenta. Si miente en
+    verde, la maquina publica en espanol o cree tener red cuando no la tiene.
+    """
+
+    EN = "## Step\n\nThe audit found 42 defects in 807 files.\n"
+    ES = (
+        "## Paso\n\nLa auditoria encontró cuarenta y dos defectos en los archivos "
+        "del repositorio, y además el informe los documenta porque también los "
+        "mide, aunque no los resuelve todavía; sin embargo sí los cuenta, pero "
+        "los cuenta porque los mide, y los mide porque los cuenta.\n"
+    )
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.raiz = Path(self.tmp.name)
+
+
+    def test_una_maquina_sin_proyeccion_no_esta_lista(self):
+        transporte = Transporte()
+        with con_clave():
+            rc = pd.main(
+                ["--raiz", str(self.raiz), "--pre-vuelo", "--slug", "no-existe"],
+                transporte=transporte,
+            )
+        self.assertEqual(rc, 9)
+        self.assertEqual(transporte.metodos, [])
+
+    def test_un_cuerpo_en_espanol_bloquea_el_pre_vuelo(self):
+        proyectar(self.raiz, "uno", self.ES)
+        transporte = Transporte()
+        with con_clave():
+            rc = pd.main(["--raiz", str(self.raiz), "--pre-vuelo", "--slug", "uno"], transporte=transporte)
+        self.assertEqual(rc, 7)
+        self.assertEqual(transporte.metodos, [])
+
+    def test_un_cuerpo_en_ingles_pasa(self):
+        proyectar(self.raiz, "uno", self.EN)
+        transporte = Transporte()
+        with con_clave():
+            rc = pd.main(["--raiz", str(self.raiz), "--pre-vuelo", "--slug", "uno"], transporte=transporte)
+        self.assertEqual(rc, 0)
+        self.assertEqual(transporte.metodos, [])
+
+    def test_sin_red_no_se_abre_ninguna_conexion(self):
+        proyectar(self.raiz, "uno", self.EN)
+        transporte = Transporte((200, []))
+        with con_clave():
+            rc = pd.main(["--raiz", str(self.raiz), "--pre-vuelo", "--slug", "uno"], transporte=transporte)
+        self.assertEqual(rc, 0)
+        self.assertEqual(transporte.llamadas, [])
+
+    def test_con_red_la_unica_peticion_es_una_lectura(self):
+        proyectar(self.raiz, "uno", self.EN)
+        transporte = Transporte((200, []))
+        with con_clave():
+            rc = pd.main(["--raiz", str(self.raiz), "--pre-vuelo", "--slug", "uno", "--red"], transporte=transporte)
+        self.assertEqual(rc, 0)
+        self.assertEqual(transporte.metodos, ["GET"])
+
+    def test_una_red_caida_no_se_lee_como_listo(self):
+        proyectar(self.raiz, "uno", self.EN)
+
+        def caida(metodo, url, clave_api, datos):
+            raise OSError("sin ruta al host")
+
+        with con_clave():
+            rc = pd.main(["--raiz", str(self.raiz), "--pre-vuelo", "--slug", "uno", "--red"], transporte=caida)
+        self.assertEqual(rc, 8)
+
+    def test_una_clave_rechazada_no_se_lee_como_listo(self):
+        """Un 401 es respuesta de la API (RC 3), no falta de clave (RC 2)."""
+        proyectar(self.raiz, "uno", self.EN)
+        transporte = Transporte((401, {"error": "no autorizado"}))
+        with con_clave():
+            rc = pd.main(["--raiz", str(self.raiz), "--pre-vuelo", "--slug", "uno", "--red"], transporte=transporte)
+        self.assertEqual(rc, 3)
+
+    def test_sin_clave_el_pre_vuelo_no_inventa_una(self):
+        proyectar(self.raiz, "uno", self.EN)
+        with mock.patch.dict(os.environ, {}, clear=True):
+            rc = pd.main(["--raiz", str(self.raiz), "--pre-vuelo", "--slug", "uno"], transporte=Transporte())
+        self.assertEqual(rc, 2)
+
+
+class IdiomaDelCuerpo(unittest.TestCase):
+    """El envio rechaza un cuerpo en espanol; el articulo vivo viaja en ingles."""
+
+    ES = PreVuelo.ES
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.raiz = Path(self.tmp.name)
+        proyectar(self.raiz, "uno", self.ES)
+
+    def test_enviar_en_espanol_devuelve_7_y_no_abre_la_red(self):
+        transporte = Transporte((200, {}))
+        with con_clave():
+            rc = pd.main(["--raiz", str(self.raiz), "--slug", "uno", "--enviar"], transporte=transporte)
+        self.assertEqual(rc, 7)
+        self.assertEqual(transporte.llamadas, [])
+
+    def test_permitir_es_declara_la_excepcion_y_envia(self):
+        transporte = Transporte((201, {"id": 1, "url": "https://dev.to/x"}))
+        with con_clave():
+            rc = pd.main(
+                ["--raiz", str(self.raiz), "--slug", "uno", "--enviar", "--permitir-es"],
+                transporte=transporte,
+            )
+        self.assertEqual(rc, 0)
+        self.assertEqual(transporte.metodos, ["POST"])
+
+    def test_el_pre_vuelo_y_el_envio_leen_el_idioma_del_mismo_sitio(self):
+        """Un solo detector: el umbral del pre-vuelo es el del envio."""
+        self.assertTrue(pd.densidad_es(self.ES) > pd.UMBRAL_ES_ABSOLUTO)
+        self.assertLessEqual(pd.densidad_es(PreVuelo.EN), pd.UMBRAL_ES_ABSOLUTO)

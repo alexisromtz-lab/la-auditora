@@ -169,6 +169,23 @@ The article that came out wrong is `id=5005894`. It still holds the flattened bo
 it with one `PUT`, and that repair is `NO_MEDIDO` until the key exists. Copying from the rendered page
 was the defect; a transport that never reads a rendered page is the fix.
 
+### A new account starts with `--pre-vuelo`
+
+Before publishing from a machine that has never published, run:
+
+    python3 tools/publicar_devto.py --raiz . --pre-vuelo --clave-archivo ~/mi-clave.env --red
+
+It answers the only question a new operator has — *can this machine publish?* — with typed codes
+instead of a promise: `9` a projection is missing (run `tools/devto.py --raiz .`), `2` the key is
+missing or unreadable, `7` a body is still in Spanish, `8` dev.to is unreachable, `3` the API
+rejected the request (a `401` lands here). It opens no connection at all unless `--red` is passed,
+and with `--red` the only request is a `GET`, which publishes nothing. It then prints the procedure.
+
+`--enviar` refuses a body that is still in Spanish (`7`) unless `--permitir-es` declares the
+exception, and the threshold is the same one `tests/test_articulos_en.py` uses: the detector lives in
+`tools/equivalencia_en.py`, so the pre-flight and the sending cannot disagree about what "in English"
+means. One key per operator, one file outside the repository — `--clave-archivo` exists for that.
+
 
 ## If the contact check fails
 

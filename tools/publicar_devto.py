@@ -17,9 +17,13 @@ Uso:
     python3 tools/publicar_devto.py --raiz . --slug <slug> --enviar
     python3 tools/publicar_devto.py --reparar <slug> --enviar     # PUT idempotente
     python3 tools/publicar_devto.py --listar                      # id | titulo
+    python3 tools/publicar_devto.py --pre-vuelo                   # esta maquina, ?puede publicar?
 
 RC: 0 sin cambio o publicado · 1 desfase en --check · 2 configuracion
-(clave ausente, proyeccion ilegible) · 3 error de la API · 20 argumentos.
+(clave ausente, proyeccion ilegible) · 3 error de la API · 4 limite de la API
+(429) · 5 cifras que cambian en una sustitucion · 6 canonica invalida ·
+7 el cuerpo no esta en ingles · 8 la red no alcanza dev.to · 9 falta una
+proyeccion · 20 argumentos.
 """
 
 from __future__ import annotations
@@ -37,6 +41,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from devto import NOMBRE  # noqa: E402
+from equivalencia_en import UMBRAL_ES_ABSOLUTO, densidad_es  # noqa: E402
 from paginas_articulos import SITIO_EN, cosechar  # noqa: E402
 
 API = "https://dev.to/api"
@@ -221,7 +226,15 @@ def slugs_en(raiz: Path) -> list[str]:
     return [m["slug"] for m in metas if m["lang"] == "en"]
 
 
-def publicar(raiz: Path, slug: str, clave_api: str, transporte, publicado: bool, enviar: bool) -> int:
+def publicar(
+    raiz: Path,
+    slug: str,
+    clave_api: str,
+    transporte,
+    publicado: bool,
+    enviar: bool,
+    permitir_es: bool = False,
+) -> int:
     encabezado, cuerpo, ruta = leer(raiz, slug)
     datos = payload(encabezado, cuerpo, publicado)
     print("%-56s %s" % (slug, ruta.name))
@@ -237,6 +250,19 @@ def publicar(raiz: Path, slug: str, clave_api: str, transporte, publicado: bool,
             publicado,
         )
     )
+    densidad = densidad_es(cuerpo)
+    if densidad > UMBRAL_ES_ABSOLUTO:
+        print(
+            "  IDIOMA: %.1f marcas espanolas por 1000 caracteres (umbral %.1f): este cuerpo no esta en ingles"
+            % (densidad, UMBRAL_ES_ABSOLUTO)
+        )
+        if enviar and not permitir_es:
+            print(
+                "  RECHAZADO: lo que se publica viaja en ingles. Traduce el cuerpo en su propio articulo;"
+                " --permitir-es solo si de verdad quieres publicar en espanol.",
+                file=sys.stderr,
+            )
+            return 7
     if not enviar:
         print("  SECO: no se envio nada. --enviar para publicar.")
         return 0
@@ -440,6 +466,75 @@ def listar(clave_api: str, transporte) -> int:
     return 0
 
 
+PROCEDIMIENTO = """
+PROCEDIMIENTO DE PUBLICACION (lo que se publica viaja en ingles; las ordenes, en espanol)
+
+  1. Traduce el cuerpo EN SU PROPIO articulo. Nunca publiques un duplicado: una
+     URL por articulo, o dos cuerpos compiten entre si.
+  2. Regenera las proyecciones desde el markdown:
+       python3 tools/devto.py --raiz .
+  3. Mira el payload sin abrir la red (imprime tamano y sha256):
+       python3 tools/publicar_devto.py --raiz . --slug <slug>
+  4. Envia:
+       python3 tools/publicar_devto.py --raiz . --slug <slug> --enviar
+  5. Lee de vuelta y anota el id y la url:
+       python3 tools/publicar_devto.py --listar
+  6. Si el articulo ya tiene pagina en el sitio, declara esa canonica:
+       python3 tools/publicar_devto.py --sustituir <id> --canonica <url https>
+
+La clave se lee de DEVTO_API_KEY o de --clave-archivo <ruta>; su valor nunca se
+imprime. Cada operario puede usar su propia cuenta y su propio archivo:
+--clave-archivo ~/mi-clave.env. Un 429 no se reintenta a ciegas: publicaria dos
+veces.
+"""
+
+
+def pre_vuelo(raiz: Path, slugs, valor: str, transporte, red: bool) -> int:
+    """?Puede esta maquina publicar? Se responde antes de intentarlo, no despues.
+
+    No abre ninguna conexion salvo con `--red`, y con `--red` la unica peticion
+    es una lectura: comprobar que la clave autentica no publica nada.
+    """
+    print("PRE-VUELO de publicacion")
+    peor = 0
+    for slug in slugs:
+        ruta = raiz / "portafolio" / "articulos" / slug / NOMBRE
+        if not ruta.exists():
+            print("  FALTA LA PROYECCION  %-52s %s" % (slug, ruta))
+            peor = max(peor, 9)
+            continue
+        try:
+            encabezado, cuerpo = separar(ruta.read_text(encoding="utf-8"))
+            payload(encabezado, cuerpo, True)
+        except Config as error:
+            print("  PROYECCION ILEGIBLE  %-52s %s" % (slug, error))
+            peor = max(peor, 2)
+            continue
+        densidad = densidad_es(cuerpo)
+        idioma = "EN" if densidad <= UMBRAL_ES_ABSOLUTO else "ES"
+        print(
+            "  OK                   %-52s %7d B  idioma=%s (%.1f marcas/1000)"
+            % (slug, len(cuerpo.encode("utf-8")), idioma, densidad)
+        )
+        if idioma == "ES":
+            print("    el cuerpo sigue en espanol: traducelo antes de enviar")
+            peor = max(peor, 7)
+    if red:
+        try:
+            estado, respuesta = transporte("GET", API + "/articles/me/all?per_page=1", valor, None)
+        except Exception as error:  # noqa: BLE001 - cualquier fallo de red es RC 8
+            print("  RED: no se alcanzo dev.to (%s)" % type(error).__name__, file=sys.stderr)
+            return max(peor, 8)
+        if estado != 200:
+            print("  RED: dev.to respondio %d" % estado, file=sys.stderr)
+            return max(peor, fallo_de_api(estado, respuesta))
+        print("  RED: dev.to responde y la clave autentica.")
+    print(PROCEDIMIENTO)
+    if peor == 0:
+        print("LISTO: la maquina puede publicar. Paso 3 para ver el payload, paso 4 para enviar.")
+    return peor
+
+
 def main(argv=None, transporte=transporte_urllib) -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--raiz", default=".", help="raiz del repositorio")
@@ -454,6 +549,17 @@ def main(argv=None, transporte=transporte_urllib) -> int:
     p.add_argument("--canonica", help="URL https a la que el articulo debe declarar como canonica")
     p.add_argument("--borrador", action="store_true", help="publicar como borrador en vez de publico")
     p.add_argument("--clave-archivo", help="archivo con la clave (por defecto, la variable de entorno)")
+    p.add_argument(
+        "--pre-vuelo",
+        action="store_true",
+        help="verifica que esta maquina puede publicar (proyecciones, idioma y, con --red, la clave)",
+    )
+    p.add_argument("--red", action="store_true", help="con --pre-vuelo: una lectura para probar la clave")
+    p.add_argument(
+        "--permitir-es",
+        action="store_true",
+        help="publicar aunque el cuerpo este en espanol (por defecto se rechaza)",
+    )
     try:
         args = p.parse_args(argv)
     except SystemExit as error:
@@ -461,7 +567,9 @@ def main(argv=None, transporte=transporte_urllib) -> int:
     publicado = not args.borrador
     # `--reparar` necesita la clave aun en seco: comparar contra el cuerpo remoto
     # exige una lectura. Publicar en seco no abre ninguna conexion.
-    necesita_clave = args.enviar or args.listar or bool(args.reparar) or bool(args.sustituir)
+    necesita_clave = (
+        args.enviar or args.listar or bool(args.reparar) or bool(args.sustituir) or args.pre_vuelo
+    )
     try:
         if args.sustituir and not args.cuerpo and not args.canonica:
             raise Config("--sustituir exige --cuerpo <archivo> o --canonica <url>")
@@ -473,6 +581,12 @@ def main(argv=None, transporte=transporte_urllib) -> int:
             print("SECO: se imprime el payload, no se abre ninguna conexion.")
         if args.listar:
             return listar(valor, transporte)
+        if args.pre_vuelo:
+            raiz = Path(args.raiz).resolve()
+            slugs = args.slug or slugs_en(raiz)
+            if not slugs:
+                raise Config("no hay articulos en ingles que verificar")
+            return pre_vuelo(raiz, slugs, valor, transporte, args.red)
         if args.sustituir:
             return sustituir(
                 args.sustituir,
@@ -492,7 +606,7 @@ def main(argv=None, transporte=transporte_urllib) -> int:
             raise Config("no hay articulos en ingles que publicar")
         peor = 0
         for slug in slugs:
-            peor = max(peor, publicar(raiz, slug, valor, transporte, publicado, args.enviar))
+            peor = max(peor, publicar(raiz, slug, valor, transporte, publicado, args.enviar, args.permitir_es))
         return peor
     except Config as error:
         print("CONFIG: %s" % error, file=sys.stderr)

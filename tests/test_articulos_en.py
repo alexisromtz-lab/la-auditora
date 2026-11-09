@@ -17,6 +17,7 @@ Tres invariantes, ninguno depende de que el traductor sea honesto:
 from __future__ import annotations
 
 import re
+import sys
 import unittest
 from collections import Counter
 from pathlib import Path
@@ -24,14 +25,10 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parent.parent
 ARTICULOS = RAIZ / "portafolio" / "articulos"
 
-# Palabras y marcas que el ingles no usa. Se compara EN contra ES: lo que
-# importa es la caida, no el valor absoluto.
-MARCADORES_ES = re.compile(
-    r"[ñáéíóú¿¡]|\b(?:que|para|del|los|las|con|una|por|como|esto|esta|más|pero|sin"
-    r"|entre|desde|cuando|porque|todo|todos|hay|es|son|fue|sin)\b",
-    re.IGNORECASE,
-)
-UMBRAL_EN = 0.2  # el gemelo conserva como maximo el 20 % de la densidad del ES
+sys.path.insert(0, str(RAIZ / "tools"))
+
+from equivalencia_en import MARCADORES_ES, UMBRAL_EN  # noqa: E402
+
 VALLA = re.compile(r"```.*?```", re.DOTALL)
 
 
