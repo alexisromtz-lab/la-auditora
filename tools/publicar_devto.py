@@ -39,29 +39,68 @@ from devto import NOMBRE  # noqa: E402
 from paginas_articulos import SITIO_EN, cosechar  # noqa: E402
 
 API = "https://dev.to/api"
-VARIABLE = "DEVTO_API_KEY"
+VARIABLES = ("DEVTO_API_KEY", "DEV_TO_API_KEY")
 MAX_TAGS = 4
+AGENTE = "platino-labs-publicar-devto/1 (+https://github.com/alexisromtz-lab/la-auditora)"
 
 
 class Config(Exception):
     """Falta la clave o la proyeccion no es legible."""
 
 
-def clave(archivo: str | None = None) -> tuple[str, str]:
+def _del_archivo(ruta: Path, variables) -> tuple[str, str] | None:
+    """Ultima aparicion de cualquiera de los nombres en un `.env`.
+
+    Un `.env` no es un archivo de una sola clave: se busca el nombre y se
+    devuelve solo su valor. Nada del resto del archivo sale de aqui.
+    """
+    encontrado = None
+    for linea in ruta.read_text(encoding="utf-8", errors="replace").splitlines():
+        limpia = linea.strip()
+        if not limpia or limpia.startswith("#") or "=" not in limpia:
+            continue
+        nombre, valor = limpia.split("=", 1)
+        nombre = nombre.strip().removeprefix("export ").strip()
+        if nombre in variables:
+            valor = valor.strip().strip('"').strip("'").strip()
+            if valor:
+                encontrado = (valor, "%s:%s" % (ruta, nombre))
+    if encontrado:
+        return encontrado
+    # Un archivo que solo contiene la clave, sin `=`. Se exige que no haya
+    # ninguna asignacion: un `.env` con otras claves no es un archivo de clave.
+    lineas = [
+        linea.strip()
+        for linea in ruta.read_text(encoding="utf-8", errors="replace").splitlines()
+        if linea.strip() and not linea.strip().startswith("#")
+    ]
+    if len(lineas) == 1 and "=" not in lineas[0]:
+        unico = lineas[0].strip('"').strip("'").strip()
+        if unico:
+            return unico, str(ruta)
+    return None
+
+
+def clave(archivo: str | None = None, variables=VARIABLES) -> tuple[str, str]:
     """La clave y su origen. El valor no sale de aqui."""
     if archivo:
-        ruta = Path(archivo)
+        ruta = Path(archivo).expanduser()
         if not ruta.exists():
             raise Config("no existe el archivo de clave: %s" % archivo)
-        valor, origen = ruta.read_text(encoding="utf-8").strip(), str(ruta)
-    else:
-        valor, origen = os.environ.get(VARIABLE, "").strip(), VARIABLE
-    if not valor:
-        raise Config(
-            "clave ausente (%s). Generala en dev.to/settings/extensions y exportala:\n"
-            "  export %s=...   # nunca en el chat, nunca en un commit" % (origen, VARIABLE)
-        )
-    return valor, origen
+        hallada = _del_archivo(ruta, variables)
+        if not hallada:
+            raise Config("en %s no hay ninguna de estas claves: %s" % (ruta, ", ".join(variables)))
+        return hallada
+    for nombre in variables:
+        valor = os.environ.get(nombre, "").strip()
+        if valor:
+            return valor, nombre
+    raise Config(
+        "clave ausente (%s). Generala en dev.to/settings/extensions y exportala:\n"
+        "  export %s=...   # nunca en el chat, nunca en un commit\n"
+        "  o pásala con --clave-archivo <ruta al .env>"
+        % (" / ".join(variables), variables[0])
+    )
 
 
 def describir_clave(valor: str) -> str:
@@ -114,6 +153,9 @@ def transporte_urllib(metodo: str, url: str, clave_api: str, datos: dict | None)
     peticion.add_header("api-key", clave_api)
     peticion.add_header("Content-Type", "application/json")
     peticion.add_header("Accept", "application/json")
+    # dev.to responde 403 al User-Agent por defecto de urllib: un cliente que no
+    # se identifica no pasa el filtro. Medido, no supuesto.
+    peticion.add_header("User-Agent", AGENTE)
     try:
         with urllib.request.urlopen(peticion, timeout=30) as respuesta:
             return respuesta.status, json.loads(respuesta.read().decode("utf-8") or "{}")
@@ -172,6 +214,29 @@ def publicar(raiz: Path, slug: str, clave_api: str, transporte, publicado: bool,
     return 0
 
 
+def localizar(listado, encabezado: dict, slug: str):
+    """El articulo remoto y la clave por la que se reconocio.
+
+    El articulo publicado a mano en el editor web no tiene `canonical_url`, asi
+    que buscar solo por canonica lo declara inexistente. Se degrada a titulo,
+    nunca a «el primero que haya».
+    """
+    canonica = encabezado["canonical_url"]
+    for a in listado:
+        if a.get("canonical_url") == canonica:
+            return a, "canonical_url"
+    if slug.isdigit():
+        for a in listado:
+            if str(a.get("id")) == slug:
+                return a, "id"
+    titulo = (encabezado.get("title") or "").strip()
+    if titulo:
+        for a in listado:
+            if (a.get("title") or "").strip() == titulo:
+                return a, "title"
+    return None, ""
+
+
 def reparar(raiz: Path, slug: str, clave_api: str, transporte, publicado: bool, enviar: bool) -> int:
     """PUT idempotente: si el cuerpo remoto ya es el local, no se envia nada."""
     encabezado, cuerpo, _ = leer(raiz, slug)
@@ -180,11 +245,13 @@ def reparar(raiz: Path, slug: str, clave_api: str, transporte, publicado: bool, 
         print("API %d al listar: %s" % (estado, json.dumps(listado)[:400]), file=sys.stderr)
         return 3
     canonica = encabezado["canonical_url"]
-    propio = [a for a in listado if a.get("canonical_url") == canonica]
-    if not propio:
-        print("%s: no hay articulo en dev.to con canonical_url %s" % (slug, canonica), file=sys.stderr)
+    remoto, por = localizar(listado, encabezado, slug)
+    if remoto is None:
+        print("%s: no hay articulo en dev.to con canonical_url ni con titulo %s" % (slug, canonica), file=sys.stderr)
         return 3
-    remoto = propio[0]
+    print("%s: reconocido por %s (id=%s)" % (slug, por, remoto.get("id")))
+    if not remoto.get("canonical_url"):
+        print("  WARN: el articulo remoto no declara canonica; el PUT la añade (%s)" % canonica)
     if (remoto.get("body_markdown") or "").strip() == cuerpo.strip():
         print("%s: sin cambio (id=%s, sha256:%s)" % (slug, remoto["id"], huella(cuerpo)))
         return 0

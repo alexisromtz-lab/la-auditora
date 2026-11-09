@@ -8,8 +8,10 @@ tabla que el articulo de origen.
 
 from __future__ import annotations
 
+import json
 import os
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -97,6 +99,57 @@ class Clave(unittest.TestCase):
         self.assertIn("abcd", descripcion)
         self.assertNotIn("1234567890", descripcion)
 
+    def test_los_dos_nombres_conocidos_se_aceptan(self):
+        # El nombre real en la maquina del dueño lleva guion bajo entre DEV y TO.
+        for nombre in pd.VARIABLES:
+            with self.subTest(nombre=nombre):
+                with mock.patch.dict(os.environ, {nombre: "valor-%s" % nombre}, clear=True):
+                    valor, origen = pd.clave()
+                self.assertEqual(valor, "valor-%s" % nombre)
+                self.assertEqual(origen, nombre)
+
+    def test_gana_el_primer_nombre_declarado(self):
+        ambos = {nombre: "valor-%s" % nombre for nombre in pd.VARIABLES}
+        with mock.patch.dict(os.environ, ambos, clear=True):
+            _, origen = pd.clave()
+        self.assertEqual(origen, pd.VARIABLES[0])
+
+    def test_un_env_se_lee_por_nombre_y_no_por_posicion(self):
+        # Un `.env` no es un archivo de una sola clave: la clave se busca, no se asume.
+        with tempfile.TemporaryDirectory() as carpeta:
+            ruta = Path(carpeta) / ".env.local"
+            ruta.write_text(
+                'OTRA=no-soy-yo\nDEV_TO_API_KEY="la-buena"\nTERCERA=tampoco\n',
+                encoding="utf-8",
+            )
+            valor, origen = pd.clave(str(ruta))
+        self.assertEqual(valor, "la-buena")
+        self.assertTrue(origen.endswith(":DEV_TO_API_KEY"), origen)
+
+    def test_en_el_env_gana_la_ultima_aparicion(self):
+        with tempfile.TemporaryDirectory() as carpeta:
+            ruta = Path(carpeta) / ".env"
+            ruta.write_text("DEV_TO_API_KEY=vieja\nDEV_TO_API_KEY=nueva\n", encoding="utf-8")
+            valor, _ = pd.clave(str(ruta))
+        self.assertEqual(valor, "nueva")
+
+    def test_un_archivo_con_solo_la_clave_tambien_sirve(self):
+        with tempfile.TemporaryDirectory() as carpeta:
+            ruta = Path(carpeta) / "clave.txt"
+            ruta.write_text("abc123\n", encoding="utf-8")
+            valor, origen = pd.clave(str(ruta))
+        self.assertEqual(valor, "abc123")
+        self.assertEqual(origen, str(ruta))
+
+    def test_un_env_sin_la_clave_nombra_las_que_busca(self):
+        with tempfile.TemporaryDirectory() as carpeta:
+            ruta = Path(carpeta) / ".env"
+            ruta.write_text("OTRA=1\n", encoding="utf-8")
+            with self.assertRaises(pd.Config) as capturado:
+                pd.clave(str(ruta))
+        for nombre in pd.VARIABLES:
+            self.assertIn(nombre, str(capturado.exception))
+
     def test_main_sin_clave_devuelve_2_y_no_abre_conexion(self):
         transporte = Transporte()
         with mock.patch.dict(os.environ, {}, clear=True):
@@ -115,6 +168,47 @@ class Seco(unittest.TestCase):
     def test_publicar_en_seco_no_exige_clave(self):
         with mock.patch.dict(os.environ, {}, clear=True):
             self.assertEqual(pd.main(["--raiz", str(RAIZ), "--slug", SLUG], transporte=Transporte()), 0)
+
+
+class Cabeceras(unittest.TestCase):
+    """dev.to responde 403 al User-Agent por defecto de urllib. Medido, no supuesto."""
+
+    def _peticion(self, metodo="GET", datos=None):
+        capturada = {}
+
+        class Respuesta:
+            status = 200
+
+            def read(self):
+                return b"{}"
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_):
+                return False
+
+        def falso_urlopen(peticion, timeout=None):
+            capturada["p"] = peticion
+            return Respuesta()
+
+        with mock.patch("urllib.request.urlopen", side_effect=falso_urlopen):
+            pd.transporte_urllib(metodo, pd.API + "/articles/me/all?per_page=1", "clavedeprueba", datos)
+        return capturada["p"]
+
+    def test_el_transporte_se_identifica_con_un_agente_propio(self):
+        agente = self._peticion().get_header("User-agent")
+        self.assertEqual(agente, pd.AGENTE)
+        self.assertNotIn("Python-urllib", agente or "")
+
+    def test_el_transporte_manda_la_clave_en_el_header_api_key(self):
+        self.assertEqual(self._peticion().get_header("Api-key"), "clavedeprueba")
+
+    def test_el_transporte_declara_json_al_escribir(self):
+        peticion = self._peticion("PUT", {"article": {"body_markdown": "x"}})
+        self.assertEqual(peticion.get_method(), "PUT")
+        self.assertEqual(peticion.get_header("Content-type"), "application/json")
+        self.assertTrue(json.loads(peticion.data.decode("utf-8"))["article"]["body_markdown"])
 
 
 class Envio(unittest.TestCase):
@@ -179,7 +273,47 @@ class Reparacion(unittest.TestCase):
         with con_clave():
             rc = pd.main(["--raiz", str(RAIZ), "--reparar", SLUG, "--enviar"], transporte=transporte)
         self.assertEqual(rc, 3)
-        self.assertEqual(transporte.metodos, ["GET"])
+
+    def test_un_articulo_pegado_a_mano_se_reconoce_por_titulo(self):
+        # El articulo vivo nacio del portapapeles: no tiene canonical_url. Buscar
+        # solo por canonica lo declaraba inexistente y la reparacion era imposible.
+        encabezado, cuerpo, _ = pd.leer(RAIZ, SLUG)
+        listado = [{"id": 5005894, "canonical_url": None, "title": encabezado["title"], "body_markdown": "plano"}]
+        remoto, por = pd.localizar(listado, encabezado, SLUG)
+        self.assertEqual(por, "title")
+        self.assertEqual(remoto["id"], 5005894)
+
+    def test_la_canonica_gana_al_titulo(self):
+        encabezado, _, _ = pd.leer(RAIZ, SLUG)
+        listado = [
+            {"id": 1, "canonical_url": None, "title": encabezado["title"], "body_markdown": "plano"},
+            {"id": 2, "canonical_url": CANONICA, "title": "otro", "body_markdown": "plano"},
+        ]
+        remoto, por = pd.localizar(listado, encabezado, SLUG)
+        self.assertEqual((remoto["id"], por), (2, "canonical_url"))
+
+    def test_el_id_numerico_localiza_sin_depender_del_titulo(self):
+        encabezado, _, _ = pd.leer(RAIZ, SLUG)
+        listado = [{"id": 5005894, "canonical_url": None, "title": "otro titulo"}]
+        remoto, por = pd.localizar(listado, encabezado, "5005894")
+        self.assertEqual((remoto["id"], por), (5005894, "id"))
+
+    def test_un_titulo_parecido_no_es_el_articulo(self):
+        encabezado, _, _ = pd.leer(RAIZ, SLUG)
+        listado = [{"id": 1, "canonical_url": None, "title": encabezado["title"] + " (parte 2)"}]
+        self.assertEqual(pd.localizar(listado, encabezado, SLUG), (None, ""))
+
+    def test_reparacion_de_un_articulo_sin_canonica_la_añade(self):
+        encabezado, cuerpo, _ = pd.leer(RAIZ, SLUG)
+        listado = [{"id": 5005894, "canonical_url": None, "title": encabezado["title"], "body_markdown": "plano"}]
+        transporte = Transporte((200, listado), (200, {"id": 5005894}))
+        with con_clave():
+            rc = pd.main(["--raiz", str(RAIZ), "--reparar", SLUG, "--enviar"], transporte=transporte)
+        self.assertEqual(rc, 0)
+        self.assertEqual(transporte.metodos, ["GET", "PUT"])
+        _, _, datos = transporte.llamadas[1]
+        self.assertEqual(datos["article"]["canonical_url"], CANONICA)
+        self.assertEqual(datos["article"]["body_markdown"], cuerpo)
 
 
 class Estructura(unittest.TestCase):
