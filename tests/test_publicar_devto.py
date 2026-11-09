@@ -688,3 +688,124 @@ class IdiomaDelCuerpo(unittest.TestCase):
         """Un solo detector: el umbral del pre-vuelo es el del envio."""
         self.assertTrue(pd.densidad_es(self.ES) > pd.UMBRAL_ES_ABSOLUTO)
         self.assertLessEqual(pd.densidad_es(PreVuelo.EN), pd.UMBRAL_ES_ABSOLUTO)
+
+
+class Canonicos(unittest.TestCase):
+    """?A donde apunta la canonica de cada post vivo, y es coherente?
+
+    Un canónico no se sostiene por declararse: se sostiene porque la pagina que
+    declara existe y habla el mismo idioma. Los tres falsadores son exactos, sin
+    parecido ni umbral que decida: sin canonica, canonica muerta, canonica
+    cruzada de idioma. La canonica cruzada es la que hoy tienen los tres posts
+    en espanol: apuntan a una pagina en ingles y no deduplican nada.
+    """
+
+    SITIO = "https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/"
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.raiz = Path(self.tmp.name)
+        for rel in ("portafolio/articulos/uno/index.html", "portafolio/articulos/en/uno/index.html"):
+            ruta = self.raiz / rel
+            ruta.parent.mkdir(parents=True, exist_ok=True)
+            ruta.write_text("<html></html>", encoding="utf-8")
+
+    def post(self, **extra):
+        base = {
+            "id": 1,
+            "title": "A title",
+            "body_markdown": PreVuelo.EN,
+            "url": "https://dev.to/alexisromtz7/uno-abc",
+        }
+        base.update(extra)
+        return base
+
+    def correr(self, *posts):
+        salida = io.StringIO()
+        transporte = Transporte((200, list(posts)))
+        with mock.patch("sys.stdout", salida):
+            rc = pd.canonicos(self.raiz, "clave", transporte)
+        return rc, salida.getvalue()
+
+    def test_una_canonica_al_sitio_en_su_idioma_es_coherente(self):
+        rc, salida = self.correr(self.post(canonical_url=self.SITIO + "en/uno/"))
+        self.assertEqual(rc, 0)
+        self.assertIn("SITIO", salida)
+
+    def test_una_canonica_a_una_pagina_que_no_existe_es_muerta(self):
+        rc, salida = self.correr(self.post(canonical_url=self.SITIO + "en/desaparecido/"))
+        self.assertEqual(rc, 10)
+        self.assertIn("MUERTA", salida)
+
+    def test_una_canonica_del_sitio_en_otro_idioma_es_cruzada(self):
+        """El post es EN y canonicaliza a la pagina ES: dos copias compitiendo."""
+        rc, salida = self.correr(self.post(canonical_url=self.SITIO + "uno/"))
+        self.assertEqual(rc, 10)
+        self.assertIn("CRUZADA", salida)
+
+    def test_una_canonica_a_un_post_vivo_en_otro_idioma_es_cruzada(self):
+        """El caso medido: el post es ES y apunta al gemelo EN de dev.to."""
+        en = self.post(id=1, canonical_url=self.SITIO + "en/uno/")
+        es = self.post(
+            id=2,
+            title="Uno",
+            body_markdown=PreVuelo.ES,
+            url="https://dev.to/alexisromtz7/uno-es",
+            canonical_url="https://dev.to/alexisromtz7/uno-abc",
+        )
+        rc, salida = self.correr(es, en)
+        self.assertEqual(rc, 10)
+        self.assertIn("CRUZADA", salida)
+        self.assertIn("apunta al post 1", salida)
+
+    def test_una_canonica_a_un_gemelo_del_mismo_idioma_se_acepta(self):
+        """Dos posts en espanol que se apuntan entre si deduplican de verdad."""
+        es = self.post(
+            id=2,
+            title="Uno",
+            body_markdown=PreVuelo.ES,
+            url="https://dev.to/alexisromtz7/uno-es",
+            canonical_url="https://dev.to/alexisromtz7/otro-es",
+        )
+        hermano = self.post(
+            id=3,
+            title="Uno",
+            body_markdown=PreVuelo.ES,
+            url="https://dev.to/alexisromtz7/otro-es",
+            canonical_url="https://dev.to/alexisromtz7/uno-es",
+        )
+        rc, salida = self.correr(es, hermano)
+        self.assertEqual(rc, 0)
+        self.assertIn("GEMELO", salida)
+
+    def test_un_post_sin_canonica_no_deduplica(self):
+        rc, salida = self.correr(self.post())
+        self.assertEqual(rc, 10)
+        self.assertIn("SIN_CANONICA", salida)
+
+    def test_sin_articulos_es_no_medido_y_no_cero(self):
+        rc, salida = self.correr()
+        self.assertEqual(rc, 1)
+        self.assertIn("NO_MEDIDO", salida)
+
+    def test_un_error_de_la_api_no_se_lee_como_verde(self):
+        transporte = Transporte((401, {"error": "no"}))
+        with mock.patch("sys.stdout", io.StringIO()), mock.patch("sys.stderr", io.StringIO()):
+            rc = pd.canonicos(self.raiz, "clave", transporte)
+        self.assertEqual(rc, 3)
+
+    def test_la_bandera_canonicos_llega_al_lector(self):
+        transporte = Transporte((200, [self.post(canonical_url=self.SITIO + "uno/")]))
+        with con_clave(), mock.patch("sys.stdout", io.StringIO()):
+            rc = pd.main(["--raiz", str(self.raiz), "--canonicos"], transporte=transporte)
+        self.assertEqual(rc, 10)
+        self.assertEqual(transporte.metodos, ["GET"])
+
+    def test_la_bandera_canonicos_exige_la_clave(self):
+        with mock.patch.dict(os.environ, {}, clear=True):
+            for nombre in pd.VARIABLES:
+                os.environ.pop(nombre, None)
+            with mock.patch("sys.stderr", io.StringIO()):
+                rc = pd.main(["--raiz", str(self.raiz), "--canonicos"], transporte=Transporte())
+        self.assertEqual(rc, 2)

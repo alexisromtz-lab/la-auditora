@@ -18,12 +18,13 @@ Uso:
     python3 tools/publicar_devto.py --reparar <slug> --enviar     # PUT idempotente
     python3 tools/publicar_devto.py --listar                      # id | titulo
     python3 tools/publicar_devto.py --pre-vuelo                   # esta maquina, ?puede publicar?
+    python3 tools/publicar_devto.py --canonicos --raiz .          # ?a donde apunta cada post?
 
 RC: 0 sin cambio o publicado · 1 desfase en --check · 2 configuracion
 (clave ausente, proyeccion ilegible) · 3 error de la API · 4 limite de la API
 (429) · 5 cifras que cambian en una sustitucion · 6 canonica invalida ·
 7 el cuerpo no esta en ingles · 8 la red no alcanza dev.to · 9 falta una
-proyeccion · 20 argumentos.
+proyeccion · 10 al menos una canonica incoherente · 20 argumentos.
 """
 
 from __future__ import annotations
@@ -42,7 +43,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from devto import NOMBRE  # noqa: E402
 from equivalencia_en import UMBRAL_ES_ABSOLUTO, densidad_es  # noqa: E402
-from paginas_articulos import SITIO_EN, cosechar  # noqa: E402
+from paginas_articulos import SITIO, SITIO_EN, cosechar  # noqa: E402
 
 API = "https://dev.to/api"
 VARIABLES = ("DEVTO_API_KEY", "DEV_TO_API_KEY")
@@ -466,6 +467,97 @@ def listar(clave_api: str, transporte) -> int:
     return 0
 
 
+def idioma_de(post) -> str:
+    """El idioma de un post ya publicado.
+
+    dev.to devuelve `language` vacio en los articulos antiguos, asi que el
+    idioma se mide sobre el cuerpo con el mismo detector y el mismo umbral que
+    usa el pre-vuelo. Dos definiciones de "esta en ingles" se contradirian.
+    """
+    cuerpo = post.get("body_markdown") or ""
+    texto = cuerpo + "\n" + (post.get("title") or "")
+    return "es" if densidad_es(texto) > UMBRAL_ES_ABSOLUTO else "en"
+
+
+def pagina_del_sitio(raiz: Path, canonica: str):
+    """La pagina local que una canonica del sitio declara: (ruta, idioma).
+
+    Devuelve (None, None) si la canonica no es de nuestro sitio: una canonica
+    externa no se juzga, porque no hay nada en el arbol con que compararla.
+    """
+    if not canonica.startswith(SITIO):
+        return None, None
+    resto = canonica[len(SITIO):]
+    if resto.startswith("en/"):
+        idioma, resto = "en", resto[3:]
+    else:
+        idioma = "es"
+    slug = resto.split("/")[0]
+    if not slug:
+        return None, None
+    base = raiz / "portafolio" / "articulos"
+    return base / ("en/" + slug if idioma == "en" else slug) / "index.html", idioma
+
+
+def canonicos(raiz: Path, clave_api: str, transporte) -> int:
+    """?A donde apunta la canonica de cada post vivo, y es coherente?
+
+    Un canónico no se sostiene por declararse: se sostiene porque la pagina que
+    declara existe y habla el mismo idioma. Tres fallas se miden aqui, y las
+    tres son exactas -- no hay parecido ni umbral que decida:
+
+      SIN_CANONICA   el post no declara canonica alguna
+      MUERTA         la canonica apunta a una pagina que no esta en el arbol
+      CRUZADA        la canonica es de otro idioma que el cuerpo del post
+
+    Una canonica a si mismo (`PROPIA`) es lo que dev.to hace por defecto y no
+    es un defecto: solo cuando hay otra copia del mismo idioma compite.
+    """
+    estado, listado = transporte("GET", API + "/articles/me/published?per_page=1000", clave_api, None)
+    if estado != 200:
+        print("API %d al listar: %s" % (estado, json.dumps(listado)[:400]), file=sys.stderr)
+        return fallo_de_api(estado, listado)
+    if not listado:
+        print("NO_MEDIDO: dev.to no devolvio ningun articulo publicado")
+        return 1
+    idiomas = {a.get("id"): idioma_de(a) for a in listado}
+    por_url = {a.get("url"): a for a in listado if a.get("url")}
+    fallas = 0
+    for a in sorted(listado, key=lambda x: x.get("id") or 0, reverse=True):
+        idioma = idiomas.get(a.get("id"))
+        canonica = (a.get("canonical_url") or "").strip()
+        etiqueta = "%s  %s  %s" % (a.get("id"), idioma, canonica or "(ninguna)")
+        if not canonica:
+            print("SIN_CANONICA  " + etiqueta)
+            fallas += 1
+            continue
+        ruta, idioma_pagina = pagina_del_sitio(raiz, canonica)
+        if ruta is not None:
+            if not ruta.is_file():
+                print("MUERTA        %s\n                no existe %s" % (etiqueta, ruta.relative_to(raiz)))
+                fallas += 1
+            elif idioma_pagina != idioma:
+                print("CRUZADA       %s\n                la pagina es %s y el post es %s" % (etiqueta, idioma_pagina, idioma))
+                fallas += 1
+            else:
+                print("SITIO         " + etiqueta)
+            continue
+        gemelo = por_url.get(canonica)
+        if gemelo is not None:
+            if idiomas.get(gemelo.get("id")) != idioma:
+                print(
+                    "CRUZADA       %s\n                apunta al post %s, que esta en %s"
+                    % (etiqueta, gemelo.get("id"), idiomas.get(gemelo.get("id")))
+                )
+                fallas += 1
+            else:
+                print("GEMELO        " + etiqueta)
+            continue
+        print(("PROPIA        " if canonica == a.get("url") else "EXTERNA       ") + etiqueta)
+    print("\n%d articulo(s) publicado(s), %d canonica(s) incoherente(s)." % (len(listado), fallas))
+    return 10 if fallas else 0
+
+
 PROCEDIMIENTO = """
 PROCEDIMIENTO DE PUBLICACION (lo que se publica viaja en ingles; las ordenes, en espanol)
 
@@ -481,6 +573,13 @@ PROCEDIMIENTO DE PUBLICACION (lo que se publica viaja en ingles; las ordenes, en
        python3 tools/publicar_devto.py --listar
   6. Si el articulo ya tiene pagina en el sitio, declara esa canonica:
        python3 tools/publicar_devto.py --sustituir <id> --canonica <url https>
+     La canonica va a la pagina DEL IDIOMA DEL POST. Un post en espanol que
+     apunta a una pagina en ingles no deduplica: le dice a Google que es una
+     copia de otro idioma.
+  7. Comprueba que el grafo de canonicas sigue entero:
+       python3 tools/publicar_devto.py --canonicos --raiz .
+     RC 10 nombra el post culpable. Una canonica a una pagina que no existe o
+     de otro idioma se paga con el trafico de ese articulo, no con un error.
 
 La clave se lee de DEVTO_API_KEY o de --clave-archivo <ruta>; su valor nunca se
 imprime. Cada operario puede usar su propia cuenta y su propio archivo:
@@ -556,6 +655,11 @@ def main(argv=None, transporte=transporte_urllib) -> int:
     )
     p.add_argument("--red", action="store_true", help="con --pre-vuelo: una lectura para probar la clave")
     p.add_argument(
+        "--canonicos",
+        action="store_true",
+        help="mide a donde apunta la canonica de cada post vivo (RC 10 si es incoherente)",
+    )
+    p.add_argument(
         "--permitir-es",
         action="store_true",
         help="publicar aunque el cuerpo este en espanol (por defecto se rechaza)",
@@ -568,7 +672,12 @@ def main(argv=None, transporte=transporte_urllib) -> int:
     # `--reparar` necesita la clave aun en seco: comparar contra el cuerpo remoto
     # exige una lectura. Publicar en seco no abre ninguna conexion.
     necesita_clave = (
-        args.enviar or args.listar or bool(args.reparar) or bool(args.sustituir) or args.pre_vuelo
+        args.enviar
+        or args.listar
+        or args.canonicos
+        or bool(args.reparar)
+        or bool(args.sustituir)
+        or args.pre_vuelo
     )
     try:
         if args.sustituir and not args.cuerpo and not args.canonica:
@@ -581,6 +690,8 @@ def main(argv=None, transporte=transporte_urllib) -> int:
             print("SECO: se imprime el payload, no se abre ninguna conexion.")
         if args.listar:
             return listar(valor, transporte)
+        if args.canonicos:
+            return canonicos(Path(args.raiz).resolve(), valor, transporte)
         if args.pre_vuelo:
             raiz = Path(args.raiz).resolve()
             slugs = args.slug or slugs_en(raiz)

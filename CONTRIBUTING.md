@@ -186,6 +186,23 @@ exception, and the threshold is the same one `tests/test_articulos_en.py` uses: 
 `tools/equivalencia_en.py`, so the pre-flight and the sending cannot disagree about what "in English"
 means. One key per operator, one file outside the repository — `--clave-archivo` exists for that.
 
+### A canonical pointing at another language is not a canonical
+
+    python3 tools/publicar_devto.py --raiz . --canonicos --clave-archivo ~/mi-clave.env
+
+It reads the 13 published posts ahead of the 4 this repository sends, and classifies each
+`canonical_url` by what the target actually is: `SITIO` and `GEMELO` are healthy, `PROPIA` is dev.to's
+default and is not a defect, `EXTERNA` is somebody else's domain and is not ours to judge.
+`SIN_CANONICA`, `MUERTA` (the page does not answer) and `CRUZADA` (the page answers, in the other
+language) are the three falsifiers — `10` when any of them appears, `1` when there are no posts to
+measure, `3`/`4` when the API refuses.
+
+`CRUZADA` is the one that hid for weeks: three Spanish posts declared their English twin as canonical,
+so the Spanish page told Google that the English page was the original. hreflang requires a
+self-referencing canonical, so the correct target for those posts is their **own** site page. Run
+`--canonicos` after any `--sustituir`: a `PUT` regenerates the slug, and the alias keeps the old URL
+alive, which is exactly the state where a stale canonical passes unnoticed.
+
 
 ## If the contact check fails
 
