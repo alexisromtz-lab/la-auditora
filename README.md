@@ -186,6 +186,25 @@ Quien siga el commit-pin de la página hasta el Data Room encontrará otro objet
 no es un fallo de medición: son dos productos con el mismo nombre genérico, y por eso están en dos
 tablas separadas.
 
+### Informes reproducibles · la tríada
+
+Dos informes se publican como artefacto ejecutable y no como prosa: `reproduce.py` vuelve a obtener
+el veredicto, `ficha.json` lo registra de forma legible por máquina e `index.html` lo narra. Este
+índice **apunta y no transcribe**: las cifras viven en cada informe, y una cifra copiada aquí
+envejecería sin que su fuente se moviera.
+
+| informe | objeto | comando desde un clon limpio | contrato |
+|---|---|---|---|
+| [auditoria-002-economia-contexto](./portafolio/auditoria-002-economia-contexto/) | tres generaciones del panel de tokens de `platino-labs` | `python3 reproduce.py` | RC 0 = las 7 afirmaciones reproducen · RC 1 = alguna diverge · RC 2 = no se pudo medir · `--repo DIR` añade un testigo que **no** altera el veredicto |
+| [auditoria-001-litellm](./portafolio/auditoria-001-litellm/) | `BerriAI/litellm` @ `d947ec1f`, step `id: tests` de `.github/workflows/test-unit.yml` | `python3 reproduce.py <test-unit.yml>` | RC 1 = el paso reporta éxito sin correr un test · RC 0 = falla cerrado en los dos escenarios · RC 2 = el bloque no se ubicó |
+
+**Las dos filas no son simétricas, y se declara.** El script de 001 ejecuta el workflow real, así
+que exige el archivo auditado fuera de este repositorio: desde un clon limpio devuelve RC 2, que es
+«no se pudo medir» y no un cero. El de 002 lleva sus datos dentro y corre sin argumentos, sin red y
+sin acceso a `platino-labs`. 001 es más fuerte como evidencia —ejecuta el objeto—; 002 lo es como
+reproducción. La compuerta de admisión de la tríada, en [CONTRIBUTING.md](./CONTRIBUTING.md), pide
+las dos cosas a partir del informe 003.
+
 ## En progreso
 
 La capa SCC está publicada para los diez snapshots de la cohorte inicial; los trece añadidos después

@@ -76,6 +76,7 @@
     <header>
       <a class="brand" href="/la-auditora/portafolio/">Platino Labs · La Auditora</a>
       <nav aria-label="Main navigation">
+        <a href="#reports">Reports</a>
         <a href="#audits">Audits</a>
         <a href="#method">Method</a>
         <a href="https://arquitectocuantico.com/">Books</a>
@@ -89,6 +90,29 @@
         <p class="lede">Reproducible software audits: Python import graphs, eager cycles, test discovery and CI signals. Every result is tied to a specific object and scope.</p>
         <div class="proof" aria-label="Working principles">
           <span>No claims beyond scope</span><span>Negative controls</span><span>Positive and null results</span>
+        </div>
+      </section>
+
+      <section class="section" id="reports" aria-labelledby="reports-title">
+        <h2 id="reports-title">Reports with a reproduction script</h2>
+        <p class="intro">Every report ships as an executable: a deterministic script, no network and no dependencies, that reaches the same verdict again. The code speaks first; the prose follows.</p>
+        <div class="grid">
+          <article>
+            <span class="tag">self-audit · context economics · reproducibility</span>
+            <h3>The 99 % paid before the first word</h3>
+            <p class="metric">population ×1.90 · volume ×3.076 · share 99.16 % – 99.28 %</p>
+            <p>Three generations of the same instrument over the same growing corpus. The population went from 10 to 19 tasks and the volume per task tripled, while the fraction of tokens re-sent as context moved 0.1145 percentage points and the quotient of total tokens to model calls moved 0.018 %. The absolute figure tracks the size of the corpus; the ratio tracks the instrument.</p>
+            <p><strong>Limit:</strong> it does not attribute cost to a model — the source records which one ran, never why — it is three points, two of them 18 minutes apart, and they are not read as a trend; the denominators are 10, 10 and 19 tasks.</p>
+            <p class="source"><code>python3 reproduce.py</code> · RC 0 with 7/7 · <a href="../auditoria-002-economia-contexto/">report and script</a></p>
+          </article>
+          <article>
+            <span class="tag">litellm · CI · fail-closed</span>
+            <h3>A green job that ran no test at all</h3>
+            <p class="metric">3 <code>exit 0</code> paths without running pytest · 2 reproduced on the spot</p>
+            <p>At the audited commit, the step that runs the test shard exits successfully when the matrix selection arrives empty, when none of the selected paths exist on disk, and when pytest returns 5 — its documented code for “no tests collected”. Renaming a test directory leaves the job green, and the only trace is an annotation in a log nobody opens while it is green.</p>
+            <p><strong>Limit:</strong> it measures one step of one workflow at a pinned commit; the Actions history was not read, so it does not claim this happened in a particular run.</p>
+            <p class="source"><a href="https://github.com/BerriAI/litellm/commit/d947ec1f7d672883afbf8b79574be9ac8a44b43d" target="_blank" rel="noopener noreferrer">BerriAI/litellm · d947ec1f</a> · <code>python3 reproduce.py &lt;test-unit.yml&gt;</code> · <a href="../auditoria-001-litellm/">report and script</a></p>
+          </article>
         </div>
       </section>
 

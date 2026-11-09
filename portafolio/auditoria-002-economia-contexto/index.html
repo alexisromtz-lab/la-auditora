@@ -1,0 +1,163 @@
+<!doctype html>
+<!-- HUELLA-AUDITORIA-002-ECONOMIA-CONTEXTO-20261108 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Report 002 · context economics — the 99 % paid before the first word | La Auditora</title>
+  <meta name="description" content="Three generations of the same token instrument over a corpus that grew 1.90x in population and 3.08x in volume: the share of tokens spent on context moved 0.11 percentage points. Reproducible arithmetic, no data required.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/auditoria-002-economia-contexto/">
+  <link rel="alternate" hreflang="es" href="https://alexisromtz-lab.github.io/la-auditora/">
+  <link rel="alternate" hreflang="en" href="https://alexisromtz-lab.github.io/la-auditora/en/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Report 002 · the 99 % you pay before saying anything">
+  <meta property="og:description" content="The absolute cost of a task tracks how much corpus you fed the instrument. The ratio does not: 99.16 % to 99.28 % across a 3.08x change in volume.">
+  <meta property="og:url" content="https://alexisromtz-lab.github.io/la-auditora/portafolio/auditoria-002-economia-contexto/">
+  <meta name="twitter:card" content="summary">
+  <style>
+    :root { color-scheme: dark; --bg:#101317; --panel:#171c22; --ink:#f3f1eb; --muted:#b2bac4; --line:#303943; --accent:#78e0c3; --warm:#f0bd76; --bad:#f08a8a; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; background:radial-gradient(ellipse at 14% 0%,#1e2a2d 0,transparent 34rem),var(--bg); color:var(--ink); font:16px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    a { color:var(--accent); text-underline-offset:.2em; }
+    a:hover { color:#b4f4e4; }
+    .skip { position:absolute; left:-9999px; top:auto; }
+    .skip:focus { left:1rem; top:1rem; z-index:5; background:var(--panel); padding:.7rem; }
+    .wrap { width:min(860px,calc(100% - 2rem)); margin:auto; }
+    header { display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:1.2rem 0; border-bottom:1px solid var(--line); }
+    .brand { color:var(--ink); font-weight:750; letter-spacing:.08em; text-decoration:none; text-transform:uppercase; font-size:.85rem; }
+    nav { display:flex; flex-wrap:wrap; gap:1rem; font-size:.9rem; }
+    nav a { text-decoration:none; }
+    main { padding:2.5rem 0 4rem; }
+    .eyebrow { color:var(--accent); font-size:.78rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; }
+    h1 { margin:.7rem 0 1rem; font-size:clamp(2rem,5.5vw,3.4rem); line-height:1.08; letter-spacing:-.04em; }
+    .lede { color:var(--muted); font-size:clamp(1.05rem,2vw,1.22rem); max-width:720px; }
+    .proof { display:flex; flex-wrap:wrap; gap:.65rem; margin:1.7rem 0 0; }
+    .proof span, .tag { border:1px solid var(--line); border-radius:999px; padding:.35rem .75rem; color:var(--muted); font-size:.82rem; }
+    .tag { padding:.15rem .55rem; font-size:.78rem; }
+    h2 { margin:2.6rem 0 1rem; font-size:clamp(1.4rem,3.4vw,1.9rem); letter-spacing:-.02em; }
+    h3 { margin:1.8rem 0 .5rem; font-size:1.12rem; }
+    p { color:var(--muted); }
+    strong { color:var(--ink); }
+    code { background:#0c1013; border:1px solid var(--line); border-radius:5px; padding:.1rem .35rem; font-size:.88em; color:var(--warm); }
+    pre { background:#0c1013; border:1px solid var(--line); border-radius:10px; padding:1rem; overflow-x:auto; font-size:.86rem; line-height:1.55; }
+    pre code { background:none; border:0; padding:0; color:var(--ink); }
+    .card { border:1px solid var(--line); border-radius:14px; padding:1.25rem; background:linear-gradient(145deg,#1a2026,var(--panel)); }
+    .metric { color:var(--warm); font-size:1.05rem; font-weight:750; }
+    table { width:100%; border-collapse:collapse; margin:1rem 0; font-size:.94rem; }
+    th, td { text-align:left; padding:.55rem .6rem; border-bottom:1px solid var(--line); }
+    th { color:var(--ink); font-size:.8rem; letter-spacing:.06em; text-transform:uppercase; }
+    td { color:var(--muted); }
+    td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+    .green { color:var(--bad); font-weight:700; }
+    .limite { border-left:2px solid var(--warm); padding:.2rem 0 .2rem 1rem; margin:1.2rem 0; }
+    .limite p { margin:.3rem 0; }
+    .cta { border:1px solid var(--accent); border-radius:14px; padding:1.4rem; margin:3rem 0 0; }
+    .cta p { margin:.4rem 0; }
+    footer { border-top:1px solid var(--line); padding:1.5rem 0 3rem; color:var(--muted); font-size:.88rem; }
+  </style>
+</head>
+<body>
+<a class="skip" href="#contenido">Skip to content</a>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../../">La Auditora</a>
+    <nav>
+      <a href="../../">Audits</a>
+      <a href="../../en/">English</a>
+      <a href="#reproduce">Reproduce</a>
+      <a href="#limits">Limits</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <p class="eyebrow">Report 002 · context economics</p>
+    <h1>The 99 % you pay before saying anything</h1>
+    <p class="lede">I measured the same token instrument on the same corpus at three points in its growth. The population nearly doubled and the total volume tripled. The share of tokens spent re-reading context instead of producing output moved <strong>0.11 percentage points</strong>. That gap between what scales and what does not is the whole report.</p>
+    <div class="proof">
+      <span>3 generations · 2 on 2026-10-30, 1 on 2026-11-08</span>
+      <span>population 10 → 10 → 19 tasks</span>
+      <span>volume ×3.076</span>
+      <span>share 99.16 % – 99.28 %</span>
+      <span>status: verified</span>
+    </div>
+
+    <h2 id="finding">The measurement</h2>
+    <p>This is a self-audit: the subject is my own instrument, <code>tools/reporte_tokens.py</code>, run over a log of every model call a working agent made. For each snapshot it publishes a set of medians per task. Two of them are enough to see the shape:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>snapshot</th><th class="num">n</th><th class="num">T_total / task</th><th class="num">T_completion / task</th><th class="num">calls / task</th><th class="num">context share</th><th class="num">T_total ÷ calls</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>bb7190b0</code> · 19:32Z</td><td class="num">10</td><td class="num">18,024,682.50</td><td class="num">141,574.50</td><td class="num">217.5</td><td class="num">99.2146 %</td><td class="num">82,872.10</td></tr>
+        <tr><td><code>03e9072b</code> · 19:50Z</td><td class="num">10</td><td class="num">23,105,392.50</td><td class="num">167,397.00</td><td class="num">276.5</td><td class="num">99.2755 %</td><td class="num">83,563.81</td></tr>
+        <tr><td><code>8f45a996</code> · 2026-11-08</td><td class="num">19</td><td class="num">55,451,483.00</td><td class="num">465,220.00</td><td class="num">669.0</td><td class="num">99.1610 %</td><td class="num">82,887.12</td></tr>
+      </tbody>
+    </table>
+    <p>“Context share” is <code>1 − T_completion / T_total</code>: the fraction of the tokens a task consumes that never becomes output. It is not an estimate or a sampling — it is the ratio of two medians the instrument prints.</p>
+
+    <h2 id="inversion">What scales and what does not</h2>
+    <p>Read the two columns on the right of that table, and then read the three in the middle. They tell opposite stories, and only one of them is about money.</p>
+    <div class="card">
+      <p><span class="metric">×3.076</span> between the first snapshot and the third in total tokens per task, with the population at <span class="metric">×1.90</span>. The middle two and the last three columns barely move: context share spans <span class="metric">0.1145 pp</span> and the quotient of total tokens to model calls spans <span class="metric">0.0181 %</span>.</p>
+    </div>
+    <p>The absolute number tracks how much corpus you fed the instrument. The ratio tracks the instrument. A dashboard that reports the first and calls it a trend is measuring the growth of its own input and reporting it as a cost signal — and a regression test built on the absolute number would go red for the wrong reason every time the corpus grows.</p>
+    <p>In human terms: for every token the model writes, it re-reads <strong>127</strong>, <strong>138</strong> and <strong>119</strong> tokens of context in the three snapshots. That ratio is stable to within 14 % across a corpus that tripled — which is why the one thing I will not do with this page is present the total as the finding.</p>
+
+    <h2 id="reproduce">Reproduce it without the data</h2>
+    <p>The script below does not need the corpus, does not touch the network, and has no dependencies beyond <code>python3</code>. It recomputes every figure on this page from the three published tuples and checks each one against the tolerance it was published under. Six of them are arithmetic. The seventh is the control that makes the other six mean something.</p>
+    <table>
+      <thead><tr><th>#</th><th>Claim checked</th><th>Window</th></tr></thead>
+      <tbody>
+        <tr><td>1–3</td><td>context share of each snapshot: 99.2146 / 99.2755 / 99.1610 %</td><td>±0.0001 pp</td></tr>
+        <tr><td>4</td><td>spread of the share across the three generations</td><td>≤ 0.2 pp</td></tr>
+        <tr><td>5</td><td>total tokens grew between the extremes</td><td>≥ 3×</td></tr>
+        <tr><td>6</td><td><strong>control</strong> — the population also grew, so the invariance is not a constant denominator</td><td>≥ 1.5×</td></tr>
+        <tr><td>7</td><td>quotient of total tokens to calls, between the extremes</td><td>≤ 0.1 %</td></tr>
+      </tbody>
+    </table>
+<pre><code>curl -O https://alexisromtz-lab.github.io/la-auditora/portafolio/auditoria-002-economia-contexto/reproduce.py
+python3 reproduce.py ; echo "rc=$?"</code></pre>
+    <p>Exit code <code>0</code> means all seven reproduce. Exit code <code>1</code> means at least one diverges — I checked that path by perturbing one snapshot 5 % and watching two claims go red, because an instrument that cannot fail is not measuring. Exit code <code>2</code> means it could not measure at all.</p>
+    <p>If you hold the corpus, the same script takes a second witness: <code>python3 reproduce.py --repo /path/to/repo</code> re-reads the three declared blobs with <code>git cat-file</code> and reports whether the object still matches the tuple. A snapshot that has moved is printed as information and does <em>not</em> fail the report, because the published claim is arithmetic over a declared tuple, not a claim about where a file lives today.</p>
+
+    <h2 id="limits">What this does not prove</h2>
+    <div class="limite">
+      <p><strong>It does not attribute cost to a model.</strong> The source log records which model ran on each task; it never records <em>why</em> that model was chosen. Any ranking of models built on this log would be inventing its own independent variable. I publish the routing question as unmeasured rather than guess it from the winning side.</p>
+      <p><strong>It is not a time series.</strong> Two of the three snapshots are 18 minutes apart on the same day; the third is nine days later. Three points, two of them adjacent, do not establish a trend and I do not call the −0.0535 pp between the extremes a decline.</p>
+      <p><strong>The denominators are small.</strong> 10, 10 and 19 tasks. This is enough to see that the ratio is stable and not enough to put a confidence interval on it. No p-value appears on this page.</p>
+      <p><strong>Not every derived figure is equally stable, and I am not hiding the one that is not.</strong> The quotient <code>T_total ÷ calls</code> is 82,872.10 and 82,887.12 at the extremes — 0.018 % apart — but the middle snapshot sits 0.835 % above them. That is why claim 7 compares the extremes and says so, instead of quoting an average that would flatter it.</p>
+      <p><strong>It does not say whether 99 % is bad.</strong> This page measures a quantity and its stability. Whether that quantity is waste, or the unavoidable cost of an agent that must re-read its own state, is a different question and I have not measured it. A cheaper architecture is a hypothesis, not a result of this page.</p>
+      <p><strong>The source repository is private.</strong> The arithmetic is fully reproducible from this page. The re-read of the blobs requires the repository, which is not public — that is the one part of this report that a stranger cannot independently verify today, and it is declared here instead of discovered later.</p>
+    </div>
+
+    <h2>What I looked for and did not find</h2>
+    <p>A report that only lists the hit is not a report. These came back clean, measured on the same snapshots:</p>
+    <table>
+      <thead><tr><th>Check</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>Drift between the published table and the raw snapshot</td><td><strong>16 / 16</strong> — median, both quartiles and <code>n</code> agree across four metrics, in the only snapshot the published table covers. The two older snapshots have no table to compare against, so this check covers one of the three and says so.</td></tr>
+        <tr><td>Sign errors in the share</td><td><strong>0 of 3</strong> — <code>1 − completion/total</code> recomputed from scratch for each snapshot</td></tr>
+        <tr><td>Does a larger population explain the total?</td><td><strong>partly, and not fully</strong> — n grew 1.90× while the total grew 3.08×, so the per-task figure also grew; the ratio absorbed both</td></tr>
+        <tr><td>Is the invariance an artefact of a constant divisor?</td><td><strong>no</strong> — calls per task grew 3.08× in step with the total, which is exactly what claim 7 and the 0.0181 % window test</td></tr>
+      </tbody>
+    </table>
+    <p>The fourth row is the one I expected to break. It did not, and its not breaking is the finding.</p>
+
+    <h2 id="contact">Need this on your repository?</h2>
+    <div class="cta">
+      <p><strong>The audit is the product, and the receipt is the point.</strong> Every finding ships as a pinned commit, the blob hash of the file it lives in, the exact command that reproduces it, and a declared list of what was <em>not</em> measured.</p>
+      <p><a href="https://github.com/alexisromtz-lab/git-preflight-gate/issues/new?title=Audit%20request&amp;body=Repository%3A%20%0ACommit%3A%20%0AWhat%20worries%20you%3A%20" target="_blank" rel="noopener noreferrer">Open a request on GitHub Issues</a> · <a href="https://wa.me/525649997759?text=Hello%2C%20I%20read%20report%20002%20and%20want%20one%20for%20my%20corpus" target="_blank" rel="noopener noreferrer">WhatsApp</a></p>
+    </div>
+  </main>
+
+  <footer>
+    <p>Report 002 · <code>tools/reporte_tokens.py</code> over three snapshots of one corpus · blobs <code>bb7190b0</code> · <code>03e9072b</code> · <code>8f45a996</code> · report table <code>REPORTE_TOKENS.md</code> blob <code>17427186</code> · 239 lines. Report generated from the audit sheet, not from memory.</p>
+  </footer>
+</div>
+</body>
+</html>

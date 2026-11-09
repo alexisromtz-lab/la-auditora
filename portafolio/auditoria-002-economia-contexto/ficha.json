@@ -1,0 +1,64 @@
+{
+  "sujeto": {
+    "repo": "alexisromtz-lab/platino-labs (privado)",
+    "sha": "8f45a996164bbed21ec90ee2e44245dd5848e20e",
+    "ambito": "tools/reporte_tokens.py sobre el panel de economia de contexto: tres generaciones del mismo instrumento sobre el mismo corpus creciente (n = 10, 10 y 19 tareas)"
+  },
+  "hallazgo": {
+    "titulo": "El coste de contexto por tarea es una constante del instrumento, no del tamano del corpus",
+    "impacto": "En tres generaciones del panel, la poblacion crecio 1.90x y el total de tokens por tarea 3.08x, mientras la fraccion de tokens que se reenvia antes de producir la primera palabra se movio 0.1145 puntos porcentuales (99.2146 -> 99.2755 -> 99.1610 %) y el cociente entre tokens totales y llamadas al modelo se movio 0.018 %. La cifra absoluta responde al tamano del corpus; la razon responde al instrumento. Publicar el total como si midiera una tendencia mide el corpus, no el coste."
+  },
+  "limite": "Mide el panel de economia de contexto de un corpus privado, en los tres blobs declarados. No mide atribucion de modelo por tarea: la fuente registra que modelo corrio, nunca por que, asi que ninguna comparacion entre modelos se sostiene sobre esta ficha. El campo `cost` de la fuente es de una cuenta con clave propia (isByok) y no es dinero. El cociente `t_total/llamadas` es un cociente de medianas, no la mediana del cociente, y por eso se declara con ese nombre y no como `tokens_por_llamada`. Dos de las tres generaciones se tomaron el mismo dia con 18 minutos de separacion; la tercera, nueve dias despues: esto no es una serie temporal y no se lee como tendencia. Los denominadores son pequenos (10, 10 y 19 tareas) y la ficha no afirma que el 99 % sea bueno o malo, solo que esta ahi y que es estable. La aritmetica se reproduce sin acceso al repositorio; la relectura de los blobs exige el repositorio, que es privado.",
+  "estado": "verificado",
+  "generaciones": [
+    {
+      "blob": "bb7190b0",
+      "utc": "2026-10-30T19:32:05Z",
+      "n": 10,
+      "t_total_mediana": 18024682.5,
+      "t_completion_mediana": 141574.5,
+      "llamadas_mediana": 217.5,
+      "arrastre_pct": 99.2146
+    },
+    {
+      "blob": "03e9072b",
+      "utc": "2026-10-30T19:50:22Z",
+      "n": 10,
+      "t_total_mediana": 23105392.5,
+      "t_completion_mediana": 167397.0,
+      "llamadas_mediana": 276.5,
+      "arrastre_pct": 99.2755
+    },
+    {
+      "blob": "8f45a996",
+      "utc": "2026-11-08",
+      "n": 19,
+      "t_total_mediana": 55451483.0,
+      "t_completion_mediana": 465220.0,
+      "llamadas_mediana": 669.0,
+      "arrastre_pct": 99.1610
+    }
+  ],
+  "locus": [
+    {
+      "ruta": "crudos/reporte_ttr_20261030.json",
+      "blob": "8f45a996164bbed21ec90ee2e44245dd5848e20e",
+      "lineas_0x0a": 1258
+    },
+    {
+      "ruta": "REPORTE_TOKENS.md",
+      "blob": "17427186c4cd511d5807dce4eb3be4017a41a578",
+      "lineas_0x0a": 239
+    },
+    {
+      "ruta": "tools/reporte_tokens.py",
+      "blob": "8252c6308e3e91afd9d1343140af38a783f654ed",
+      "lineas_0x0a": 1318
+    }
+  ],
+  "reproduccion": {
+    "comando": "python3 reproduce.py",
+    "rc": 0,
+    "salida": "RC 0 - 7 of 7 published claims reproduce"
+  }
+}
