@@ -1,6 +1,7 @@
 name: Pull request checks
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
@@ -9,8 +10,8 @@ permissions:
   contents: read
 
 jobs:
-  validate_html:
-    name: validate_html
+  validate:
+    name: validate
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
