@@ -477,5 +477,81 @@ class Sustitucion(unittest.TestCase):
         self.assertEqual(transporte.metodos, ["GET"])
 
 
+class Canonica(unittest.TestCase):
+    """Un articulo en espanol con gemelo en ingles no debe canonicalizarse a si mismo."""
+
+    GEMELO = "https://dev.to/alexisromtz7/the-63b-hack-was-not-a-code-bug-on9"
+
+    def remoto(self, **extra):
+        base = {
+            "id": 4949662,
+            "body_markdown": "El hackeo de 6.3B",
+            "title": "El hackeo",
+            "url": "https://dev.to/alexisromtz7/el-hackeo-4gah",
+        }
+        base.update(extra)
+        return [base]
+
+    def test_la_canonica_se_reenvia_sin_tocar_el_cuerpo(self):
+        enviado = {}
+
+        def transporte(metodo, url, clave_api, datos):
+            if metodo == "GET":
+                return 200, self.remoto()
+            enviado.update(datos["article"])
+            return 200, {"id": 4949662, "url": "https://dev.to/x"}
+
+        with con_clave():
+            rc = pd.main(["--sustituir", "4949662", "--canonica", self.GEMELO, "--enviar"], transporte=transporte)
+        self.assertEqual(rc, 0)
+        self.assertEqual(enviado["canonical_url"], self.GEMELO)
+        self.assertEqual(enviado["body_markdown"], "El hackeo de 6.3B")
+
+    def test_una_canonica_a_si_mismo_se_rechaza(self):
+        transporte = Transporte((200, self.remoto()))
+        with con_clave():
+            rc = pd.main(
+                ["--sustituir", "4949662", "--canonica", "https://dev.to/alexisromtz7/el-hackeo-4gah", "--enviar"],
+                transporte=transporte,
+            )
+        self.assertEqual(rc, 6)
+        self.assertEqual(transporte.metodos, ["GET"])
+
+    def test_una_canonica_sin_https_se_rechaza(self):
+        transporte = Transporte((200, self.remoto()))
+        with con_clave():
+            rc = pd.main(["--sustituir", "4949662", "--canonica", "http://dev.to/x", "--enviar"], transporte=transporte)
+        self.assertEqual(rc, 2)
+        self.assertEqual(transporte.metodos, [])
+
+    def test_si_la_canonica_ya_es_la_buena_no_se_envia(self):
+        transporte = Transporte((200, self.remoto(canonical_url=self.GEMELO)))
+        with con_clave():
+            rc = pd.main(["--sustituir", "4949662", "--canonica", self.GEMELO, "--enviar"], transporte=transporte)
+        self.assertEqual(rc, 0)
+        self.assertEqual(transporte.metodos, ["GET"])
+
+    def test_el_cuerpo_y_la_canonica_pueden_ir_juntos(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            ruta = Path(tmp) / "c.md"
+            ruta.write_text("The 6.3B hack", encoding="utf-8")
+            enviado = {}
+
+            def transporte(metodo, url, clave_api, datos):
+                if metodo == "GET":
+                    return 200, self.remoto()
+                enviado.update(datos["article"])
+                return 200, {"id": 4949662, "url": "https://dev.to/x"}
+
+            with con_clave():
+                rc = pd.main(
+                    ["--sustituir", "4949662", "--cuerpo", str(ruta), "--canonica", self.GEMELO, "--enviar"],
+                    transporte=transporte,
+                )
+        self.assertEqual(rc, 0)
+        self.assertEqual(enviado["canonical_url"], self.GEMELO)
+        self.assertEqual(enviado["body_markdown"], "The 6.3B hack")
+
+
 if __name__ == "__main__":
     unittest.main()
