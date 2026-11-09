@@ -155,6 +155,20 @@ make it copyable. `tests/test_devto.py` holds the four falsifiers that name this
 the mechanism measured on the fence itself (a wrapped body yields two fenced regions instead of one,
 and the second one is empty).
 
+### Publishing is an HTTP request, not a clipboard
+
+`tools/publicar_devto.py` sends that projection as `body_markdown`, so structure has no way to be
+lost in transit. It prints the payload, its size and the body hash and **opens no connection** unless
+`--enviar` is passed; the key is read from `DEVTO_API_KEY` or `DEV_TO_API_KEY` and only its name,
+length and four-character prefix are ever printed. `--clave-archivo <ruta>` reads the key by name out
+of a `.env` file, so a shared secrets file never has to be sourced or copied. `--reparar <slug>`
+compares against the body dev.to already holds and sends a `PUT` only when the two differ, so running
+it twice is a no-op — that is a falsifier, not a promise.
+
+The article that came out wrong is `id=5005894`. It still holds the flattened body; `--reparar` fixes
+it with one `PUT`, and that repair is `NO_MEDIDO` until the key exists. Copying from the rendered page
+was the defect; a transport that never reads a rendered page is the fix.
+
 
 ## If the contact check fails
 

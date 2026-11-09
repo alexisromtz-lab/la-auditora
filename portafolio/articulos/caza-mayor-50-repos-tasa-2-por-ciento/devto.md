@@ -2,7 +2,7 @@
 title: "I swept 50 repositories: two real defects and a 2 % hit rate"
 published: false
 description: "I measured 765 workflow files in 50 repos with more than 5 000 stars: 262 steps invoke a test runner and 11 cannot make the workflow fail. The defensible-defect rate is 2 %, and the most severe one sits in the deadest repository."
-tags: devops, ci, github-actions, opensource
+tags: devops, ci, githubactions, opensource
 canonical_url: "https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/caza-mayor-50-repos-tasa-2-por-ciento/"
 ---
 

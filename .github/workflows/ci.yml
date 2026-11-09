@@ -25,6 +25,12 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_articulos_en.py' -v
       - name: Test dev.to projection falsifiers
         run: python3 -m unittest discover -s tests -p 'test_devto.py' -v
+      # El publicador no tiene red en CI: su transporte es inyectable y todos los
+      # falsadores corren contra un transporte falso. En seco no abre conexion.
+      - name: Test dev.to publisher falsifiers
+        run: python3 -m unittest discover -s tests -p 'test_publicar_devto.py' -v
+      - name: dev.to publisher prints a payload without a key
+        run: env -u DEVTO_API_KEY -u DEV_TO_API_KEY python3 tools/publicar_devto.py --raiz . --slug auditoria-litellm-46923-el-bug-que-responde-success
       # Las paginas de articulo son una proyeccion del markdown: si alguien edita
       # la fuente y no regenera, la pagina publica miente. Esta compuerta lo niega.
       - name: Article pages match their markdown source
