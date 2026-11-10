@@ -240,10 +240,6 @@ class GeneradorFalsable(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stdout)
         self.assertIn("Cero cambios", proc.stdout)
 
-
-if __name__ == "__main__":
-    unittest.main()
-
     def test_un_articulo_solo_en_ingles_se_genera_si_lo_declara(self) -> None:
         """Un articulo que vive solo en ingles necesita pagina propia: su
         canonica no puede ser dev.to para siempre."""
@@ -266,3 +262,19 @@ if __name__ == "__main__":
         proc = self.correr("--aplicar")
         self.assertEqual(proc.returncode, 1, proc.stdout)
         self.assertIn("solo_en: si", proc.stdout)
+
+
+    def test_tags_degenerados_encienden_el_generador(self) -> None:
+        origen = self.root / "portafolio" / "articulos" / "un-articulo" / "articulo.md"
+        fuente = origen.read_text(encoding="utf-8")
+        origen.write_text(
+            fuente.replace("tags: fixture, markdown", "tags: f, i, x, ,, ,, m, a, r"),
+            encoding="utf-8",
+        )
+        proc = self.correr("--check")
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.assertIn("degenerados", proc.stdout + proc.stderr)
+
+
+if __name__ == "__main__":
+    unittest.main()

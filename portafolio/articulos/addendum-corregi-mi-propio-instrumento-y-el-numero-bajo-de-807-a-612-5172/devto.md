@@ -2,7 +2,7 @@
 title: "Addendum: the number was 807, then 612 — and why I published both"
 published: false
 description: "Sobre: El hackeo de $6.3B no fue un bug de código (Dev.to, id 4949662, publicado 30-Oct-2026..."
-tags: s, e, c, u
+tags: security, devops, opensource, github
 canonical_url: "https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/addendum-corregi-mi-propio-instrumento-y-el-numero-bajo-de-807-a-612-5172/"
 ---
 

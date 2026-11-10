@@ -24,6 +24,8 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
 INSTRUMENTO = RAIZ / "tools" / "devto.py"
+sys.path.insert(0, str(RAIZ / "tools"))
+import devto  # noqa: E402
 
 FUENTE_EN = """---
 title: A fixture article
@@ -278,3 +280,18 @@ class ProyeccionFalsable(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TagsDegenerados(unittest.TestCase):
+    """Un front matter mal escrito no se sanea en silencio: se rechaza."""
+
+    def test_una_cadena_unida_caracter_a_caracter_se_rechaza(self) -> None:
+        with self.assertRaises(ValueError) as ctx:
+            devto.tags_legales(["a", "i", ",", " ", "a", "r"])
+        self.assertIn("degenerados", str(ctx.exception))
+
+    def test_tags_normales_pasan_y_se_capan_a_cuatro(self) -> None:
+        self.assertEqual(
+            devto.tags_legales(["ai", "security", "github-actions", "gitlab", "extra"]),
+            ["ai", "security", "githubactions", "gitlab"],
+        )

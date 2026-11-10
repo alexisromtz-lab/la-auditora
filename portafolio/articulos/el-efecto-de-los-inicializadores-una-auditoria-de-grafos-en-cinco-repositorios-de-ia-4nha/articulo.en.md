@@ -2,7 +2,7 @@
 title: The initializer effect: a graph audit of five AI repositories
 lede: Ablación de expansión de __init__.py en cinco snapshots Python; sensibilidad de SCC en grafos estáticos, no una puntuación de riesgo.
 date: 2026-10-28
-tags: p, y, t, h, o, n, ,,  , a, r, c, h, i, t, e, c, t, u, r, e, ,,  , o, p, e, n, s, o, u, r, c, e, ,,  , s, o, f, t, w, a, r, e
+tags: python, architecture, opensource, software
 fuente: https://dev.to/alexisromtz7/el-efecto-de-los-inicializadores-una-auditoria-de-grafos-en-cinco-repositorios-de-ia-4nha
 lang: en
 solo_en: si

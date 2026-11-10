@@ -2,7 +2,7 @@
 title: "Addendum R2 — the missing rate, measured over the two missing classes"
 published: false
 description: "Addendum R2 — la tasa que faltaba, medida sobre las dos clases que faltaban    Este artículo..."
-tags: s, e, c, u
+tags: security, github, devops, opensource
 canonical_url: "https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/addendum-r2-la-tasa-que-faltaba-medida-sobre-las-dos-clases-que-faltaban-5f6h/"
 ---
 

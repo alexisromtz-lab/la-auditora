@@ -257,6 +257,12 @@ def leer_articulo(ruta: Path) -> dict:
     if faltan:
         raise ValueError("%s: el encabezado no declara %s" % (ruta, ", ".join(faltan)))
     meta["tags"] = [t.strip() for t in meta.get("tags", "").split(",") if t.strip()]
+    de_una_letra = [t for t in meta["tags"] if len(t) == 1]
+    if de_una_letra:
+        raise ValueError(
+            "%s: tags degenerados (%r): una cadena se unio caracter a caracter"
+            % (ruta, ", ".join(meta["tags"]))
+        )
     return meta
 
 

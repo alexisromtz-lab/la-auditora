@@ -2,7 +2,7 @@
 title: The Fractal Geometry of Software: What PyTorch and Ray's Dependency Cycles Reveal
 lede: The Fractal Geometry of Software: What PyTorch and Ray's Dependency Cycles Reveal  Code search can...
 date: 2026-10-29
-tags: p, y, t, h, o, n, ,,  , a, r, c, h, i, t, e, c, t, u, r, e, ,,  , o, p, e, n, s, o, u, r, c, e, ,,  , s, o, f, t, w, a, r, e
+tags: python, architecture, opensource, software
 fuente: https://dev.to/alexisromtz7/the-fractal-geometry-of-software-what-pytorch-and-rays-dependency-cycles-reveal-49f
 lang: en
 solo_en: si

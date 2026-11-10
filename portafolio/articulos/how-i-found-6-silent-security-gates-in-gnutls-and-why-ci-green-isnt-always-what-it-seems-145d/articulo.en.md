@@ -2,7 +2,7 @@
 title: How I found 6 silent security gates in GnuTLS (and why CI green isn't always what it seems)
 lede: There is a dangerous assumption in modern software engineering: "The pipeline is green, therefore the...
 date: 2026-11-06
-tags: d, e, v, o, p, s, ,,  , g, i, t, l, a, b, ,,  , s, e, c, u, r, i, t, y, ,,  , o, p, e, n, s, o, u, r, c, e
+tags: devops, gitlab, security, opensource
 fuente: https://dev.to/alexisromtz7/how-i-found-6-silent-security-gates-in-gnutls-and-why-ci-green-isnt-always-what-it-seems-145d
 lang: en
 solo_en: si

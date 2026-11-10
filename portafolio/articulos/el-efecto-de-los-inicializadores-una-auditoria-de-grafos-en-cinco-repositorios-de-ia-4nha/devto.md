@@ -2,7 +2,7 @@
 title: "The initializer effect: a graph audit of five AI repositories"
 published: false
 description: "Ablación de expansión de __init__.py en cinco snapshots Python; sensibilidad de SCC en grafos estáticos, no una puntuación de riesgo."
-tags: p, y, t, h
+tags: python, architecture, opensource, software
 canonical_url: "https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/el-efecto-de-los-inicializadores-una-auditoria-de-grafos-en-cinco-repositorios-de-ia-4nha/"
 ---
 

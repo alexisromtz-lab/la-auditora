@@ -2,7 +2,7 @@
 title: "The Fractal Geometry of Software: What PyTorch and Ray's Dependency Cycles Reveal"
 published: false
 description: "The Fractal Geometry of Software: What PyTorch and Ray's Dependency Cycles Reveal  Code search can..."
-tags: p, y, t, h
+tags: python, architecture, opensource, software
 canonical_url: "https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/the-fractal-geometry-of-software-what-pytorch-and-rays-dependency-cycles-reveal-49f/"
 ---
 
