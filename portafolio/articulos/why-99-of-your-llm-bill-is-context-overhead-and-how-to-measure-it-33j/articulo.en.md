@@ -2,7 +2,7 @@
 title: Why 99% of your LLM Bill is Context Overhead (and how to measure it)
 lede: The 99% is a measured share of token volume—not proof that 99% of dollars are wasted.  In one...
 date: 2026-10-31
-tags: a, i, ,,  , a, r, c, h, i, t, e, c, t, u, r, e, ,,  , l, l, m, ,,  , f, i, n, o, p, s
+tags: ai, architecture, llm, finops
 fuente: https://dev.to/alexisromtz7/why-99-of-your-llm-bill-is-context-overhead-and-how-to-measure-it-33j
 lang: en
 solo_en: si

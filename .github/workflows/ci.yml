@@ -40,6 +40,10 @@ jobs:
       # publica un cuerpo que ya no es el del articulo.
       - name: dev.to projections match their markdown source
         run: python3 tools/devto.py --raiz . --check
+      # El feed Atom es lo que consume un publicador automatico (Postiz y compania).
+      # Si envejece, la difusion sigue apuntando a lo que ya no es lo publicado.
+      - name: Atom feed matches the published portfolio
+        run: python3 tools/feed.py --raiz . --check
       - name: Validate local portfolio contact
         run: bash tests/test_portafolio_contacto.sh
       # El canario mide lo que ninguna otra comprobacion mira: enlaces relativos

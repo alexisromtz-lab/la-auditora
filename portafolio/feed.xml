@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+  <title>La Auditora — reproducible audits and measurements</title>
+  <id>https://alexisromtz-lab.github.io/la-auditora/</id>
+  <updated>2026-11-08T00:00:00Z</updated>
+  <link rel="self" type="application/atom+xml" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/feed.xml"/>
+  <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/"/>
+  <author><name>Jose Alexis Román Martínez</name></author>
+  <rights>CC BY 4.0 sobre el texto; MIT sobre el codigo</rights>
+  <entry xml:lang="es">
+    <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/auditoria-002-economia-contexto/</id>
+    <title>El coste de contexto por tarea es una constante del instrumento, no del tamano del corpus</title>
+    <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/auditoria-002-economia-contexto/"/>
+    <published>2026-11-08T00:00:00Z</published>
+    <updated>2026-11-08T00:00:00Z</updated>
+    <summary>En tres generaciones del panel, la poblacion crecio 1.90x y el total de tokens por tarea 3.08x, mientras la fraccion de tokens que se reenvia antes de producir la primera palabra se movio 0.1145 puntos porcentuales (99.2146 -&gt; 99.2755 -&gt; 99.1610 %) y el cociente entre tokens totales y llamadas al modelo se movio 0.018 %. La cifra absoluta responde al tamano del corpus; la razon responde al instrumento. Publicar el total como si midiera una tendencia mide el corpus, no el coste.</summary>
+    <author><name>Jose Alexis Román Martínez</name></author>
+  </entry>
+  <entry xml:lang="en">
+    <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/how-i-found-6-silent-security-gates-in-gnutls-and-why-ci-green-isnt-always-what-it-seems-145d/</id>
+    <title>How I found 6 silent security gates in GnuTLS (and why CI green isn't always what it seems)</title>
+    <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/how-i-found-6-silent-security-gates-in-gnutls-and-why-ci-green-isnt-always-what-it-seems-145d/"/>
+    <published>2026-11-06T00:00:00Z</published>
+    <updated>2026-11-06T00:00:00Z</updated>
+    <summary>There is a dangerous assumption in modern software engineering: &quot;The pipeline is green, therefore the...</summary>
+    <category term="devops"/>
+    <category term="gitlab"/>
+    <category term="security"/>
+    <category term="opensource"/>
+    <author><name>Jose Alexis Román Martínez</name></author>
+  </entry>
+  <entry xml:lang="en">
+    <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/el-hackeo-de-6-3b-no-fue-un-bug-de-codigo/</id>
+    <title>The $6.3B hack was not a code bug</title>
+    <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/el-hackeo-de-6-3b-no-fue-un-bug-de-codigo/"/>
+    <published>2026-11-06T00:00:00Z</published>
+    <updated>2026-11-06T00:00:00Z</updated>
+    <summary>Ten public repositories with a deployment workflow, measured with the exact commit of each one: 807 findings and 115 with a conjunction of authority. None of the ten returns a clean green, and the article says why that is not 807 vulnerabilities.</summary>
+    <category term="security"/>
+    <category term="devops"/>
+    <category term="supplychain"/>
+    <category term="opensource"/>
+    <author><name>Jose Alexis Román Martínez</name></author>
+  </entry>
+  <entry xml:lang="en">
+    <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/economia-de-contexto-99-2/</id>
+    <title>Context economics — the 99.2 %</title>
+    <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/economia-de-contexto-99-2/"/>
+    <published>2026-11-06T00:00:00Z</published>
+    <updated>2026-11-06T00:00:00Z</updated>
+    <summary>99.2 % of an agent's cost is input, not output. Measured across two generations of the same panel: the total moves 28.19 % between runs, the ratio moves 0.06 points. That is why what is sold is a ratio and not a receipt.</summary>
+    <category term="ai"/>
+    <category term="llm"/>
+    <category term="productivity"/>
+    <category term="opensource"/>
+    <author><name>Jose Alexis Román Martínez</name></author>
+  </entry>
+  <entry xml:lang="en">
+    <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/caza-mayor-50-repos-tasa-2-por-ciento/</id>
+    <title>I swept 50 repositories: two real defects and a 2 % hit rate</title>
+    <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/caza-mayor-50-repos-tasa-2-por-ciento/"/>
+    <published>2026-11-06T00:00:00Z</published>
+    <updated>2026-11-06T00:00:00Z</updated>
+    <summary>I measured 765 workflow files in 50 repos with more than 5 000 stars: 262 steps invoke a test runner and 11 cannot make the workflow fail. The defensible-defect rate is 2 %, and the most severe one sits in the deadest repository.</summary>
+    <category term="devops"/>
+    <category term="ci"/>
+    <category term="github-actions"/>
+    <category term="opensource"/>
+    <author><name>Jose Alexis Román Martínez</name></author>
+  </entry>
+  <entry xml:lang="en">
+    <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/auditoria-litellm-46923-el-bug-que-responde-success/</id>
+    <title>The bug that answers SUCCESS: a reproducible audit of litellm#46923</title>
+    <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/auditoria-litellm-46923-el-bug-que-responde-success/"/>
+    <published>2026-11-06T00:00:00Z</published>
+    <updated>2026-11-06T00:00:00Z</updated>
+    <summary>Six arms, an HTTP server that records the real payload and a negative control. How to audit a framework defect without mocks, why the candidate patch makes the synchronous path worse, and why the dangerous state is the one that looks like success.</summary>
+    <category term="devops"/>
+    <category term="git"/>
+    <category term="productivity"/>
+    <category term="opensource"/>
+    <author><name>Jose Alexis Román Martínez</name></author>
+  </entry>
+  <entry xml:lang="es">
+    <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/auditoria-001-litellm/</id>
+    <title>El paso que corre los tests del shard sale en verde cuando no corre ningun test</title>
+    <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/auditoria-001-litellm/"/>
+    <published>2026-11-05T00:00:00Z</published>
+    <updated>2026-11-05T00:00:00Z</updated>
+    <summary>Tres salidas del step `id: tests` terminan en `exit 0` sin haber ejecutado pytest: seleccion vacia, todos los paths de la seleccion inexistentes, y rc=5 (cero tests recogidos, el codigo documentado de pytest para esa condicion). Un renombrado de directorio de tests, o un shard cuyo path se vuelve obsoleto, produce un job verde indistinguible de un job que paso. Medido: los dos escenarios terminan con rc=0.</summary>
+    <author><name>Jose Alexis Román Martínez</name></author>
+  </entry>
+  <entry xml:lang="en">
+    <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/why-99-of-your-llm-bill-is-context-overhead-and-how-to-measure-it-33j/</id>
+    <title>Why 99% of your LLM Bill is Context Overhead (and how to measure it)</title>
+    <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/why-99-of-your-llm-bill-is-context-overhead-and-how-to-measure-it-33j/"/>
+    <published>2026-10-31T00:00:00Z</published>
+    <updated>2026-10-31T00:00:00Z</updated>
+    <summary>The 99% is a measured share of token volume—not proof that 99% of dollars are wasted.  In one...</summary>
+    <category term="ai"/>
+    <category term="architecture"/>
+    <category term="llm"/>
+    <category term="finops"/>
+    <author><name>Jose Alexis Román Martínez</name></author>
+  </entry>
+  <entry xml:lang="en">
+    <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/github-actions-supply-chain-risk-57-of-workflows-in-our-scan-used-non-sha-refs-4ph1/</id>
+    <title>GitHub Actions Supply-Chain Risk: 57% of Workflows in Our Scan Used Non-SHA Refs</title>
+    <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/github-actions-supply-chain-risk-57-of-workflows-in-our-scan-used-non-sha-refs-4ph1/"/>
+    <published>2026-10-31T00:00:00Z</published>
+    <updated>2026-10-31T00:00:00Z</updated>
+    <summary>The 64.9% figure describes rule occurrences—not workflow prevalence. Here is what our scan of 279...</summary>
+    <category term="ai"/>
+    <category term="security"/>
+    <category term="supplychain"/>
+    <category term="githubactions"/>
+    <author><name>Jose Alexis Román Martínez</name></author>
+  </entry>
+  <entry xml:lang="en">
+    <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/addendum-r2-la-tasa-que-faltaba-medida-sobre-las-dos-clases-que-faltaban-5f6h/</id>
+    <title>Addendum R2 — the missing rate, measured over the two missing classes</title>
+    <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/addendum-r2-la-tasa-que-faltaba-medida-sobre-las-dos-clases-que-faltaban-5f6h/"/>
+    <published>2026-10-31T00:00:00Z</published>
+    <updated>2026-10-31T00:00:00Z</updated>
+    <summary>Addendum R2 — la tasa que faltaba, medida sobre las dos clases que faltaban    Este artículo...</summary>
+    <category term="security"/>
+    <category term="github"/>
+    <category term="devops"/>
+    <category term="opensource"/>
+    <author><name>Jose Alexis Román Martínez</name></author>
+  </entry>
+  <entry xml:lang="en">
+    <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/addendum-corregi-mi-propio-instrumento-y-el-numero-bajo-de-807-a-612-5172/</id>
+    <title>Addendum: the number was 807, then 612 — and why I published both</title>
+    <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/addendum-corregi-mi-propio-instrumento-y-el-numero-bajo-de-807-a-612-5172/"/>
+    <published>2026-10-31T00:00:00Z</published>
+    <updated>2026-10-31T00:00:00Z</updated>
+    <summary>Sobre: El hackeo de $6.3B no fue un bug de código (Dev.to, id 4949662, publicado 30-Oct-2026...</summary>
+    <category term="security"/>
+    <category term="devops"/>
+    <category term="opensource"/>
+    <category term="github"/>
+    <author><name>Jose Alexis Román Martínez</name></author>
+  </entry>
+  <entry xml:lang="en">
+    <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/the-fractal-geometry-of-software-what-pytorch-and-rays-dependency-cycles-reveal-49f/</id>
+    <title>The Fractal Geometry of Software: What PyTorch and Ray's Dependency Cycles Reveal</title>
+    <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/the-fractal-geometry-of-software-what-pytorch-and-rays-dependency-cycles-reveal-49f/"/>
+    <published>2026-10-29T00:00:00Z</published>
+    <updated>2026-10-29T00:00:00Z</updated>
+    <summary>The Fractal Geometry of Software: What PyTorch and Ray's Dependency Cycles Reveal  Code search can...</summary>
+    <category term="python"/>
+    <category term="architecture"/>
+    <category term="opensource"/>
+    <category term="software"/>
+    <author><name>Jose Alexis Román Martínez</name></author>
+  </entry>
+  <entry xml:lang="en">
+    <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/maths-20-por-que-la-ia-necesita-auditores-no-solo-generadores-de-codigo-2f29/</id>
+    <title>Maths 2.0: why AI needs auditors, not just code generators</title>
+    <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/maths-20-por-que-la-ia-necesita-auditores-no-solo-generadores-de-codigo-2f29/"/>
+    <published>2026-10-28T00:00:00Z</published>
+    <updated>2026-10-28T00:00:00Z</updated>
+    <summary>Producir una respuesta no es lo mismo que poder explicarla, verificarla y mantenerla. Una lectura de Math 2.0 de Terence Tao aplicada a la auditoría de sistemas de IA, con límites de evidencia declarados.</summary>
+    <category term="ai"/>
+    <category term="softwaredevelopment"/>
+    <category term="math"/>
+    <category term="engineering"/>
+    <author><name>Jose Alexis Román Martínez</name></author>
+  </entry>
+  <entry xml:lang="en">
+    <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/el-efecto-de-los-inicializadores-una-auditoria-de-grafos-en-cinco-repositorios-de-ia-4nha/</id>
+    <title>The initializer effect: a graph audit of five AI repositories</title>
+    <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/el-efecto-de-los-inicializadores-una-auditoria-de-grafos-en-cinco-repositorios-de-ia-4nha/"/>
+    <published>2026-10-28T00:00:00Z</published>
+    <updated>2026-10-28T00:00:00Z</updated>
+    <summary>Ablación de expansión de __init__.py en cinco snapshots Python; sensibilidad de SCC en grafos estáticos, no una puntuación de riesgo.</summary>
+    <category term="python"/>
+    <category term="architecture"/>
+    <category term="opensource"/>
+    <category term="software"/>
+    <author><name>Jose Alexis Román Martínez</name></author>
+  </entry>
+  <entry xml:lang="en">
+    <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/como-encontrar-bugs-de-importacion-en-tor-usando-grafos-ast-49cn/</id>
+    <title>How to find import bugs in Tor using AST graphs</title>
+    <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/como-encontrar-bugs-de-importacion-en-tor-usando-grafos-ast-49cn/"/>
+    <published>2026-10-27T00:00:00Z</published>
+    <updated>2026-10-27T00:00:00Z</updated>
+    <summary>Un ciclo de importación en stem (Tor) que solo falla según el punto de entrada, detectado con un grafo AST antes de leer una sola línea de código.</summary>
+    <category term="python"/>
+    <category term="staticanalysis"/>
+    <category term="ast"/>
+    <category term="tor"/>
+    <author><name>Jose Alexis Román Martínez</name></author>
+  </entry>
+</feed>

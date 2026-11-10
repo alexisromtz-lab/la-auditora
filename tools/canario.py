@@ -383,9 +383,83 @@ def check_reproduce(root: Path):
     return "%d informe(s) ejecutado(s) contra su rc declarado" % ejecutados, fallas, notas
 
 
+def check_feed(root: Path):
+    """Seis: el feed declara lo mismo que el sitemap, en las dos direcciones.
+
+    Un feed que solo se regenera a mano envejece en silencio: el publicador
+    automatico no ve el articulo nuevo y nadie se entera. La comparacion es
+    contra el sitemap, que ya es el universo publico del sitio.
+    """
+    import xml.etree.ElementTree as ET
+
+    problemas = []
+    ruta = root / "portafolio" / "feed.xml"
+    if not ruta.is_file():
+        return "Atom con lo publicado", ["portafolio/feed.xml no existe"], []
+    try:
+        raiz_xml = ET.parse(ruta).getroot()
+    except ET.ParseError as e:
+        return "Atom con lo publicado", ["portafolio/feed.xml no es XML valido: %s" % e], []
+    ns = {"a": "http://www.w3.org/2005/Atom"}
+    del_feed = set()
+    for entrada in raiz_xml.findall("a:entry", ns):
+        nodo = entrada.find("a:id", ns)
+        texto = (nodo.text or "").strip() if nodo is not None else ""
+        if not texto:
+            problemas.append("una entrada del feed no declara a:id")
+            continue
+        del_feed.add(texto.rstrip("/"))
+
+    sitemap = root / "sitemap.xml"
+    if not sitemap.is_file():
+        return "Atom con lo publicado", ["sitemap.xml no existe: no hay contra que comparar el feed"], []
+    publicadas = set(re.findall(r"<loc>([^<]+)</loc>", sitemap.read_text(encoding="utf-8")))
+    # el loc del sitemap lleva barra final: sin quitarla, ningun patron con $ casa
+    # y el conjunto sale vacio (comparar contra el vacio siempre aprueba)
+    secas = {u.rstrip("/") for u in publicadas}
+    base = SITE_BASE.rstrip("/")
+    indices = {base + "/portafolio/articulos", base + "/portafolio/articulos/en"}
+
+    def slug(u):
+        if u in indices:
+            return None
+        m = re.search(r"/portafolio/articulos/(?:en/)?([^/]+)$", u)
+        return m.group(1) if m else None
+
+    articulos_sitemap = {slug(u) for u in secas if slug(u)}
+    articulos_feed = {slug(u) for u in del_feed if slug(u)}
+    informes_sitemap = {u for u in secas if re.search(r"/portafolio/auditoria-[^/]+$", u)}
+    informes_feed = {u for u in del_feed if re.search(r"/portafolio/auditoria-[^/]+$", u)}
+
+    if not articulos_sitemap and not informes_sitemap:
+        problemas.append(
+            "el sitemap no expone piezas reconocibles: el regex y el sitemap no hablan del mismo universo"
+        )
+    # articulos_feed son slugs y del_feed son URLs: restarlos mezcla tipos y
+    # marca en rojo toda entrada legitima (URL != slug)
+    clasificadas = {u for u in del_feed if slug(u)} | informes_feed
+    for url in sorted(del_feed - clasificadas):
+        problemas.append("el feed declara una entrada que no es articulo ni informe: %s/" % url)
+    for titulo in sorted(articulos_sitemap - articulos_feed):
+        problemas.append("el feed no declara el articulo %s" % titulo)
+    for titulo in sorted(articulos_feed - articulos_sitemap):
+        problemas.append("el feed declara el articulo %s, que el sitemap no publica" % titulo)
+    for url in sorted(informes_sitemap - informes_feed):
+        problemas.append("el feed no declara el informe %s/" % url)
+    for url in sorted(informes_feed - informes_sitemap):
+        problemas.append("el feed declara el informe %s, que el sitemap no publica" % url)
+    detalle = "%d entrada(s): %d articulo(s) + %d informe(s)" % (
+        len(del_feed),
+        len(articulos_feed),
+        len(informes_feed),
+    )
+    return detalle, problemas, []
+
+
 CHECKS = (
     ("enlaces", check_enlaces),
     ("grafo", check_grafo),
+    ("feed", check_feed),
     ("triada", check_triada),
     ("citas", check_citas),
     ("reproduce", check_reproduce),

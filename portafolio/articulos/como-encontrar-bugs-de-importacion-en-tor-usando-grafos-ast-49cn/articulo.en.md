@@ -2,7 +2,7 @@
 title: How to find import bugs in Tor using AST graphs
 lede: Un ciclo de importación en stem (Tor) que solo falla según el punto de entrada, detectado con un grafo AST antes de leer una sola línea de código.
 date: 2026-10-27
-tags: p, y, t, h, o, n, ,,  , s, t, a, t, i, c, a, n, a, l, y, s, i, s, ,,  , a, s, t, ,,  , t, o, r
+tags: python, staticanalysis, ast, tor
 fuente: https://dev.to/alexisromtz7/como-encontrar-bugs-de-importacion-en-tor-usando-grafos-ast-49cn
 lang: en
 solo_en: si

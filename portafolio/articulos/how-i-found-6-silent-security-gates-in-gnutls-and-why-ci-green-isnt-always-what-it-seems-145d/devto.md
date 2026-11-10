@@ -2,7 +2,7 @@
 title: "How I found 6 silent security gates in GnuTLS (and why CI green isn't always what it seems)"
 published: false
 description: "There is a dangerous assumption in modern software engineering: \"The pipeline is green, therefore the..."
-tags: d, e, v, o
+tags: devops, gitlab, security, opensource
 canonical_url: "https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/how-i-found-6-silent-security-gates-in-gnutls-and-why-ci-green-isnt-always-what-it-seems-145d/"
 ---
 

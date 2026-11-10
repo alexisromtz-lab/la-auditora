@@ -2,7 +2,7 @@
 title: "GitHub Actions Supply-Chain Risk: 57% of Workflows in Our Scan Used Non-SHA Refs"
 published: false
 description: "The 64.9% figure describes rule occurrences—not workflow prevalence. Here is what our scan of 279..."
-tags: a, i, s, e
+tags: ai, security, supplychain, githubactions
 canonical_url: "https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/github-actions-supply-chain-risk-57-of-workflows-in-our-scan-used-non-sha-refs-4ph1/"
 ---
 

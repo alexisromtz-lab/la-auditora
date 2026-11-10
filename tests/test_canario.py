@@ -84,7 +84,38 @@ def construir(destino: Path) -> Path:
         "Deposito: https://doi.org/10.5281/zenodo.1\n", encoding="utf-8"
     )
     shutil.copy2(CANARIO, destino / "tools" / "canario.py")
+    sembrar_feed(destino)
     return destino
+
+
+FEED = """<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Fixture del canario</title>
+  <id>{base}</id>
+  <updated>2026-11-09T00:00:00Z</updated>
+{entradas}</feed>
+"""
+
+ENTRADA = (
+    '  <entry><title>%s</title><id>%s</id>'
+    "<link href=\"%s\"/><updated>2026-11-09T00:00:00Z</updated></entry>\n"
+)
+
+
+def sembrar_feed(root: Path) -> None:
+    """Feed coherente con el sitemap: si el fixture sano suena por el feed, el test miente."""
+    sitemap = (root / "sitemap.xml").read_text(encoding="utf-8")
+    locs = [trozo.split("</loc>")[0] for trozo in sitemap.split("<loc>")[1:]]
+    entradas = []
+    for loc in locs:
+        seca = loc.rstrip("/")
+        if seca.endswith("/portafolio/articulos") or seca.endswith("/portafolio/articulos/en"):
+            continue
+        if "/portafolio/auditoria-" in seca or "/portafolio/articulos/" in seca:
+            entradas.append(ENTRADA % (seca.rsplit("/", 1)[-1], loc, loc))
+    destino = root / "portafolio" / "feed.xml"
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    destino.write_text(FEED.format(base=BASE_LOC, entradas="".join(entradas)), encoding="utf-8")
 
 
 def ficha_actualizada(root: Path, **cambios) -> None:
@@ -131,6 +162,7 @@ def cablear_articulo(root: Path) -> None:
             % ("" if portada == "index.html" else "../"),
             encoding="utf-8",
         )
+    sembrar_feed(root)
 
 
 def cablear_gemelo(root: Path) -> None:
@@ -166,6 +198,7 @@ def cablear_gemelo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
+    sembrar_feed(root)
 
 
 class CanarioFalsable(unittest.TestCase):
@@ -189,7 +222,7 @@ class CanarioFalsable(unittest.TestCase):
     def test_fixture_sano_es_verde(self) -> None:
         proc = self.correr()
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
-        self.assertIn("CANARIO OK - 5 de 5", proc.stdout)
+        self.assertIn("CANARIO OK - 6 de 6", proc.stdout)
 
     def test_enlace_relativo_roto_enciende_enlaces(self) -> None:
         (self.root / "index.html").write_text(
@@ -432,6 +465,69 @@ def cablear_solo_en(root: Path) -> None:
         ),
         encoding="utf-8",
     )
+    sembrar_feed(root)
+
+
+
+class FeedFalsable(unittest.TestCase):
+    """El feed es lo que un publicador automatico consume: si envejece, la
+    distribucion se apaga sin que nadie vea un error."""
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.root = construir(Path(self._tmp.name) / "sitio")
+        cablear_articulo(self.root)
+        self.feed = self.root / "portafolio" / "feed.xml"
+
+    def correr(self) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            [sys.executable, str(self.root / "tools" / "canario.py"), "--root", str(self.root)],
+            capture_output=True,
+            text=True,
+        )
+
+    def test_feed_sano_es_verde(self) -> None:
+        proc = self.correr()
+        self.assertEqual(proc.returncode, 0, proc.stdout)
+        self.assertIn("feed", proc.stdout)
+
+    def test_feed_ausente_enciende_feed(self) -> None:
+        self.feed.unlink()
+        proc = self.correr()
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.assertIn("portafolio/feed.xml no existe", proc.stdout)
+
+    def test_feed_ilegible_enciende_feed(self) -> None:
+        self.feed.write_text("<feed><entry>", encoding="utf-8")
+        proc = self.correr()
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.assertIn("no es XML valido", proc.stdout)
+
+    def test_feed_sin_el_articulo_enciende_feed(self) -> None:
+        texto = self.feed.read_text(encoding="utf-8")
+        self.feed.write_text(
+            texto.replace("/portafolio/articulos/un-articulo/", "/portafolio/articulos/otro/"),
+            encoding="utf-8",
+        )
+        proc = self.correr()
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.assertIn("el feed no declara el articulo un-articulo", proc.stdout)
+
+    def test_feed_con_pieza_no_publicada_enciende_feed(self) -> None:
+        texto = self.feed.read_text(encoding="utf-8")
+        entrada = (
+            '  <entry><title>fantasma</title>'
+            "<id>%sportafolio/articulos/fantasma/</id>"
+            '<link href="%sportafolio/articulos/fantasma/"/>'
+            "<updated>2026-11-09T00:00:00Z</updated></entry>\n"
+            % (BASE_LOC, BASE_LOC)
+        )
+        self.feed.write_text(texto.replace("</feed>", entrada + "</feed>"), encoding="utf-8")
+        proc = self.correr()
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.assertIn("que el sitemap no publica", proc.stdout)
+        self.assertIn("fantasma", proc.stdout)
 
 
 class SoloEnIngles(unittest.TestCase):

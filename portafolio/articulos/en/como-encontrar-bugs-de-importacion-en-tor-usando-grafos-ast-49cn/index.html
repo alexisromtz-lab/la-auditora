@@ -35,7 +35,7 @@
     <p class="eyebrow">Article · 2026-10-27</p>
     <h1>How to find import bugs in Tor using AST graphs</h1>
     <p class="lede">Un ciclo de importación en stem (Tor) que solo falla según el punto de entrada, detectado con un grafo AST antes de leer una sola línea de código.</p>
-    <div class="proof"><span>p</span><span>y</span><span>t</span><span>h</span><span>o</span><span>n</span><span>s</span><span>t</span><span>a</span><span>t</span><span>i</span><span>c</span><span>a</span><span>n</span><span>a</span><span>l</span><span>y</span><span>s</span><span>i</span><span>s</span><span>a</span><span>s</span><span>t</span><span>t</span><span>o</span><span>r</span></div>
+    <div class="proof"><span>python</span><span>staticanalysis</span><span>ast</span><span>tor</span></div>
 
 <p>There is a class of bug that tests do not catch and linters do not see: the module works, but <strong>the order in which you import it decides whether it starts</strong>. The code is not broken; the dependency graph is.  The same pattern later appeared in a much bigger repo: an environment with 117 packages where <code>uv pip check</code> answered <code>All installed packages are compatible</code> and <strong>12.06 s later the same interpreter</strong> raised <code>ModuleNotFoundError: No module named 'prisma'</code>. Six import hops to a package that the installed extra does not declare. I wrote it up with the exact lines: <a href="https://doi.org/10.5281/zenodo.23955654">Coherence is not completeness</a> · the measurement rules behind it, published in <a href="https://github.com/alexisromtz-lab/corpus-medido"><code>corpus-medido</code></a> · and the upstream thread in <a href="https://github.com/astral-sh/uv/issues/13963"><code>astral-sh/uv#13963</code></a>.</p>
 

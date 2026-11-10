@@ -2,7 +2,7 @@
 title: "Maths 2.0: why AI needs auditors, not just code generators"
 published: false
 description: "Producir una respuesta no es lo mismo que poder explicarla, verificarla y mantenerla. Una lectura de Math 2.0 de Terence Tao aplicada a la auditoría de sistemas de IA, con límites de evidencia declarados."
-tags: a, i, s, o
+tags: ai, softwaredevelopment, math, engineering
 canonical_url: "https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/maths-20-por-que-la-ia-necesita-auditores-no-solo-generadores-de-codigo-2f29/"
 ---
 

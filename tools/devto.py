@@ -66,6 +66,18 @@ def tag_legal(tag: str) -> str:
 
 
 def tags_legales(tags) -> list:
+    """Un tag de una letra no es un tag: es un front matter mal escrito.
+
+    Proyectar `tags: a, i, r, c` hacia dev.to publica cuatro etiquetas que no
+    significan nada y nadie vuelve a mirar. Se rechaza en vez de sanear, para
+    que el archivo se arregle en su origen.
+    """
+    de_una_letra = [tag for tag in tags if len(tag.strip()) == 1]
+    if de_una_letra:
+        raise ValueError(
+            "tags degenerados (%r): parece que una cadena se unio caracter a caracter"
+            % ", ".join(tags)
+        )
     vistos, salida = set(), []
     for tag in tags:
         limpio = tag_legal(tag)

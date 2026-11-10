@@ -2,7 +2,7 @@
 title: Addendum R2 — the missing rate, measured over the two missing classes
 lede: Addendum R2 — la tasa que faltaba, medida sobre las dos clases que faltaban    Este artículo...
 date: 2026-10-31
-tags: s, e, c, u, r, i, t, y, ,,  , g, i, t, h, u, b, ,,  , d, e, v, o, p, s, ,,  , o, p, e, n, s, o, u, r, c, e
+tags: security, github, devops, opensource
 fuente: https://dev.to/alexisromtz7/addendum-r2-la-tasa-que-faltaba-medida-sobre-las-dos-clases-que-faltaban-5f6h
 lang: en
 solo_en: si

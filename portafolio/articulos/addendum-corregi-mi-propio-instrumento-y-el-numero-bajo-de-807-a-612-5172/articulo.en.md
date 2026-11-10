@@ -2,7 +2,7 @@
 title: Addendum: the number was 807, then 612 — and why I published both
 lede: Sobre: El hackeo de $6.3B no fue un bug de código (Dev.to, id 4949662, publicado 30-Oct-2026...
 date: 2026-10-31
-tags: s, e, c, u, r, i, t, y, ,,  , d, e, v, o, p, s, ,,  , o, p, e, n, s, o, u, r, c, e, ,,  , g, i, t, h, u, b
+tags: security, devops, opensource, github
 fuente: https://dev.to/alexisromtz7/addendum-corregi-mi-propio-instrumento-y-el-numero-bajo-de-807-a-612-5172
 lang: en
 solo_en: si
