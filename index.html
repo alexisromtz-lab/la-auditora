@@ -161,6 +161,14 @@
             <p><strong>Límite:</strong> no se completó la importación de runtime porque faltaba Werkzeug; comportamiento y seguridad quedaron <code>NO_MEDIDO</code>.</p>
             <p class="source"><a href="https://github.com/pallets/flask/commit/d086db856be187255b8ec61ef409357393020f32" target="_blank" rel="noopener noreferrer">pallets/flask · d086db85</a></p>
           </article>
+          <article>
+            <span class="tag">seis repositorios · CI · censo fail-open</span>
+            <h3>La compuerta que fue desactivada</h3>
+            <p class="metric">28 compuertas neutralizadas · 28/28 locus verificado · 5 de 6 sujetos positivos</p>
+            <p>Sobre seis repositorios de infraestructura de IA fijados a commit, 28 unidades declaran <code>continue-on-error</code>, <code>allow_failure</code> o <code>soft_fail</code> sobre un paso que sí invoca un runner de pruebas: la unidad corre, falla, y la compuerta no cierra. Se descartaron 112 neutralizadores de shell que no comparten la orden con el runner, y la cifra se declara <strong>cota inferior</strong>: las neutralizaciones condicionales por matriz quedan fuera del vocabulario medido.</p>
+            <p><strong>Límite:</strong> el censo mide la topología de CI en un commit fijado y no la intención; un <code>continue-on-error</code> puede ser deliberado, y el informe publica la señal, no la negligencia. Cuatro de los 28 loci caen en jobs que no se disparan en pull request.</p>
+            <p class="source"><a href="https://doi.org/10.5281/zenodo.24117643" target="_blank" rel="noopener noreferrer">Report #003 · DOI 10.5281/zenodo.24117643</a></p>
+          </article>
         </div>
       </section>
 

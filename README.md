@@ -23,7 +23,7 @@ La [muestra de diagnóstico FinOps](./portafolio/DIAGNOSTICO_FINOPS_EJECUTIVO.pd
 | superficie | qué contiene | relación |
 |---|---|---|
 | `README.md` (este archivo) | índice completo, cohortes, comandos, licencia, contacto | **manda** |
-| `index.html` · `en/index.html` | seis resúmenes en prosa con commit-pin, los informes reproducibles 001 y 002, y un enlace al Data Room | resume este archivo |
+| `index.html` · `en/index.html` | seis resúmenes en prosa con commit-pin, los informes reproducibles 001, 002 y 003, y un enlace al Data Room | resume este archivo |
 | Data Room (`platino-data-room`) | 23 snapshots JSON de imports: 10 con capa SCC canónica (`graph-input/1+scc/2`) y 13 adicionales sin capa SCC | es la evidencia pública; aquí solo se indexa |
 | depósito en Zenodo | el corpus versionado, con DOI de concepto | **citable**, y su lectura se mide del lado del servidor — ver [El corpus citable](#el-corpus-citable) |
 | metadatos del repo y del perfil | descripción, topics, `homepageUrl`, licencia, «Start here» | pendiente, ver [En progreso](#en-progreso) |
@@ -216,7 +216,9 @@ transcribe el depósito.
 |---|---|---|
 | corpus · concepto | [`10.5281/zenodo.23459449`](https://doi.org/10.5281/zenodo.23459449) | el DOI que sobrevive a las versiones |
 | corpus · versión | [`10.5281/zenodo.23506724`](https://doi.org/10.5281/zenodo.23506724) | v0.1.2, 2026-10-20, Apache-2.0 |
-| estos informes | **sin depósito** | el hueco que este apartado declara |
+| Report #001 · tt-metal | [`10.5281/zenodo.23512732`](https://doi.org/10.5281/zenodo.23512732) | v1.1, 2026-10-20 — *El verde que no ejecuta* |
+| Report #002 · pytorch | [`10.5281/zenodo.23514239`](https://doi.org/10.5281/zenodo.23514239) | v1.1, 2026-10-20 — *El test que existe y nadie invoca* |
+| Report #003 · seis repositorios | [`10.5281/zenodo.24117643`](https://doi.org/10.5281/zenodo.24117643) | v1.0.0, 2026-11-10 — *La compuerta que fue desactivada* |
 
 **La lectura se mide donde el contador es del servidor.** `GET https://zenodo.org/api/records/23506724`
 devuelve el campo `stats` sin credencial alguna. Medido el 2026-11-09T00:50Z, en el concepto: **48
@@ -226,10 +228,16 @@ el contador propio de GitHub para este repositorio dio **13 vistas / 9 únicas**
 
 **Lo que no se mide, y por qué.** `traffic/referrers` y `traffic/paths` responden 404: los endpoints
 públicos son `traffic/popular/referrers` y `traffic/popular/paths`. Y ninguno de los dos mira las
-páginas de GitHub Pages, solo rutas del repositorio. Por tanto **las vistas de los informes son
-`NO_MEDIDO`**: no hay instrumento, no hay un cero. Un depósito por informe convertiría cada página en
-un objeto con contador de servidor; la preparación de ese depósito —`CITATION.cff` y `.zenodo.json`—
-está en la raíz del repositorio, y la publicación la hace el dueño.
+páginas de GitHub Pages, solo rutas del repositorio. En GitHub las vistas de un informe siguen siendo
+`NO_MEDIDO`: no hay instrumento, no hay un cero. **En Zenodo sí hay instrumento**, porque cada informe
+es su propio depósito; el contador de las páginas de este repositorio no se suma al de esos objetos y
+no debe leerse como si lo hiciera.
+
+**Estado de lectura de la serie, con su ventana.** Medido el 2026-11-10T18:44Z con
+`GET https://zenodo.org/api/records/<id>`, campo `stats`: el Report #001 aporta **15 vistas / 15 únicas
+y 13 descargas / 13 únicas**, el #002 **8 / 8** y **6 / 6**, y el #003 **0 / 0** y **0 / 0** por llevar
+horas publicado. La versión v0.1.2 del corpus aporta **49 / 20** y **3 / 3** en la misma lectura. La
+preparación del siguiente depósito —`CITATION.cff` y `.zenodo.json`— está en la raíz del repositorio.
 
 ## En progreso
 

@@ -162,6 +162,14 @@
             <p><strong>Limit:</strong> runtime import could not complete because Werkzeug was missing; behavior and security remained <code>NOT MEASURED</code>.</p>
             <p class="source"><a href="https://github.com/pallets/flask/commit/d086db856be187255b8ec61ef409357393020f32" target="_blank" rel="noopener noreferrer">pallets/flask · d086db85</a></p>
           </article>
+          <article>
+            <span class="tag">six repositories · CI · fail-open census</span>
+            <h3>The gate that was switched off</h3>
+            <p class="metric">28 neutralized gates · 28/28 loci verified · 5 of 6 subjects positive</p>
+            <p>Across six AI-infrastructure repositories pinned to commit, 28 units declare <code>continue-on-error</code>, <code>allow_failure</code> or <code>soft_fail</code> on a step that does invoke a test runner: the unit runs, fails, and the gate does not close. 112 shell neutralizers that do not share the command with the runner were discarded, and the figure is declared a <strong>lower bound</strong>: conditional, matrix-driven neutralizations fall outside the measured vocabulary.</p>
+            <p><strong>Limit:</strong> the census measures CI topology at a pinned commit, not intent; a <code>continue-on-error</code> may be deliberate, and the report publishes the signal, not negligence. Four of the 28 loci sit in jobs that do not fire on pull requests.</p>
+            <p class="source"><a href="https://doi.org/10.5281/zenodo.24117643" target="_blank" rel="noopener noreferrer">Report #003 · DOI 10.5281/zenodo.24117643</a></p>
+          </article>
         </div>
       </section>
 
