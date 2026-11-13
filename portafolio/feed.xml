@@ -2,11 +2,20 @@
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
   <title>La Auditora — reproducible audits and measurements</title>
   <id>https://alexisromtz-lab.github.io/la-auditora/</id>
-  <updated>2026-11-08T00:00:00Z</updated>
+  <updated>2026-11-12T00:00:00Z</updated>
   <link rel="self" type="application/atom+xml" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/feed.xml"/>
   <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/"/>
   <author><name>Jose Alexis Román Martínez</name></author>
   <rights>CC BY 4.0 sobre el texto; MIT sobre el codigo</rights>
+  <entry xml:lang="es">
+    <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/auditoria-003-gvisor/</id>
+    <title>Un solo workflow interpola el valor de un secreto dentro de un bloque `run:`; el instrumento lo clasifica CRITICA y el mecanismo solo sostiene higiene latente</title>
+    <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/auditoria-003-gvisor/"/>
+    <published>2026-11-12T00:00:00Z</published>
+    <updated>2026-11-12T00:00:00Z</updated>
+    <summary>En `.github/workflows/go.yml` (job `generate`), 4 de las 5 apariciones de `${{ secrets.* }}` caen dentro de bloques `run:`. GitHub expande esas expresiones en el texto del script antes de que el shell lo lea, asi que el valor del secreto se parsea como sintaxis: un valor con una comilla doble rompe el `[[ ]]` (bash rc 2, medido) y un valor con `$(...)` se ejecuta (medido). El disparador es el valor del secreto, no una entrada del atacante: ninguna entrada controlable por quien abre un pull request llega a esa expansion, y GitHub enmascara el valor en el log. Por eso la severidad efectiva es higiene latente —el fallo se dispara con el propio valor y se convierte en caida o en ejecucion, no en fuga hacia un tercero— y no la exposicion critica que el clasificador le asigna. Remedio de una linea, medido: pasar el secreto por `env:`, donde el mismo valor con comilla queda inerte.</summary>
+    <author><name>Jose Alexis Román Martínez</name></author>
+  </entry>
   <entry xml:lang="es">
     <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/auditoria-002-economia-contexto/</id>
     <title>El coste de contexto por tarea es una constante del instrumento, no del tamano del corpus</title>

@@ -1,0 +1,200 @@
+<!doctype html>
+<!-- HUELLA-AUDITORIA-003-GVISOR-20261112 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Audit 003 · gvisor — 28 findings, one demoted | La Auditora</title>
+  <meta name="description" content="google/gvisor at 2f5253ab: 28 structural findings across 15 GitHub Actions workflows, reproduced with curl alone. The single CRITICAL does not survive its own mechanism and is demoted here, with the demonstration.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/auditoria-003-gvisor/">
+  <link rel="alternate" hreflang="es" href="https://alexisromtz-lab.github.io/la-auditora/">
+  <link rel="alternate" hreflang="en" href="https://alexisromtz-lab.github.io/la-auditora/en/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Audit 003 · gvisor — 28 findings, one demoted">
+  <meta property="og:description" content="An audit that revises its own severity. 28 findings reproduced with curl; the one graded CRITICAL is demoted to latent hygiene, with the shell evidence.">
+  <meta property="og:url" content="https://alexisromtz-lab.github.io/la-auditora/portafolio/auditoria-003-gvisor/">
+  <meta name="twitter:card" content="summary">
+  <style>
+    :root { color-scheme: dark; --bg:#101317; --panel:#171c22; --ink:#f3f1eb; --muted:#b2bac4; --line:#303943; --accent:#78e0c3; --warm:#f0bd76; --bad:#f08a8a; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; background:radial-gradient(ellipse at 14% 0%,#1e2a2d 0,transparent 34rem),var(--bg); color:var(--ink); font:16px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    a { color:var(--accent); text-underline-offset:.2em; }
+    a:hover { color:#b4f4e4; }
+    .skip { position:absolute; left:-9999px; top:auto; }
+    .skip:focus { left:1rem; top:1rem; z-index:5; background:var(--panel); padding:.7rem; }
+    .wrap { width:min(860px,calc(100% - 2rem)); margin:auto; }
+    header { display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:1.2rem 0; border-bottom:1px solid var(--line); }
+    .brand { color:var(--ink); font-weight:750; letter-spacing:.08em; text-decoration:none; text-transform:uppercase; font-size:.85rem; }
+    nav { display:flex; flex-wrap:wrap; gap:1rem; font-size:.9rem; }
+    nav a { text-decoration:none; }
+    main { padding:2.5rem 0 4rem; }
+    .eyebrow { color:var(--accent); font-size:.78rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; }
+    h1 { margin:.7rem 0 1rem; font-size:clamp(2rem,5.5vw,3.4rem); line-height:1.08; letter-spacing:-.04em; }
+    .lede { color:var(--muted); font-size:clamp(1.05rem,2vw,1.22rem); max-width:720px; }
+    .proof { display:flex; flex-wrap:wrap; gap:.65rem; margin:1.7rem 0 0; }
+    .proof span, .tag { border:1px solid var(--line); border-radius:999px; padding:.35rem .75rem; color:var(--muted); font-size:.82rem; }
+    h2 { margin:2.6rem 0 1rem; font-size:clamp(1.4rem,3.4vw,1.9rem); letter-spacing:-.02em; }
+    h3 { margin:1.8rem 0 .5rem; font-size:1.12rem; }
+    p { color:var(--muted); }
+    strong { color:var(--ink); }
+    code { background:#0c1013; border:1px solid var(--line); border-radius:5px; padding:.1rem .35rem; font-size:.88em; color:var(--warm); }
+    pre { background:#0c1013; border:1px solid var(--line); border-radius:10px; padding:1rem; overflow-x:auto; font-size:.86rem; line-height:1.55; }
+    pre code { background:none; border:0; padding:0; color:var(--ink); }
+    .card { border:1px solid var(--line); border-radius:14px; padding:1.25rem; background:linear-gradient(145deg,#1a2026,var(--panel)); }
+    .metric { color:var(--warm); font-size:1.05rem; font-weight:750; }
+    table { width:100%; border-collapse:collapse; margin:1rem 0; font-size:.94rem; }
+    th, td { text-align:left; padding:.55rem .6rem; border-bottom:1px solid var(--line); }
+    th { color:var(--ink); font-size:.8rem; letter-spacing:.06em; text-transform:uppercase; }
+    td { color:var(--muted); }
+    .green { color:var(--bad); font-weight:700; }
+    .limite { border-left:2px solid var(--warm); padding:.2rem 0 .2rem 1rem; margin:1.2rem 0; }
+    .limite p { margin:.3rem 0; }
+    .cta { border:1px solid var(--accent); border-radius:14px; padding:1.4rem; margin:3rem 0 0; }
+    .cta p { margin:.4rem 0; }
+    footer { border-top:1px solid var(--line); padding:1.5rem 0 3rem; color:var(--muted); font-size:.88rem; }
+  </style>
+</head>
+<body>
+<a class="skip" href="#contenido">Skip to content</a>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../../">La Auditora</a>
+    <nav>
+      <a href="../../">Audits</a>
+      <a href="../../en/">English</a>
+      <a href="#demotion">Demotion</a>
+      <a href="#reproduce">Reproduce</a>
+      <a href="#limits">Limits</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <p class="eyebrow">Audit 003 · continuous integration</p>
+    <h1>28 findings, one demoted</h1>
+    <p class="lede">In <strong>google/gvisor</strong> at commit <code>2f5253ab</code>, a structural audit of the 15 GitHub Actions workflows returns <strong>28 findings</strong>. I re-ran the instrument against the live commit, recounted every number with <code>curl</code> alone, and then checked the one finding it graded <em>CRITICAL</em> against its own mechanism. That one does not survive. It is demoted below, with the shell output that demotes it.</p>
+    <div class="proof">
+      <span>commit 2f5253abfaa87b6d62d79a0da60942e773389934</span>
+      <span>15 workflows · 28 findings</span>
+      <span>6 / 6 counts reproduced offline · the 15 files ship inside the artifact</span>
+      <span>1 severity revised downward</span>
+      <span>status: verified · one severity revised</span>
+    </div>
+
+    <h2 id="surface">What the surface returns</h2>
+    <p>The instrument reads YAML as text and classifies. Five codes came back at this commit:</p>
+    <table>
+      <thead><tr><th>Code</th><th>Locations</th><th>What it names</th></tr></thead>
+      <tbody>
+        <tr><td><code>SC1_ROOT_PERMISSIONS_MISSING</code></td><td>12</td><td>the workflow declares no root <code>permissions:</code>, so the effective ceiling is the repository or organisation default</td></tr>
+        <tr><td><code>SC1_JOB_WRITE_SCOPE_REVIEW</code></td><td>10</td><td>a job declares explicit <code>write</code> scopes — the correct form, published for review</td></tr>
+        <tr><td><code>GATE_RC_1_AUTORIDAD_CONTAMINADA</code></td><td>4</td><td>the job holds authority and executes code it does not control</td></tr>
+        <tr><td><code>SC1_ROOT_WRITE_INHERITED</code></td><td>1</td><td>the root grants <code>write</code> that jobs inherit without asking</td></tr>
+        <tr><td><code>GATE_RC_4_SECRETO_EXPUESTO</code></td><td>1</td><td>a secret value is interpolated into a <code>run:</code> block</td></tr>
+      </tbody>
+    </table>
+    <p>Twelve of those 28 depend on a fact I did <strong>not</strong> measure: the organisation's default permission for <code>GITHUB_TOKEN</code>. If that default is read-only, the twelve inherit <code>read</code> and nothing is exposed. So they are published here as <strong>undetermined</strong>, not as exposed. A count that needs an unread default is not a severity.</p>
+
+    <h2 id="demotion">The one graded CRITICAL, and why it does not stay critical</h2>
+    <p>In <code>.github/workflows/go.yml</code>, job <code>generate</code>, four of the file's five <code>${{ secrets.* }}</code> expressions sit inside <code>run:</code> blocks. Line 27 is the clearest:</p>
+<pre><code>- id: setup
+  run: |
+    if ! [[ -z "${{ secrets.GO_TOKEN }}" ]]; then
+      echo has_token=true &gt;&gt; "$GITHUB_OUTPUT"</code></pre>
+    <p>GitHub substitutes that expression <strong>into the script text</strong>, before the shell parses it. So the secret's value is not data — it is syntax. I ran the three cases:</p>
+<pre><code># A · a value containing a double quote
+$ bash -c 'if ! [[ -z "abc"def" ]]; then echo has_token; fi'
+bash: -c: line 0: unexpected EOF while looking for matching `"'
+rc=2                                    # the step dies; has_token is never written
+
+# B · a value containing a command substitution
+$ bash -c 'if ! [[ -z "$(echo EJECUTADO &gt;&amp;2)" ]]; then echo has_token; fi'
+EJECUTADO                               # the value executes on the runner
+rc=0
+
+# C · the same quoted value, passed through env:
+$ TOKEN='abc"def' bash -c 'if ! [[ -z "${TOKEN}" ]]; then echo has_token_env; fi'
+has_token_env                           # inert — this is the one-line fix
+rc=0</code></pre>
+    <p><strong>What that proves, and what it does not.</strong> It proves the value is parsed as shell. It does <em>not</em> prove an attacker can reach it: no event field, no pull-request input and no matrix value flows into that expression at this commit, and GitHub masks secret values in the job log — the value does not land in the log, contrary to the first draft of the machine report, which said it would. The trigger is the secret's own value: an operator pasting a token with a quote, a backslash or a newline.</p>
+    <p>So the honest severity is <strong>latent hygiene</strong> — a failure that becomes an outage or a self-inflicted execution, never a leak to a third party. The classifier said CRITICAL. The mechanism says otherwise, and the mechanism is the one with evidence behind it. <strong>That is the only kind of correction worth publishing: the one that removes a number from my own side of the ledger.</strong></p>
+
+    <h2 id="reproduce">Reproduce it in 60 seconds</h2>
+    <p>The script reads a byte-exact copy of the 15 audited files that ships inside the artifact, under <code>objeto/</code> with the licence that governs them, and recounts six published numbers. <strong>No network, no token, no clone, no YAML parser</strong> — the surface is read as text, which is what the finding is about. A report that can only be checked with a connection cannot be checked in a courtroom, on a plane, or in ten years.</p>
+    <table>
+      <thead><tr><th>#</th><th>Published count</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>workflow files read</td><td>15</td></tr>
+        <tr><td>2</td><td>workflows with no root <code>permissions:</code></td><td>12</td></tr>
+        <tr><td>3</td><td>workflows interpolating a secret inside <code>run:</code></td><td>1</td></tr>
+        <tr><td>4</td><td>secret interpolations inside <code>run:</code> blocks</td><td>4</td></tr>
+        <tr><td>5</td><td>secret interpolations outside <code>run:</code> (the correct place)</td><td>7</td></tr>
+        <tr><td>6</td><td>occurrences inside <code>go.yml</code></td><td>4</td></tr>
+      </tbody>
+    </table>
+<pre><code>git clone --depth 1 https://github.com/alexisromtz-lab/la-auditora.git
+cd la-auditora/portafolio/auditoria-003-gvisor
+
+python3 reproduce.py            # rc 0 = the 6 published counts reproduce, offline
+python3 reproduce.py --control  # rc 0 = the counter moves when the input moves
+python3 reproduce.py --remoto   # witness: the pinned copy still equals the commit
+python3 reproduce.py --self-test # rc 0 = the counter tells `run:` from `env:`</code></pre>
+    <p>Exit code <code>0</code> means all six counts reproduce. Exit <code>1</code> means at least one published number is wrong — <em>that</em> is the direction that matters, and it is measured, not asserted: the built-in control perturbs the copy and publishes which counts move.</p>
+    <table>
+      <thead><tr><th>Perturbation of the copy</th><th>Count that must move</th></tr></thead>
+      <tbody>
+        <tr><td>declare a root <code>permissions:</code> in <code>build.yml</code></td><td><code>sin_permissions_raiz</code> 12 → 11</td></tr>
+        <tr><td>add one <code>${{ secrets.* }}</code> outside <code>run:</code> in <code>go.yml</code></td><td><code>ocurrencias_fuera_de_run</code> 7 → 8</td></tr>
+      </tbody>
+    </table>
+    <p>A counter that returns the same numbers on a perturbed input is a counter that always says green. <code>--control</code> exits <code>0</code> only when both moves are observed, and the same values are published in <code>ficha.json</code> so no reader has to take this paragraph's word for it.</p>
+    <p><code>--remoto</code> is a witness, not a second verdict: it re-downloads the 15 paths from the pinned commit and compares bytes. Today it returns <strong>15 of 15 identical</strong>. If Google ever rewrites that history, the pinned copy stops being the object and the witness says <code>TESTIGO DIVERGE</code> — without ever changing the exit code of the audit, so a network outage cannot make a correct audit look wrong.</p>
+
+    <h2 id="moved">The number that moved: 31 → 28</h2>
+    <p>The ledger entry for this repository holds <strong>31</strong> findings. This report holds <strong>28</strong>. Neither number is wrong; they are two commits:</p>
+    <table>
+      <thead><tr><th>Source</th><th>Ref</th><th>UTC</th><th>Findings</th></tr></thead>
+      <tbody>
+        <tr><td>ledger entry</td><td><code>6ff6a1f4</code></td><td>2026-11-11 23:24:07</td><td>31</td></tr>
+        <tr><td>this report</td><td><code>2f5253ab</code></td><td>2026-11-12 00:40:58</td><td>28</td></tr>
+      </tbody>
+    </table>
+    <p>The two refs are 8 commits apart (<code>compare 2f5253ab...6ff6a1f4</code> → <code>ahead 0 · behind 8</code>). Three findings were closed in those eight hours. Publishing either number without its ref would produce a figure that cannot be reproduced — so the ref publishes next to the number, always. Re-running the instrument against the live commit the same day returned 28 again, with the same five codes and the same counts.</p>
+
+    <h2 id="limits">What this does not prove</h2>
+    <div class="limite">
+      <p><strong>It does not read the organisation's default permissions.</strong> Twelve findings assume an inherited ceiling I did not measure. They are undetermined, and a reader who knows the default can close them in one line.</p>
+      <p><strong>It does not observe runtime.</strong> The Actions history for this repository was not read. Nothing here claims that any workflow has fired wrongly on any date.</p>
+      <p><strong>It publishes no line numbers from the instrument.</strong> The instrument judges YAML as text; the line numbers above come from reading the file, and the reproduce script reads the same text.</p>
+      <p><strong>Declared out of scope by the instrument itself:</strong> reusable workflows (<code>workflow_call</code>), composite actions hosted in other repositories, OIDC trust policy at the destination registry, and the interior of tree scripts — <code>make</code> and <code>cmake</code> read the tree, so they fall outside the authority check.</p>
+      <p><strong>No patch is proposed.</strong> This page reports measurements. The one-line remedy for the demoted finding is shown because it costs one line and it is measured, not because it is a request to anyone.</p>
+    </div>
+
+    <h2>What I did not find — and looked for</h2>
+    <p>A report that only lists hits is not a report. These came back clean at the same commit, measured directly on the fetched files:</p>
+    <table>
+      <thead><tr><th>Check</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>remote <code>uses:</code> references pinned to a full 40-hex SHA</td><td><strong>23 / 23</strong> — zero floating tags, zero branch refs</td></tr>
+        <tr><td><code>continue-on-error: true</code></td><td><strong>0 occurrences</strong> — no step can swallow its own failure</td></tr>
+        <tr><td>secret interpolations placed in <code>env:</code> or <code>with:</code> instead of <code>run:</code></td><td><strong>7</strong> — the recommended form, used correctly</td></tr>
+      </tbody>
+    </table>
+    <p><strong>23 of 23 pinned actions is better than almost every repository I have measured.</strong> This is a surface that is otherwise careful, which is exactly why the four <code>run:</code> interpolations are worth naming — and why they are named as hygiene, not as an alarm.</p>
+
+    <h2 id="contact">Need this on your repository?</h2>
+    <div class="cta">
+      <p><strong>The audit is the product, and the receipt is the point.</strong> Every finding ships as a pinned commit, the blob hash of the file it lives in, the exact command that reproduces it, and a declared list of what was <em>not</em> measured — including the severities I had to revise.</p>
+      <p><a href="https://github.com/alexisromtz-lab/git-preflight-gate/issues/new?title=Audit%20request&amp;body=Repository%3A%20%0ACommit%3A%20%0AWhat%20worries%20you%3A%20" target="_blank" rel="noopener noreferrer">Open a request on GitHub Issues</a> · <a href="https://wa.me/525649997759?text=Hello%2C%20I%20read%20audit%20003%20and%20want%20one%20for%20my%20repository" target="_blank" rel="noopener noreferrer">WhatsApp</a></p>
+    </div>
+  </main>
+
+  <footer>
+    <p><strong>Two series, two numbers, declared:</strong> this is portfolio case <strong>003</strong> of the executable <code>auditoria-00N</code> series. It is <em>not</em> Report #003 of the DOI series — <em>La compuerta que fue desactivada</em>, <a href="https://doi.org/10.5281/zenodo.24117643" target="_blank" rel="noopener noreferrer">10.5281/zenodo.24117643</a> — which is a different artifact with a different subject. The two share a digit in this site and nothing else.</p>
+    <p>Audit 003 · <code>google/gvisor</code> @ <a href="https://github.com/google/gvisor/commit/2f5253abfaa87b6d62d79a0da60942e773389934" target="_blank" rel="noopener noreferrer"><code>2f5253ab</code></a> · locus <a href="https://github.com/google/gvisor/blob/2f5253abfaa87b6d62d79a0da60942e773389934/.github/workflows/go.yml#L27" target="_blank" rel="noopener noreferrer"><code>.github/workflows/go.yml</code></a> · blob <code>d18dba0b</code> · 76 lines. Report generated from the audit sheet, not from memory.</p>
+  </footer>
+</div>
+</body>
+</html>

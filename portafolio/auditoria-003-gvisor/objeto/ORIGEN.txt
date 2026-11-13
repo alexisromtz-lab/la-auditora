@@ -1,0 +1,21 @@
+objeto/ — copia fijada del sujeto auditado
+==========================================
+
+Repositorio  google/gvisor
+Commit       2f5253abfaa87b6d62d79a0da60942e773389934
+Fecha        2026-11-12T00:40:58Z
+Rutas        .github/workflows/auto_assign.yml, build.yml, cherry_pick_release.yml,
+             close_banned_prs.yml, codeql.yml, cut_release.yml, fileheader.yml,
+             gazelle.yml, go.yml, issue_reviver.yml, labeler.yml, lint.yml,
+             release_mirror.yml, stage_release.yml, stale.yml
+Licencia     Apache License 2.0 — texto integro en LICENCIA-gvisor.txt
+
+Las 15 rutas se copiaron byte a byte desde raw.githubusercontent.com en ese
+commit, sin normalizar saltos de linea ni codificacion. `python3 reproduce.py
+--remoto` vuelve a descargarlas y compara: hoy devuelve 15 de 15 identicas. Si
+Google reescribe el historial, la copia deja de ser el objeto y el testigo lo
+publica como TESTIGO DIVERGE.
+
+La copia vive aqui porque el veredicto tiene que ser reproducible sin red: un
+informe que solo se puede comprobar con conexion no se puede comprobar en un
+jurado, en un avion o dentro de diez anos.
