@@ -115,6 +115,14 @@
             <p class="source"><a href="https://github.com/BerriAI/litellm/commit/d947ec1f7d672883afbf8b79574be9ac8a44b43d" target="_blank" rel="noopener noreferrer">BerriAI/litellm · d947ec1f</a> · <a href="../portafolio/auditoria-001-litellm/">report and reproduction script</a></p>
           </article>
           <article>
+            <span class="tag">gvisor · CI · permissions</span>
+            <h3>28 findings, one demoted</h3>
+            <p class="metric">15 workflows · 28 findings · 1 severity revised downward</p>
+            <p>Twelve of the fifteen workflows declare no root <code>permissions:</code>, four hold authority while executing code they do not control, and one interpolates four secrets into <code>run:</code> blocks. All 28 numbers reproduce with <code>curl</code> alone, no clone. The single finding the instrument graded CRITICAL does not survive its own mechanism — it is demoted here, with the shell evidence that demotes it.</p>
+            <p><strong>Limit:</strong> the organisation's default token permissions were not read, so the twelve are published as undetermined, not as exposed. Runtime history was not read.</p>
+            <p class="source"><a href="https://github.com/google/gvisor/commit/2f5253abfaa87b6d62d79a0da60942e773389934" target="_blank" rel="noopener noreferrer">google/gvisor · 2f5253ab</a> · <code>python3 reproduce.py</code> · <a href="../portafolio/auditoria-003-gvisor/">report and reproduction script</a></p>
+          </article>
+          <article>
             <span class="tag">PyTorch · tests · static analysis</span>
             <h3>Recognized tests with no CI execution path</h3>
             <p class="metric">45 files · 459 test functions · 3.35% of the corpus</p>

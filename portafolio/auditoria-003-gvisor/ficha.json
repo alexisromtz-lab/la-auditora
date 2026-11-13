@@ -1,0 +1,84 @@
+{
+  "sujeto": {
+    "repo": "google/gvisor",
+    "sha": "2f5253abfaa87b6d62d79a0da60942e773389934",
+    "ambito": ".github/workflows/*.yml — 15 workflow files leidos como texto, sin clonar y sin parser YAML"
+  },
+  "hallazgo": {
+    "titulo": "Un solo workflow interpola el valor de un secreto dentro de un bloque `run:`; el instrumento lo clasifica CRITICA y el mecanismo solo sostiene higiene latente",
+    "impacto": "En `.github/workflows/go.yml` (job `generate`), 4 de las 5 apariciones de `${{ secrets.* }}` caen dentro de bloques `run:`. GitHub expande esas expresiones en el texto del script antes de que el shell lo lea, asi que el valor del secreto se parsea como sintaxis: un valor con una comilla doble rompe el `[[ ]]` (bash rc 2, medido) y un valor con `$(...)` se ejecuta (medido). El disparador es el valor del secreto, no una entrada del atacante: ninguna entrada controlable por quien abre un pull request llega a esa expansion, y GitHub enmascara el valor en el log. Por eso la severidad efectiva es higiene latente —el fallo se dispara con el propio valor y se convierte en caida o en ejecucion, no en fuga hacia un tercero— y no la exposicion critica que el clasificador le asigna. Remedio de una linea, medido: pasar el secreto por `env:`, donde el mismo valor con comilla queda inerte.",
+    "conteo_independiente": {
+      "workflows_leidos": 15,
+      "sin_permissions_raiz": 12,
+      "workflows_con_secreto_en_run": 1,
+      "ocurrencias_en_run": 4,
+      "ocurrencias_fuera_de_run": 7,
+      "ocurrencias_en_go_yml": 4
+    },
+    "hallazgos_del_instrumento": {
+      "total": 28,
+      "por_codigo": {
+        "SC1_ROOT_PERMISSIONS_MISSING": 12,
+        "SC1_JOB_WRITE_SCOPE_REVIEW": 10,
+        "GATE_RC_1_AUTORIDAD_CONTAMINADA": 4,
+        "SC1_ROOT_WRITE_INHERITED": 1,
+        "GATE_RC_4_SECRETO_EXPUESTO": 1
+      }
+    }
+  },
+  "reconciliacion": {
+    "registro": {
+      "archivo": "candidatos.json",
+      "ref": "6ff6a1f498df",
+      "utc": "2026-11-11T23:24:07Z",
+      "hallazgos": 31
+    },
+    "informe": {
+      "ref": "2f5253abfaa87b6d62d79a0da60942e773389934",
+      "utc": "2026-11-12T00:40:58Z",
+      "hallazgos": 28
+    },
+    "relacion": "El ref del registro esta 8 commits detras del sujeto del informe (compare 2f5253ab...6ff6a1f4: ahead=0, behind=8). Los hallazgos pasaron de 31 a 28 entre los dos refs. Un conteo sin su ref es otro objeto: se publica el del informe y se declara el del registro.",
+    "reverificacion": "El instrumento se volvio a correr contra el sujeto vivo el 2026-11-12 y devolvio 28 hallazgos sobre 15 workflows, con los mismos cinco codigos y los mismos conteos."
+  },
+  "limite": "El instrumento juzga el YAML como texto y no publica numero de linea. No lee los permisos por defecto de la organizacion, que son los que deciden si los 12 workflows sin `permissions:` raiz heredan `read` o `write`: por eso esos 12 se publican como indeterminados, no como expuestos. No se observo runtime ni se leyo el historial de GitHub Actions, asi que no se afirma que ningun flujo concreto se haya disparado. Fuera de alcance declarado por el propio instrumento: workflows reutilizables (`workflow_call`), acciones compuestas alojadas en repositorios ajenos, y el interior de los scripts del arbol (`make`, `cmake` leen del arbol). El conteo se reproduce con `curl`, sin clonar, sin token y sin dependencias; la severidad no se reproduce con un script porque es un juicio, y por eso se publica con su mecanismo al lado. La copia fijada en `objeto/` es el sujeto del veredicto; `--remoto` solo la testifica y no la sustituye. El informe no mide el permiso por defecto de la organizacion para GITHUB_TOKEN: los 12 hallazgos de permissions raiz son indeterminados, no expuestos.",
+  "estado": "verificado_en_conteo · severidad reclasificada de CRITICA a higiene latente",
+  "locus": [
+    {
+      "ruta": ".github/workflows/go.yml",
+      "blob": "d18dba0b4e8ff5df8cb536d388985d12726de45b",
+      "lineas_0x0a": 76,
+      "lineas_citadas": [
+        27,
+        36,
+        64,
+        73
+      ]
+    },
+    {
+      "ruta": ".github/workflows/build.yml",
+      "blob": "a13844b3f38a37abc3336158068f858024f18614",
+      "lineas_0x0a": 35
+    },
+    {
+      "ruta": ".github/workflows/stale.yml",
+      "blob": "5bd75fff85e376b750e255dad713da93b6504702",
+      "lineas_0x0a": 32
+    }
+  ],
+  "reproduccion": {
+    "comando": "python3 reproduce.py",
+    "rc": 0,
+    "salida": "RC 0 - 6 of 6 published claims reproduce",
+    "sin_red": true,
+    "control_negativo": "python3 reproduce.py --control  ->  sin_permissions_raiz 12->11 y ocurrencias_fuera_de_run 7->8, RC 0 solo si ambas cifras se mueven",
+    "testigo": "python3 reproduce.py --remoto  ->  compara objeto/ con el commit fijado; hoy 15/15 identicas; un testigo divergente no cambia el veredicto"
+  },
+  "objeto_fijado": {
+    "ruta": "objeto/",
+    "archivos": 15,
+    "origen": "raw.githubusercontent.com/google/gvisor @ 2f5253ab, copia byte a byte",
+    "licencia": "Apache-2.0 (texto en objeto/LICENCIA-gvisor.txt)",
+    "por_que": "el veredicto debe reproducirse sin red, sin token y sin clon"
+  }
+}

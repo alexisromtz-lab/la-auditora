@@ -114,6 +114,14 @@
             <p class="source"><a href="https://github.com/BerriAI/litellm/commit/d947ec1f7d672883afbf8b79574be9ac8a44b43d" target="_blank" rel="noopener noreferrer">BerriAI/litellm · d947ec1f</a> · <a href="portafolio/auditoria-001-litellm/">informe y script de reproducción</a></p>
           </article>
           <article>
+            <span class="tag">gvisor · CI · permisos</span>
+            <h3>28 hallazgos, uno rebajado</h3>
+            <p class="metric">15 workflows · 28 hallazgos · 1 severidad revisada a la baja</p>
+            <p>Doce de los quince workflows no declaran <code>permissions:</code> en la raíz, cuatro conservan autoridad mientras ejecutan código que no controlan, y uno interpola cuatro secretos dentro de bloques <code>run:</code>. Las 28 cifras se reproducen con <code>curl</code> solo, sin clonar. El único hallazgo que el instrumento graduó como CRÍTICO no sobrevive a su propio mecanismo: aquí se rebaja, con la evidencia de shell que lo rebaja.</p>
+            <p><strong>Límite:</strong> no se leyó el permiso por defecto de la organización para el token, así que los doce se publican como indeterminados, no como expuestos. No se leyó historial de ejecuciones.</p>
+            <p class="source"><a href="https://github.com/google/gvisor/commit/2f5253abfaa87b6d62d79a0da60942e773389934" target="_blank" rel="noopener noreferrer">google/gvisor · 2f5253ab</a> · <code>python3 reproduce.py</code> · <a href="portafolio/auditoria-003-gvisor/">informe y script de reproducción</a></p>
+          </article>
+          <article>
             <span class="tag">PyTorch · tests · análisis estático</span>
             <h3>Tests reconocidos que ningún camino del CI convoca</h3>
             <p class="metric">45 archivos · 459 funciones de test · 3,35 % del corpus</p>
