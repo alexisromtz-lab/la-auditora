@@ -321,6 +321,10 @@ def check_citas(root: Path):
     return "CITATION.cff, .zenodo.json y DOI en el README", fallas, []
 
 
+METACARACTERES = ("&&", "||", ";", "|", "&", ">", ">>", "<", "<<")
+METACARACTERES_PEGADOS = ("$(", "`", "&&", "||")
+
+
 def check_reproduce(root: Path):
     fallas = []
     notas = []
@@ -350,16 +354,37 @@ def check_reproduce(root: Path):
             continue
         if argv[0] in ("python", "python3"):
             argv[0] = sys.executable
+        # HUELLA-CANARIO-COMANDO-UNICO-20261112: un `&&` en `comando` no es una
+        # tuberia, es un segundo comando que este lector nunca ejecuta. Antes se
+        # colaba como ruta inexistente, se emitia nota NO_MEDIDO y el caso se
+        # saltaba: el rc de 003 no se comprobo jamas. Silencio no es inocencia.
+        sueltos = [tok for tok in argv if tok in METACARACTERES]
+        pegados = [m for m in METACARACTERES_PEGADOS if m in comando]
+        if sueltos or pegados:
+            fallas.append(
+                "%s/ficha.json: `reproduccion.comando` lleva metacaracteres de shell (%s); "
+                "la ficha declara UN comando, no una tuberia"
+                % (rel, ", ".join(sorted(set(sueltos + pegados))))
+            )
+            continue
         ausentes = [
             arg
             for arg in argv[1:]
             if not arg.startswith("-") and not (informe / arg).exists()
         ]
         if ausentes:
-            notas.append(
-                "%s: el comando exige %s, que no vive en el repositorio -> NO_MEDIDO"
-                % (rel, ", ".join(ausentes))
-            )
+            razon = str(bloque.get("no_medible") or "").strip()
+            if not razon:
+                fallas.append(
+                    "%s/ficha.json: el comando exige %s, que no vive en el caso, y la ficha "
+                    "no declara `reproduccion.no_medible` con su razon"
+                    % (rel, ", ".join(ausentes))
+                )
+            else:
+                notas.append(
+                    "%s: NO_MEDIDO declarado en la ficha (%s): %s -> %s"
+                    % (rel, ", ".join(ausentes), razon, comando)
+                )
             continue
         try:
             proc = subprocess.run(

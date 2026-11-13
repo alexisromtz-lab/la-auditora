@@ -20,6 +20,7 @@
   "reproduccion": {
     "comando": "python3 reproduce.py .github/workflows/test-unit.yml",
     "rc": 1,
-    "salida": "RESULTADO: el paso reporta exito sin haber corrido un solo test."
+    "salida": "RESULTADO: el paso reporta exito sin haber corrido un solo test.",
+    "no_medible": "el sujeto es .github/workflows/test-unit.yml de BerriAI/litellm, que no vive en este repositorio; el caso 001 es anterior a la compuerta de admision, que desde el informe 003 obliga a fijar el objeto en `objeto/`. Declarado aqui para que el canario no lo lea como verde: este caso NO se ejecuta, y por eso el canario dice 2 ejecutados y no 3."
   }
 }

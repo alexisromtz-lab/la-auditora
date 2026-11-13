@@ -302,15 +302,40 @@ class CanarioFalsable(unittest.TestCase):
         self.exigir_rojo("reproduce", proc.stdout)
         self.assertIn("declara rc=1", proc.stdout)
 
-    def test_sujeto_ausente_es_no_medido_y_no_rojo(self) -> None:
+    def test_sujeto_ausente_declarado_es_no_medido_y_no_rojo(self) -> None:
         ruta = self.root / INFORME / "ficha.json"
         ficha = json.loads(ruta.read_text(encoding="utf-8"))
         ficha["reproduccion"]["comando"] = "python3 reproduce.py objeto/workflow.yml"
+        ficha["reproduccion"]["no_medible"] = "el sujeto vive en otro repositorio"
         ruta.write_text(json.dumps(ficha), encoding="utf-8")
         proc = self.correr()
         self.assertEqual(proc.returncode, 0, proc.stdout)
-        self.assertIn("NO_MEDIDO", proc.stdout)
+        self.assertIn("NO_MEDIDO declarado", proc.stdout)
         self.assertIn("CANARIO OK", proc.stdout)
+
+    # HUELLA-TEST-CANARIO-COMIENDO-METACARACTERES-20261112: el falsador de los
+    # dos agujeros del 12-Nov. El primero: `&&` se colaba como ruta inexistente y
+    # el caso se saltaba con una nota, asi que el rc nunca se comparaba.
+    def test_comando_con_metacaracteres_enciende_reproduce(self) -> None:
+        ruta = self.root / INFORME / "ficha.json"
+        ficha = json.loads(ruta.read_text(encoding="utf-8"))
+        ficha["reproduccion"]["comando"] = "python3 reproduce.py && true"
+        ruta.write_text(json.dumps(ficha), encoding="utf-8")
+        proc = self.correr()
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.exigir_rojo("reproduce", proc.stdout)
+        self.assertIn("metacaracteres de shell", proc.stdout)
+
+    def test_sujeto_ausente_sin_declarar_enciende_reproduce(self) -> None:
+        ruta = self.root / INFORME / "ficha.json"
+        ficha = json.loads(ruta.read_text(encoding="utf-8"))
+        ficha["reproduccion"].pop("no_medible", None)
+        ficha["reproduccion"]["comando"] = "python3 reproduce.py objeto/workflow.yml"
+        ruta.write_text(json.dumps(ficha), encoding="utf-8")
+        proc = self.correr()
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.exigir_rojo("reproduce", proc.stdout)
+        self.assertIn("no declara `reproduccion.no_medible`", proc.stdout)
 
     def test_articulo_sano_cableado_es_verde(self) -> None:
         cablear_articulo(self.root)
