@@ -163,6 +163,6 @@ curl -sL https://EL-DOMINIO/ | grep -o '<title>[^<]*</title>'
 
 If that title is also the title of the inner pages, the problem is not in the text: it is in where the declaration lives. And fixing the text does not touch it.
 
-- The instrument this is measured with: https://alexisromtz-lab.github.io/auditor-toolkit/
-- Other published measurements: https://alexisromtz-lab.github.io/la-auditora/
+- The instrument this is measured with: [https://alexisromtz-lab.github.io/auditor-toolkit/](https://alexisromtz-lab.github.io/auditor-toolkit/)
+- Other published measurements: [https://alexisromtz-lab.github.io/la-auditora/](https://alexisromtz-lab.github.io/la-auditora/)
 - [The site this was applied to, measured after deploying](https://arquitectocuantico.com/?utm_source=la-auditora&utm_medium=articulo&utm_campaign=muro-use-client)
