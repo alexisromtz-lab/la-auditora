@@ -184,7 +184,7 @@ $ curl -s -o /dev/null -w '%{http_code} age=%header{age}\n' https://arquitectocu
 
 <p>The fix covered the eleven URLs declared in the sitemap. The four remaining — <code>/privacy</code>, <code>/terms</code> and the two OAuth authorisation screens — still served the root layout title: they are client components with no server layout, which is literally the blind spot the previous section describes. Four more server layouts and the census closes at 15 of 15.</p>
 
-<p>And a correction to my own plan: I had the Cloudflare purge as a mandatory step before probing. It was not needed. <code>cf-cache-status</code> answers <code>DYNAMIC</code> on <code>/</code> and on <code>/sitemap.xml</code>, and <code>REVALIDATED</code> on <code>/robots.txt</code>: Cloudflare was not holding a copy of those routes. The cache serving the old <code>age</code> was Vercel's, and a new deployment invalidates it by itself. One step too many, measured before running it.</p>
+<p>And a correction to my own plan: I had the Cloudflare purge as a mandatory step before probing. It was not needed. <code>cf-cache-status</code> answers <code>DYNAMIC</code> on <code>/</code> and on <code>/sitemap.xml</code> — served from the origin — and <code>REVALIDATED</code> on <code>/robots.txt</code>, which did have a stored copy and revalidated it against the origin. Which cache produced the old <code>age</code> is something none of those headers state: that field stays <code>NO_MEDIDO</code>. What is observed is the only thing that mattered for the act: with the new deployment, none of the three routes serves the previous object any more, and without a manual purge.</p>
 
 <h2>What this piece does not claim</h2>
 

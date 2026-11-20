@@ -118,7 +118,7 @@ La sección anterior la escribí sin credencial de despliegue. Horas después ha
 
 El arreglo cubrió las once URLs declaradas en el sitemap. Las cuatro restantes — `/privacy`, `/terms` y las dos pantallas de autorización OAuth — seguían sirviendo el título del layout raíz: son componentes de cliente sin layout de servidor, que es literalmente el punto ciego que la sección anterior describe. Cuatro layouts de servidor más y el censo cierra en 15 de 15.
 
-Y una corrección a mi propio plan: tenía la purga de Cloudflare como paso obligatorio antes de sondear. No hizo falta. `cf-cache-status` responde `DYNAMIC` en `/` y en `/sitemap.xml`, y `REVALIDATED` en `/robots.txt`: Cloudflare no guardaba copia de esas rutas. La caché que servía el `age` viejo era la de Vercel, y un despliegue nuevo la invalida por sí solo. Un paso de más, medido antes de ejecutarlo.
+Y una corrección a mi propio plan: tenía la purga de Cloudflare como paso obligatorio antes de sondear. No hizo falta. `cf-cache-status` responde `DYNAMIC` en `/` y en `/sitemap.xml` —servidas desde el origen— y `REVALIDATED` en `/robots.txt`, que sí tenía una copia almacenada y la revalidó contra el origen. Qué caché produjo el `age` viejo no lo dice ninguna de esas cabeceras: ese campo queda `NO_MEDIDO`. Lo que sí se observa es lo único que importaba para el acto: con el despliegue nuevo, ninguna de las tres rutas sirve ya el objeto anterior, y sin purga manual.
 
 ## Qué no afirma esta pieza
 

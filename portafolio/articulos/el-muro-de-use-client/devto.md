@@ -119,7 +119,7 @@ I wrote the previous section without a deploy credential. Hours later there were
 
 The fix covered the eleven URLs declared in the sitemap. The four remaining — `/privacy`, `/terms` and the two OAuth authorisation screens — still served the root layout title: they are client components with no server layout, which is literally the blind spot the previous section describes. Four more server layouts and the census closes at 15 of 15.
 
-And a correction to my own plan: I had the Cloudflare purge as a mandatory step before probing. It was not needed. `cf-cache-status` answers `DYNAMIC` on `/` and on `/sitemap.xml`, and `REVALIDATED` on `/robots.txt`: Cloudflare was not holding a copy of those routes. The cache serving the old `age` was Vercel's, and a new deployment invalidates it by itself. One step too many, measured before running it.
+And a correction to my own plan: I had the Cloudflare purge as a mandatory step before probing. It was not needed. `cf-cache-status` answers `DYNAMIC` on `/` and on `/sitemap.xml` — served from the origin — and `REVALIDATED` on `/robots.txt`, which did have a stored copy and revalidated it against the origin. Which cache produced the old `age` is something none of those headers state: that field stays `NO_MEDIDO`. What is observed is the only thing that mattered for the act: with the new deployment, none of the three routes serves the previous object any more, and without a manual purge.
 
 ## What this piece does not claim
 
