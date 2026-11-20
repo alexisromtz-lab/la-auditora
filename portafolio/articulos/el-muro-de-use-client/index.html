@@ -71,11 +71,18 @@
 
 <h2>La causa no es el contenido</h2>
 
-<p>No es que el sitio no defina títulos. Es que no puede definirlos donde los definió.</p>
+<p>No es que el sitio no defina títulos. Es que no puede definirlos con el mecanismo que eligió.</p>
 
-<p>En el App Router de Next.js, el título de una ruta lo lee el <strong>servidor</strong>: es la parte del árbol que se serializa a <code>&lt;head&gt;</code> antes de que exista JavaScript. Se declara exportando <code>metadata</code> desde un componente de servidor.</p>
+<p>En el App Router de Next.js hay dos formas de poner un título. La primera es exportar <code>metadata</code> desde un componente de servidor: el framework la serializa a <code>&lt;head&gt;</code>. La segunda es renderizar un elemento <code>&lt;title&gt;</code> en cualquier punto del árbol — React 19 lo eleva a <code>&lt;head&gt;</code>, también durante el renderizado en servidor.</p>
 
-<p><code>"use client"</code> marca la frontera del módulo: todo lo que ese fichero importa entra al bundle del navegador y deja de ejecutarse en el servidor. Y una de las cosas que deja de estar disponible es exactamente la exportación de <code>metadata</code>.</p>
+<p><strong><code>"use client"</code> no impide ninguna de las dos cosas por sí mismo</strong>, y conviene decirlo antes de seguir, porque la intuición habitual —«cliente significa que lo pinta el navegador y el servidor no»— es falsa, y se mide en un comando. <code>/privacy</code> es un componente de cliente y su texto completo está en el HTML crudo:</p>
+
+<pre><code>curl -sL https://arquitectocuantico.com/privacy | sed 's/&lt;[^&gt;]*&gt;/ /g' | tr -s ' ' | wc -c
+→ 3194</code></pre>
+
+<p>Tres mil ciento noventa y cuatro caracteres de texto visible servidos por el servidor, con el JavaScript sin ejecutar. El componente de cliente se prerenderiza igual.</p>
+
+<p>Lo que <code>"use client"</code> sí hace es excluir el módulo de la exportación de <code>metadata</code>: esa API es de servidor y no está disponible en el lado cliente. El sitio eligió <code>metadata</code> —una sola vez, en <code>src/app/layout.tsx</code>— y marcó las otras siete rutas como <code>"use client"</code>. El resultado no es una imposibilidad: es una omisión, con una declaración para quince URLs.</p>
 
 <p>Conteo sobre el repositorio, en <code>fb28bab</code>:</p>
 
@@ -91,7 +98,7 @@ grep -rl '^"use client"' src/app --include=page.tsx | wc -l    → 7</code></pre
 <tr>
 <th>qué es el componente</th>
 <th>URLs servidas</th>
-<th>con título propio</th>
+<th>declara su propio título</th>
 </tr>
 </thead>
 <tbody>
@@ -100,15 +107,15 @@ grep -rl '^"use client"' src/app --include=page.tsx | wc -l    → 7</code></pre
 </tbody>
 </table>
 
-<p>Cero de catorce, uno de uno. Una regla con una sola excepción no es una correlación: es la regla.</p>
+<p>Cero de catorce, uno de uno. La única ruta que declara algo es también la única a la que <code>metadata</code> le está permitido.</p>
 
 <p>Y el efecto es multiplicativo, no aditivo: cada slug nuevo que se añada a la comunidad hereda el mismo título raíz sin que nadie toque nada. La deuda no crece de uno en uno; crece con el catálogo.</p>
 
 <h2>El arreglo es estructural</h2>
 
-<p>Reescribir el título dentro de cada componente de cliente no funciona: React 19 puede montar un <code>&lt;title&gt;</code> y el navegador lo aplica, pero eso ocurre <strong>después</strong> de la hidratación, y el rastreador que decide indexar lee el HTML antes. El título quedaría correcto para un humano y vacío para un buscador — el peor de los dos estados, porque parece resuelto.</p>
+<p>Escribir un <code>&lt;title&gt;</code> dentro de cada componente de cliente también funcionaría — acabamos de medir que se prerenderiza — y esa es justamente la trampa: reparte la misma declaración en catorce archivos, uno por slug, y el decimoquinto que se añada mañana vuelve a olvidarla. La deuda no se paga una vez; se paga con el catálogo.</p>
 
-<p>El arreglo es subir la declaración al nivel donde vive el servidor:</p>
+<p>El arreglo sube la declaración a donde vive el servidor, que es donde el catálogo ya está listado:</p>
 
 <ul>
 <li><code>src/app/layout.tsx</code> — <code>metadataBase</code>, plantilla de título, <code>openGraph</code>, <code>robots</code>.</li>
@@ -120,9 +127,9 @@ grep -rl '^"use client"' src/app --include=page.tsx | wc -l    → 7</code></pre
 
 <p>Seis archivos, +147 −2 líneas. Con eso: <code>tsc --noEmit</code> → RC 0, <code>next build</code> → RC 0, y los tres layouts de servidor emiten canonical más tres alternates <code>hreflang</code> por página.</p>
 
-<h2>El punto ciego: el arreglo no llegó a la frontera</h2>
+<h2>El punto ciego: el arreglo no llega a estas URLs</h2>
 
-<p>Aquí es donde la pieza se separa de casi todo lo que se escribe sobre este tema. El parche está escrito y validado. <strong>No está desplegado.</strong> Y eso no lo digo por memoria: lo mide una cabecera.</p>
+<p>Aquí es donde la pieza se separa de casi todo lo que se escribe sobre este tema. El parche está escrito y validado. <strong>Y ninguna de las quince URLs lo sirve.</strong></p>
 
 <pre><code>$ curl -s -o /dev/null -w '%{http_code} age=%header{age}\n' https://arquitectocuantico.com/
 200 age=783014
@@ -132,7 +139,9 @@ $ curl -s -o /dev/null -w '%{http_code} age=%header{age}\n' https://arquitectocu
 
 <p><code>783014</code> segundos son <strong>9,06 días</strong>: el HTML que sirve hoy la portada se generó antes de que el parche existiera. <code>175297</code> segundos son <strong>2,03 días</strong>: el 404 del sitemap está cacheado desde el día 18.</p>
 
-<p>Dos objetos distintos, dos instrumentos distintos:</p>
+<p>Y aquí está la segunda trampa, la que me costó corregir el primer borrador de esta pieza: <strong><code>age</code> mide la respuesta, no el despliegue.</strong> Una CDN puede servir un objeto viejo mientras el origen ya tiene el nuevo; la antigüedad de la respuesta no distingue «no se desplegó» de «se desplegó y la caché no se refrescó». Lo que estos dos números sí prueban es lo único que importa para el lector: el arreglo no llega a estas URLs. Si el origen lo tiene, desde aquí no se puede saber — no hay credencial de despliegue ni identificador de versión en las cabeceras. Ese campo es <code>NO_MEDIDO</code>.</p>
+
+<p>Tres preguntas, tres instrumentos, y no se sustituyen:</p>
 
 <table>
 <thead>
@@ -144,19 +153,21 @@ $ curl -s -o /dev/null -w '%{http_code} age=%header{age}\n' https://arquitectocu
 </thead>
 <tbody>
 <tr><td>¿el código compila y genera las rutas?</td><td><code>next build</code></td><td>verde, RC 0</td></tr>
-<tr><td>¿producción sirve ese código?</td><td><code>age</code> de la respuesta</td><td><strong>no</strong>: 9,06 días de antigüedad</td></tr>
+<tr><td>¿el arreglo llega a estas URLs?</td><td><code>age</code> de la respuesta</td><td><strong>no</strong>: 9,06 días de antigüedad</td></tr>
+<tr><td>¿el origen tiene el despliegue?</td><td>credencial de despliegue o id de versión</td><td><code>NO_MEDIDO</code></td></tr>
 </tbody>
 </table>
 
-<p>Un build verde en local no es un acto público. Es la mitad del acto. Medir sólo la primera mitad es cómo se publica un arreglo que nadie recibe, y se siente terminado.</p>
+<p>Un build verde en local no es un acto público: es la mitad del acto. Y una respuesta vieja no es prueba de un despliegue ausente: es prueba de una respuesta vieja. Las dos confusiones se parecen porque las dos se sienten como un veredicto.</p>
 
 <h2>Qué no afirma esta pieza</h2>
 
 <ul>
 <li><strong>No afirma</strong> que corregir los títulos vaya a subir el tráfico. La analítica del dominio no es accesible desde donde se hizo esta medición: ese número es <code>NO_MEDIDO</code>, y <code>NO_MEDIDO</code> no se lee como cero.</li>
 <li><strong>No afirma</strong> que el 404 del sitemap lo causara el parche. Tiene 2,03 días y el parche se escribió hoy: el 404 es anterior.</li>
+<li><strong>No afirma</strong> que el despliegue esté ausente del origen. Mide que no llega al lector; el estado del origen es <code>NO_MEDIDO</code>.</li>
 <li><strong>No afirma</strong> que el despliegue vaya a resolverse solo. Entre el repositorio y el dominio hay una CDN que puede reescribir <code>robots.txt</code> sin consultar al origen; si lo hace, la directiva <code>Sitemap:</code> de <code>app/robots.ts</code> no aparecerá nunca en la respuesta. Eso no está medido.</li>
-<li><strong>No afirma</strong> que <code>"use client"</code> sea un error. Es una directiva correcta usada en el sitio equivocado: la portada, la comunidad y las páginas legales son componentes de servidor que alguien marcó como interactivos.</li>
+<li><strong>No afirma</strong> que <code>"use client"</code> sea un error. Es una directiva correcta cuyo efecto lateral —excluir <code>metadata</code>— se vuelve costoso cuando se aplica a catorce rutas que no necesitan interactividad.</li>
 </ul>
 
 <h2>Reproducir</h2>

@@ -71,11 +71,18 @@
 
 <h2>The cause is not the content</h2>
 
-<p>It is not that the site does not define titles. It is that it cannot define them where it defined them.</p>
+<p>It is not that the site does not define titles. It is that it cannot define them with the mechanism it chose.</p>
 
-<p>In the Next.js App Router the title of a route is read by the <strong>server</strong>: it is the part of the tree that gets serialised into <code>&lt;head&gt;</code> before any JavaScript exists. It is declared by exporting <code>metadata</code> from a server component.</p>
+<p>In the Next.js App Router there are two ways to set a title. The first is exporting <code>metadata</code> from a server component: the framework serialises it into <code>&lt;head&gt;</code>. The second is rendering a <code>&lt;title&gt;</code> element anywhere in the tree — React 19 hoists it into <code>&lt;head&gt;</code>, during server rendering too.</p>
 
-<p><code>"use client"</code> marks the module boundary: everything that file imports enters the browser bundle and stops running on the server. And one of the things that stops being available is precisely the <code>metadata</code> export.</p>
+<p><strong><code>"use client"</code> prevents neither of those things by itself</strong>, and it is worth saying so before going on, because the usual intuition — "client means the browser paints it and the server does not" — is false, and it is measured with one command. <code>/privacy</code> is a client component and its full text is in the raw HTML:</p>
+
+<pre><code>curl -sL https://arquitectocuantico.com/privacy | sed 's/&lt;[^&gt;]*&gt;/ /g' | tr -s ' ' | wc -c
+→ 3194</code></pre>
+
+<p>Three thousand one hundred and ninety-four characters of visible text served by the server, with JavaScript never executed. The client component is prerendered all the same.</p>
+
+<p>What <code>"use client"</code> does do is exclude the module from the <code>metadata</code> export: that API is server-side and is not available on the client. The site chose <code>metadata</code> — once, in <code>src/app/layout.tsx</code> — and marked the other seven routes as <code>"use client"</code>. The result is not an impossibility: it is an omission, with one declaration for fifteen URLs.</p>
 
 <p>Counting over the repository, at <code>fb28bab</code>:</p>
 
@@ -91,7 +98,7 @@ grep -rl '^"use client"' src/app --include=page.tsx | wc -l    → 7</code></pre
 <tr>
 <th>what the component is</th>
 <th>URLs served</th>
-<th>with a title of its own</th>
+<th>declares a title of its own</th>
 </tr>
 </thead>
 <tbody>
@@ -100,15 +107,15 @@ grep -rl '^"use client"' src/app --include=page.tsx | wc -l    → 7</code></pre
 </tbody>
 </table>
 
-<p>Zero of fourteen, one of one. A rule with a single exception is not a correlation: it is the rule.</p>
+<p>Zero of fourteen, one of one. The only route that declares anything is also the only one <code>metadata</code> is allowed in.</p>
 
 <p>And the effect is multiplicative, not additive: every new slug added to the community inherits the same root title without anyone touching anything. The debt does not grow one at a time; it grows with the catalogue.</p>
 
 <h2>The fix is structural</h2>
 
-<p>Rewriting the title inside each client component does not work: React 19 can mount a <code>&lt;title&gt;</code> and the browser applies it, but that happens <strong>after</strong> hydration, and the crawler that decides whether to index reads the HTML before. The title would be right for a human and empty for a search engine — the worst of the two states, because it looks solved.</p>
+<p>Writing a <code>&lt;title&gt;</code> inside each client component would also work — we just measured that it is prerendered — and that is precisely the trap: it scatters the same declaration across fourteen files, one per slug, and the fifteenth added tomorrow forgets it again. The debt is not paid once; it is paid with the catalogue.</p>
 
-<p>The fix is to move the declaration up to where the server lives:</p>
+<p>The fix moves the declaration up to where the server lives, which is where the catalogue is already listed:</p>
 
 <ul>
 <li><code>src/app/layout.tsx</code> — <code>metadataBase</code>, title template, <code>openGraph</code>, <code>robots</code>.</li>
@@ -120,9 +127,9 @@ grep -rl '^"use client"' src/app --include=page.tsx | wc -l    → 7</code></pre
 
 <p>Six files, +147 −2 lines. With that: <code>tsc --noEmit</code> → RC 0, <code>next build</code> → RC 0, and the three server layouts emit a canonical plus three <code>hreflang</code> alternates per page.</p>
 
-<h2>The blind spot: the fix never reached the edge</h2>
+<h2>The blind spot: the fix does not reach these URLs</h2>
 
-<p>This is where the piece parts ways with almost everything written about this topic. The patch is written and validated. <strong>It is not deployed.</strong> And I am not saying that from memory: a header measures it.</p>
+<p>This is where the piece parts ways with almost everything written about this topic. The patch is written and validated. <strong>And none of the fifteen URLs serves it.</strong></p>
 
 <pre><code>$ curl -s -o /dev/null -w '%{http_code} age=%header{age}\n' https://arquitectocuantico.com/
 200 age=783014
@@ -132,7 +139,9 @@ $ curl -s -o /dev/null -w '%{http_code} age=%header{age}\n' https://arquitectocu
 
 <p><code>783014</code> seconds is <strong>9.06 days</strong>: the HTML the front page serves today was generated before the patch existed. <code>175297</code> seconds is <strong>2.03 days</strong>: the sitemap 404 has been cached since the 18th.</p>
 
-<p>Two different objects, two different instruments:</p>
+<p>And here is the second trap, the one that cost me a correction in the first draft of this piece: <strong><code>age</code> measures the response, not the deployment.</strong> A CDN can serve a stale object while the origin already holds the new one; the age of the response does not distinguish "it was never deployed" from "it was deployed and the cache was not refreshed". What these two numbers do prove is the only thing that matters to the reader: the fix does not reach these URLs. Whether the origin has it cannot be known from here — there is no deploy credential and no version identifier in the headers. That field is <code>NO_MEDIDO</code> (not measured).</p>
+
+<p>Three questions, three instruments, and none of them substitutes for another:</p>
 
 <table>
 <thead>
@@ -144,19 +153,21 @@ $ curl -s -o /dev/null -w '%{http_code} age=%header{age}\n' https://arquitectocu
 </thead>
 <tbody>
 <tr><td>does the code compile and generate the routes?</td><td><code>next build</code></td><td>green, RC 0</td></tr>
-<tr><td>does production serve that code?</td><td>the response <code>age</code></td><td><strong>no</strong>: 9.06 days old</td></tr>
+<tr><td>does the fix reach these URLs?</td><td>the response <code>age</code></td><td><strong>no</strong>: 9.06 days old</td></tr>
+<tr><td>does the origin hold the deployment?</td><td>deploy credential or version id</td><td><code>NO_MEDIDO</code></td></tr>
 </tbody>
 </table>
 
-<p>A green local build is not a public act. It is half the act. Measuring only the first half is how you ship a fix nobody receives, and it feels finished.</p>
+<p>A green local build is not a public act: it is half the act. And a stale response is not proof of a missing deployment: it is proof of a stale response. The two confusions look alike because both feel like a verdict.</p>
 
 <h2>What this piece does not claim</h2>
 
 <ul>
 <li><strong>It does not claim</strong> that fixing the titles will raise traffic. The domain's analytics are not reachable from where this measurement was taken: that number is <code>NO_MEDIDO</code> (not measured), and <code>NO_MEDIDO</code> does not read as zero.</li>
 <li><strong>It does not claim</strong> that the patch caused the sitemap 404. It is 2.03 days old and the patch was written today: the 404 predates it.</li>
+<li><strong>It does not claim</strong> that the deployment is absent from the origin. It measures that it does not reach the reader; the state of the origin is <code>NO_MEDIDO</code>.</li>
 <li><strong>It does not claim</strong> that the deployment will resolve itself. Between the repository and the domain there is a CDN that can rewrite <code>robots.txt</code> without consulting the origin; if it does, the <code>Sitemap:</code> directive from <code>app/robots.ts</code> will never appear in the response. That is not measured.</li>
-<li><strong>It does not claim</strong> that <code>"use client"</code> is a mistake. It is a correct directive used in the wrong place: the front page, the community and the legal pages are server components that someone marked as interactive.</li>
+<li><strong>It does not claim</strong> that <code>"use client"</code> is a mistake. It is a correct directive whose side effect — excluding <code>metadata</code> — becomes expensive when applied to fourteen routes that need no interactivity.</li>
 </ul>
 
 <h2>Reproduce</h2>
