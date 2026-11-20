@@ -2,11 +2,24 @@
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
   <title>La Auditora — reproducible audits and measurements</title>
   <id>https://alexisromtz-lab.github.io/la-auditora/</id>
-  <updated>2026-11-12T00:00:00Z</updated>
+  <updated>2026-11-20T00:00:00Z</updated>
   <link rel="self" type="application/atom+xml" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/feed.xml"/>
   <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/"/>
   <author><name>Jose Alexis Román Martínez</name></author>
   <rights>CC BY 4.0 sobre el texto; MIT sobre el codigo</rights>
+  <entry xml:lang="en">
+    <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/exposicion-a-ciclos-22-repos/</id>
+    <title>Nearly half the code in 22 projects depends on a cycle, and the usual metric rewards the worst offender</title>
+    <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/exposicion-a-ciclos-22-repos/"/>
+    <published>2026-11-20T00:00:00Z</published>
+    <updated>2026-11-20T00:00:00Z</updated>
+    <summary>Across 33,688 modules in 22 projects, 28.1% sit inside a cycle and 48.3% are exposed to one. The two numbers do not rank the same: Spearman correlation between them is +0.041.</summary>
+    <category term="architecture"/>
+    <category term="python"/>
+    <category term="graphs"/>
+    <category term="opensource"/>
+    <author><name>Jose Alexis Román Martínez</name></author>
+  </entry>
   <entry xml:lang="es">
     <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/auditoria-003-gvisor/</id>
     <title>Un solo workflow interpola el valor de un secreto dentro de un bloque `run:`; el instrumento lo clasifica CRITICA y el mecanismo solo sostiene higiene latente</title>

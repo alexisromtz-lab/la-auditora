@@ -1,0 +1,152 @@
+<!doctype html>
+<!-- HUELLA-PAGINA-ARTICULO-exposicion-a-ciclos-22-repos-20261108 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nearly half the code in 22 projects depends on a cycle, and the usual metric rewards the worst offender | La Auditora</title>
+  <meta name="description" content="Across 33,688 modules in 22 projects, 28.1% sit inside a cycle and 48.3% are exposed to one. The two numbers do not rank the same: Spearman correlation between them is +0.041.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/exposicion-a-ciclos-22-repos/">
+  <link rel="alternate" hreflang="es" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/exposicion-a-ciclos-22-repos/">
+  <link rel="alternate" hreflang="en" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/exposicion-a-ciclos-22-repos/">
+  <link rel="alternate" hreflang="x-default" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/exposicion-a-ciclos-22-repos/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Nearly half the code in 22 projects depends on a cycle, and the usual metric rewards the worst offender">
+  <meta property="og:description" content="Across 33,688 modules in 22 projects, 28.1% sit inside a cycle and 48.3% are exposed to one. The two numbers do not rank the same: Spearman correlation between them is +0.041.">
+  <meta property="og:url" content="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/exposicion-a-ciclos-22-repos/">
+  <meta property="og:locale" content="en_US">
+  <meta property="article:published_time" content="2026-11-20">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../../articulo.css">
+</head>
+<body>
+<a class="skip" href="#contenido">Skip to content</a>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../../../">La Auditora</a>
+    <nav>
+      <a href="../">Articles</a>
+      <a href="../../../">Audits</a>
+      <a href="../../../en/">Portfolio (EN)</a>
+      <a href="../../exposicion-a-ciclos-22-repos/" hreflang="es" lang="es">Leer en espanol</a>
+      <a href="../../exposicion-a-ciclos-22-repos/articulo.en.md">Source .md</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <p class="eyebrow">Article · 2026-11-20</p>
+    <h1>Nearly half the code in 22 projects depends on a cycle, and the usual metric rewards the worst offender</h1>
+    <p class="lede">Across 33,688 modules in 22 projects, 28.1% sit inside a cycle and 48.3% are exposed to one. The two numbers do not rank the same: Spearman correlation between them is +0.041.</p>
+    <div class="proof"><span>architecture</span><span>python</span><span>graphs</span><span>opensource</span></div>
+
+<h2>The second number</h2>
+
+<p>When people talk about architectural debt in Python they publish one number: how many cycles there are. I measured two things across 22 projects instead of one — how many modules sit <strong>inside</strong> a cycle and how many, without being in one, <strong>depend</strong> on one.</p>
+
+<table>
+<thead>
+<tr>
+<th>what was measured</th>
+<th>magnitude</th>
+<th>how it was obtained</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>projects</td><td><strong>22</strong></td><td>hand-picked commits, each projection pinned to the commit its row declares</td></tr>
+<tr><td>modules read</td><td><strong>33,688</strong></td><td>sum of <code>scc.modules</code> across the 22 public projections</td></tr>
+<tr><td>modules inside a cycle</td><td><strong>9,466 · 28.1%</strong></td><td>they belong to a strongly connected component of size &gt; 1</td></tr>
+<tr><td>exposed modules</td><td><strong>16,256 · 48.3%</strong></td><td>not in a cycle, but they reach one through the import graph</td></tr>
+</tbody>
+</table>
+
+<p>The second number is the one that decides whether a change inside the cycle wakes you up at three in the morning.</p>
+
+<p>"Exposed" has a mechanical, checkable definition: a module that belongs to no cyclic component but reaches one by following the import graph. That is, it imports — directly or transitively — something that sits inside a cycle.</p>
+
+<h2>Cycle counts do not rank anything</h2>
+
+<p>I ordered the 22 projects by number of cyclic components and then reordered them by exposure. The Spearman correlation between the two orders is <strong>+0.041</strong> over 22 rows: essentially zero. A cycle count says nothing about how much code hangs off a cycle.</p>
+
+<p>Four projects have exactly <strong>one</strong> cyclic component, and their sizes range from 33 to 801 modules:</p>
+
+<table>
+<thead>
+<tr>
+<th>project</th>
+<th>cyclic components</th>
+<th>modules in the largest</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>apache/superset</td><td>1</td><td>801</td></tr>
+<tr><td>gradio-app/gradio</td><td>1</td><td>147</td></tr>
+<tr><td>pydantic/pydantic</td><td>1</td><td>64</td></tr>
+<tr><td>stripe/stripe-python</td><td>1</td><td>33</td></tr>
+</tbody>
+</table>
+
+<p>The same number for four projects, with a factor of 24 between the first and the last. Another pair: apache/airflow and pytest-dev/pytest have two cyclic components each, and they add up to 367 trapped modules versus 4 — airflow's largest encloses 363 modules and pytest's encloses 2.</p>
+
+<h2>What produces the exposure</h2>
+
+<p>Working hypothesis: the culprit is not "having cycles", it is the package <code>__init__</code> sitting inside one. In 6 of the 10 rows where the package root could be resolved, the root is inside the largest component. The other 12 projects stay <strong>unmeasured</strong> on this point: the <code>paquete</code> field of their projection carries the literal <code>repo</code>, which is not a module. That is not a false, it is an absence of data, and an absence is not read as a zero.</p>
+
+<p>The extreme case is huggingface/transformers: 3,139 modules, eight cyclic components, the largest with 176 modules, and 91.9% of the package exposed — 2,886 modules out of 3,139. The mechanism lives in the graph: <code>transformers</code> is the node with the most in-edges, 3,103 of those 3,139 modules import it, and that node sits inside the 176-module cycle. When the <code>__init__</code> falls inside a small cycle, every module in the package ends up depending on it.</p>
+
+<h2>The metric rewards the worst offender</h2>
+
+<p>pytorch/pytorch has the largest cycle of the 22: <strong>1,660 modules</strong>, 65.7% of the package's 2,527, and 1,710 inside cycles overall (67.7%). Its exposure is 493 modules, 19.5%.</p>
+
+<p>vllm-project/vllm: 1,648 in the largest component out of 3,003 modules (54.9%), 1,801 inside (60.0%), and only 704 exposed (23.4%).</p>
+
+<p>In both cases exposure is low for the worst possible reason: the cycle swallowed the package and nobody was left outside to be exposed.</p>
+
+<p>stripe/stripe-python is the mirror image: 1,651 modules, a single 33-module cycle (2.0%), and 1,368 exposed (82.9% of 1,651). Ordered by exposure, transformers tops the list and pytorch drops to the lower half. Ordered by how much of the package is trapped in a single component, the ranking flips.</p>
+
+<p>Neither number is "the right one". The error is publishing only one and calling it architectural maturity.</p>
+
+<h2>Blind spot — what this piece does not claim</h2>
+
+<p>It does not claim that a cycle causes a failure. I measured static import topology on 22 commits; I ran nothing and did not cross the graphs with incidents. A previous, published measurement of the same corpus found 2 ruptures in 1,449 modules: cycles tell you where to look, not what will break.</p>
+
+<p>It does not claim that exposure implies execution risk. An exposed module may import the root package once at startup and never touch it again.</p>
+
+<p>It does not claim that the 12 projects without a resolved root are free of a cyclic <code>__init__</code>: they are unmeasured, which is why the raw data marks them as such instead of counting them as zero.</p>
+
+<p>It does not claim that 22 projects are a sample. They are 22 hand-picked commits with big names, not a draw; the rate holds for those 22 and for nobody else until it is repeated on another batch.</p>
+
+<p>It does not claim that the instrument is portable for the reader: it computes with <code>tools/calculate_arch_index.py</code>. What anyone can verify without it is the arithmetic, by downloading the 22 public projections and summing the <code>scc.*</code> fields, which is exactly what I did here.</p>
+
+<h2>Reproduce</h2>
+
+<pre><code>.venv/bin/python tools/calculate_arch_index.py ingesta_ast_v2_mlflow_mlflow_cd1597e989e8.json --repo mlflow/mlflow</code></pre>
+
+<p>The 22 projections live in the <code>arch-index-20261029-batch2</code> release of the data room; the raw data behind this measurement is a 433-line JSON with <code>sha256:ff0c2459a62c8276</code>.</p>
+
+<h2>Single CTA</h2>
+
+<p>Before accepting any architecture report — this one included — ask for both numbers: how many modules are inside a cycle and how many depend on one. If it only brings the first, it brings the one that can be discounted.</p>
+
+<ul>
+<li>The 22 projections: https://github.com/alexisromtz-lab/platino-data-room/releases/tag/arch-index-20261029-batch2</li>
+<li>The instrument: https://alexisromtz-lab.github.io/auditor-toolkit/</li>
+<li>The same piece on dev.to: https://dev.to/alexisromtz7/casi-la-mitad-del-codigo-de-22-proyectos-depende-de-un-ciclo-y-el-indicador-habitual-premia-al-que-3ecn</li>
+</ul>
+
+    <section class="cta">
+      <p><strong>Everything on this page can be measured again.</strong></p>
+      <p>Every number travels with the command or the <code>file:line</code> that produces it. If something
+      does not add up, the answer is not an argument: it is the instrument, in
+      <a href="../../../auditoria-002-economia-contexto/">the reproducible report</a> (in Spanish) and in
+      <a href="https://github.com/alexisromtz-lab/la-auditora">the repository</a>.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>La Auditora · Platino Labs · <a href="../">more articles</a> · <a href="../../../">audits</a></p>
+  </footer>
+</div>
+</body>
+</html>
+
