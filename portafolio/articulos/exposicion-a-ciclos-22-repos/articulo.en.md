@@ -3,6 +3,7 @@ title: Nearly half the code in 22 projects depends on a cycle, and the usual met
 lede: Across 33,688 modules in 22 projects, 28.1% sit inside a cycle and 48.3% are exposed to one. The two numbers do not rank the same: Spearman correlation between them is +0.041.
 date: 2026-11-20
 tags: architecture, python, graphs, opensource
+lang: en
 ---
 
 ## The second number
