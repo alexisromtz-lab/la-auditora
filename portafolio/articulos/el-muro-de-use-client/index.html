@@ -1,0 +1,208 @@
+<!doctype html>
+<!-- HUELLA-PAGINA-ARTICULO-el-muro-de-use-client-20261108 -->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catorce de quince URLs dicen el mismo título, y la causa es una directiva de tres palabras | La Auditora</title>
+  <meta name="description" content="Sobre 15 URLs vivas de un sitio Next.js, 14 sirven literalmente el mismo título y ninguna declara canonical. La única que tiene título propio es la única cuyo componente no empieza por &quot;use client&quot;.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/el-muro-de-use-client/">
+  <link rel="alternate" hreflang="es" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/el-muro-de-use-client/">
+  <link rel="alternate" hreflang="en" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/el-muro-de-use-client/">
+  <link rel="alternate" hreflang="x-default" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/el-muro-de-use-client/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Catorce de quince URLs dicen el mismo título, y la causa es una directiva de tres palabras">
+  <meta property="og:description" content="Sobre 15 URLs vivas de un sitio Next.js, 14 sirven literalmente el mismo título y ninguna declara canonical. La única que tiene título propio es la única cuyo componente no empieza por &quot;use client&quot;.">
+  <meta property="og:url" content="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/el-muro-de-use-client/">
+  <meta property="og:locale" content="es_ES">
+  <meta property="article:published_time" content="2026-11-20">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../articulo.css">
+</head>
+<body>
+<a class="skip" href="#contenido">Saltar al contenido</a>
+<div class="wrap">
+  <header>
+    <a class="brand" href="../../">La Auditora</a>
+    <nav>
+      <a href="../">Articulos</a>
+      <a href="../../">Auditorias</a>
+      <a href="../../en/">Portafolio EN</a>
+      <a href="../en/el-muro-de-use-client/" hreflang="en" lang="en">Read in English</a>
+      <a href="articulo.md">Fuente .md</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <p class="eyebrow">Articulo · 2026-11-20</p>
+    <h1>Catorce de quince URLs dicen el mismo título, y la causa es una directiva de tres palabras</h1>
+    <p class="lede">Sobre 15 URLs vivas de un sitio Next.js, 14 sirven literalmente el mismo título y ninguna declara canonical. La única que tiene título propio es la única cuyo componente no empieza por &quot;use client&quot;.</p>
+    <div class="proof"><span>nextjs</span><span>react</span><span>seo</span><span>arquitectura</span></div>
+
+<h2>El síntoma, medido</h2>
+
+<p>Un sitio con contenido distinto en cada ruta. Medí el HTML crudo de 15 URLs — 7 rutas estáticas más las 8 rutas dinámicas de una comunidad — y esto es lo que devuelve el servidor:</p>
+
+<table>
+<thead>
+<tr>
+<th>ruta</th>
+<th>título servido</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>/</code></td><td>El Arquitecto Cuántico — Libros de Jose Alexis Román Martínez</td></tr>
+<tr><td><code>/comunidad</code></td><td>El Arquitecto Cuántico — Libros de Jose Alexis Román Martínez</td></tr>
+<tr><td><code>/comunidad/arquitecto-cuantico</code></td><td>El Arquitecto Cuántico — Libros de Jose Alexis Román Martínez</td></tr>
+<tr><td><code>/comunidad/codigo-origen</code></td><td>El Arquitecto Cuántico — Libros de Jose Alexis Román Martínez</td></tr>
+<tr><td><code>/comunidad/mente-eterna</code></td><td>El Arquitecto Cuántico — Libros de Jose Alexis Román Martínez</td></tr>
+<tr><td><code>/privacy</code></td><td>El Arquitecto Cuántico — Libros de Jose Alexis Román Martínez</td></tr>
+<tr><td><code>/terms</code></td><td>El Arquitecto Cuántico — Libros de Jose Alexis Román Martínez</td></tr>
+<tr><td><code>/informes/ariastate</code></td><td><strong>Informe de riesgo estructural — ariastate · Platino Labs</strong></td></tr>
+</tbody>
+</table>
+
+<p>Catorce de quince. La excepción no es aleatoria, y ahí está toda la pieza.</p>
+
+<p><em>(Tabla abreviada: se listan 8 de las 15 URLs medidas. Las 7 restantes — <code>/pinterest-demo</code>, <code>/tiktok-demo</code> y los 5 slugs de comunidad no listados — devuelven el mismo título raíz. El listado completo se reproduce al final.)</em></p>
+
+<p>Además: <code>rel="canonical"</code> aparece <strong>0 veces</strong> en las 15. Y <code>https://arquitectocuantico.com/sitemap.xml</code> responde <strong>HTTP 404</strong>.</p>
+
+<h2>La causa no es el contenido</h2>
+
+<p>No es que el sitio no defina títulos. Es que no puede definirlos donde los definió.</p>
+
+<p>En el App Router de Next.js, el título de una ruta lo lee el <strong>servidor</strong>: es la parte del árbol que se serializa a <code>&lt;head&gt;</code> antes de que exista JavaScript. Se declara exportando <code>metadata</code> desde un componente de servidor.</p>
+
+<p><code>"use client"</code> marca la frontera del módulo: todo lo que ese fichero importa entra al bundle del navegador y deja de ejecutarse en el servidor. Y una de las cosas que deja de estar disponible es exactamente la exportación de <code>metadata</code>.</p>
+
+<p>Conteo sobre el repositorio, en <code>fb28bab</code>:</p>
+
+<pre><code>find src/app -name page.tsx | wc -l                            → 8
+grep -rl '^"use client"' src/app --include=page.tsx | wc -l    → 7</code></pre>
+
+<p>Siete de ocho <code>page.tsx</code> abren con <code>"use client"</code> — el 87,5 %. El único que no lo hace es <code>src/app/informes/ariastate/page.tsx</code>, y es el único que exporta su propio título.</p>
+
+<h2>El 2×2, sin excepciones</h2>
+
+<table>
+<thead>
+<tr>
+<th>qué es el componente</th>
+<th>URLs servidas</th>
+<th>con título propio</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>"use client"</code></td><td>14</td><td>0</td></tr>
+<tr><td>servidor</td><td>1</td><td>1</td></tr>
+</tbody>
+</table>
+
+<p>Cero de catorce, uno de uno. Una regla con una sola excepción no es una correlación: es la regla.</p>
+
+<p>Y el efecto es multiplicativo, no aditivo: cada slug nuevo que se añada a la comunidad hereda el mismo título raíz sin que nadie toque nada. La deuda no crece de uno en uno; crece con el catálogo.</p>
+
+<h2>El arreglo es estructural</h2>
+
+<p>Reescribir el título dentro de cada componente de cliente no funciona: React 19 puede montar un <code>&lt;title&gt;</code> y el navegador lo aplica, pero eso ocurre <strong>después</strong> de la hidratación, y el rastreador que decide indexar lee el HTML antes. El título quedaría correcto para un humano y vacío para un buscador — el peor de los dos estados, porque parece resuelto.</p>
+
+<p>El arreglo es subir la declaración al nivel donde vive el servidor:</p>
+
+<ul>
+<li><code>src/app/layout.tsx</code> — <code>metadataBase</code>, plantilla de título, <code>openGraph</code>, <code>robots</code>.</li>
+<li><code>src/app/comunidad/layout.tsx</code> — título propio de la sala común.</li>
+<li><code>src/app/comunidad/[slug]/layout.tsx</code> — <code>generateMetadata</code>, que sí recibe los <code>params</code> y produce un título por slug.</li>
+<li><code>src/app/sitemap.ts</code> y <code>src/app/robots.ts</code> — las dos rutas que no existían y devolvían 404.</li>
+<li><code>next.config.ts</code> — cabeceras <code>X-Robots-Tag</code> para no indexar los dos demos.</li>
+</ul>
+
+<p>Seis archivos, +147 −2 líneas. Con eso: <code>tsc --noEmit</code> → RC 0, <code>next build</code> → RC 0, y los tres layouts de servidor emiten canonical más tres alternates <code>hreflang</code> por página.</p>
+
+<h2>El punto ciego: el arreglo no llegó a la frontera</h2>
+
+<p>Aquí es donde la pieza se separa de casi todo lo que se escribe sobre este tema. El parche está escrito y validado. <strong>No está desplegado.</strong> Y eso no lo digo por memoria: lo mide una cabecera.</p>
+
+<pre><code>$ curl -s -o /dev/null -w '%{http_code} age=%header{age}\n' https://arquitectocuantico.com/
+200 age=783014
+
+$ curl -s -o /dev/null -w '%{http_code} age=%header{age}\n' https://arquitectocuantico.com/sitemap.xml
+404 age=175297</code></pre>
+
+<p><code>783014</code> segundos son <strong>9,06 días</strong>: el HTML que sirve hoy la portada se generó antes de que el parche existiera. <code>175297</code> segundos son <strong>2,03 días</strong>: el 404 del sitemap está cacheado desde el día 18.</p>
+
+<p>Dos objetos distintos, dos instrumentos distintos:</p>
+
+<table>
+<thead>
+<tr>
+<th>qué se quiere saber</th>
+<th>qué lo mide</th>
+<th>veredicto aquí</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>¿el código compila y genera las rutas?</td><td><code>next build</code></td><td>verde, RC 0</td></tr>
+<tr><td>¿producción sirve ese código?</td><td><code>age</code> de la respuesta</td><td><strong>no</strong>: 9,06 días de antigüedad</td></tr>
+</tbody>
+</table>
+
+<p>Un build verde en local no es un acto público. Es la mitad del acto. Medir sólo la primera mitad es cómo se publica un arreglo que nadie recibe, y se siente terminado.</p>
+
+<h2>Qué no afirma esta pieza</h2>
+
+<ul>
+<li><strong>No afirma</strong> que corregir los títulos vaya a subir el tráfico. La analítica del dominio no es accesible desde donde se hizo esta medición: ese número es <code>NO_MEDIDO</code>, y <code>NO_MEDIDO</code> no se lee como cero.</li>
+<li><strong>No afirma</strong> que el 404 del sitemap lo causara el parche. Tiene 2,03 días y el parche se escribió hoy: el 404 es anterior.</li>
+<li><strong>No afirma</strong> que el despliegue vaya a resolverse solo. Entre el repositorio y el dominio hay una CDN que puede reescribir <code>robots.txt</code> sin consultar al origen; si lo hace, la directiva <code>Sitemap:</code> de <code>app/robots.ts</code> no aparecerá nunca en la respuesta. Eso no está medido.</li>
+<li><strong>No afirma</strong> que <code>"use client"</code> sea un error. Es una directiva correcta usada en el sitio equivocado: la portada, la comunidad y las páginas legales son componentes de servidor que alguien marcó como interactivos.</li>
+</ul>
+
+<h2>Reproducir</h2>
+
+<p>El título que sirve cada URL dinámica, en una línea:</p>
+
+<pre><code>for s in arquitecto-cuantico codigo-origen corazon-punto-cero experiencias-de-lectura \
+         mente-eterna sala-general sincronicidades suenos-y-meditaciones; do
+  curl -sL "https://arquitectocuantico.com/comunidad/$s" | grep -o '&lt;title&gt;[^&lt;]*&lt;/title&gt;'
+done | sort | uniq -c</code></pre>
+
+<p>La frontera, en otra:</p>
+
+<pre><code>curl -s -o /dev/null -w '%{http_code} age=%header{age}\n' https://arquitectocuantico.com/sitemap.xml</code></pre>
+
+<p>Y el conteo de la causa, sobre el repositorio:</p>
+
+<pre><code>find src/app -name page.tsx | wc -l
+grep -rl '^"use client"' src/app --include=page.tsx | wc -l</code></pre>
+
+<h2>CTA único</h2>
+
+<p>Antes de leer el contenido de cualquier sitio que heredes, corre esto:</p>
+
+<pre><code>curl -sL https://EL-DOMINIO/ | grep -o '&lt;title&gt;[^&lt;]*&lt;/title&gt;'</code></pre>
+
+<p>Si ese título es también el de las páginas internas, el problema no está en el texto: está en dónde vive la declaración. Y arreglar el texto no lo toca.</p>
+
+<ul>
+<li>El instrumento con el que se mide esto: https://alexisromtz-lab.github.io/auditor-toolkit/</li>
+<li>Otras mediciones publicadas: https://alexisromtz-lab.github.io/la-auditora/</li>
+</ul>
+
+    <section class="cta">
+      <p><strong>Todo lo que hay aqui se puede medir otra vez.</strong></p>
+      <p>Las cifras viajan con el comando o el <code>archivo:linea</code> que las produce. Si algo no cuadra,
+      la respuesta no es un argumento: es el instrumento, en
+      <a href="../../auditoria-002-economia-contexto/">el informe reproducible</a> y en
+      <a href="https://github.com/alexisromtz-lab/la-auditora">el repositorio</a>.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>La Auditora · Platino Labs · <a href="../">mas articulos</a> · <a href="../../">auditorias</a></p>
+  </footer>
+</div>
+</body>
+</html>
+
