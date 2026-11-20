@@ -165,3 +165,4 @@ If that title is also the title of the inner pages, the problem is not in the te
 
 - The instrument this is measured with: https://alexisromtz-lab.github.io/auditor-toolkit/
 - Other published measurements: https://alexisromtz-lab.github.io/la-auditora/
+- The site this was applied to, measured after deploying: https://arquitectocuantico.com/?utm_source=la-auditora&utm_medium=articulo&utm_campaign=muro-use-client

@@ -45,6 +45,8 @@ Text with `inline code` and __dunder__ that a fence must protect.
 | A | RAISED |
 | B | SUCCESS |
 
+- The site this measures: https://ejemplo.com/?utm_source=la-auditora&utm_medium=articulo
+
 ```bash
 echo hola
 ```
@@ -118,11 +120,21 @@ class ProyeccionFalsable(unittest.TestCase):
         self.correr()
         self.assertEqual(primero, self.destino.read_bytes())
 
-    def test_el_cuerpo_es_byte_a_byte_el_del_origen(self) -> None:
+    def test_el_cuerpo_es_el_del_origen_salvo_el_token_utm(self) -> None:
+        """La unica diferencia admitida es el `utm_source` de la superficie."""
         self.correr()
         origen = self.origen.read_text(encoding="utf-8").split("---", 2)[2]
-        self.assertEqual(origen.strip("\n"), self.cuerpo().strip("\n"))
+        esperado = origen.strip("\n").replace("utm_source=la-auditora", "utm_source=devto")
+        self.assertEqual(esperado, self.cuerpo().strip("\n"))
         self.assertIn("__dunder__", self.cuerpo())
+
+    def test_la_copia_no_conserva_el_utm_del_sitio_original(self) -> None:
+        """El cuerpo lo sirven dos sitios: la copia se atribuye a si misma."""
+        self.correr()
+        cuerpo = self.cuerpo()
+        self.assertIn("utm_source=devto", cuerpo)
+        self.assertNotIn("utm_source=la-auditora", cuerpo)
+        self.assertIn("```bash\necho hola\n```", cuerpo)
 
     def test_description_es_el_lede_y_canonical_es_la_url_publica(self) -> None:
         self.correr()

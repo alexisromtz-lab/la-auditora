@@ -4,7 +4,11 @@
 dev.to lee Jekyll front matter con nombres propios (`description`, `published`,
 `canonical_url`); el articulo de origen usa los del sitio (`lede`, `date`,
 `fuente`). Este instrumento es la unica traduccion entre los dos idiomas de
-encabezado, y **no toca el cuerpo**: lo copia byte a byte.
+encabezado, y **no toca el cuerpo**: lo copia byte a byte, con una sola
+excepcion textual -- el token `utm_source` de los enlaces al objeto medido, que
+en dev.to tiene que nombrar a dev.to y no al sitio que sirve la copia. La
+sustitucion es de un token, no de estructura: no puede abrir ni cerrar una
+valla, y por eso no reabre el defecto que el parrafo siguiente describe.
 
 El archivo que emite no lleva ninguna valla alrededor. Envolver markdown en un
 bloque ```text lo corrompe -- una valla que contiene vallas se cierra en la
@@ -32,6 +36,15 @@ from paginas_articulos import SITIO_EN, cosechar, leer_articulo  # noqa: E402
 NOMBRE = "devto.md"
 # dev.to acepta como maximo cuatro tags por articulo.
 MAX_TAGS = 4
+
+# El cuerpo es uno solo y lo sirven dos sitios: el que tiene la canonica y la
+# copia. El `utm_source` del enlace al objeto medido nombra el sitio desde el
+# que se lee; si la copia conservara el token del original, la atribucion diria
+# una superficie que el lector no uso.
+SITIO_FUENTE = "la-auditora"
+SITIO_COPIA = "devto"
+FUENTE_UTM = "utm_source=" + SITIO_FUENTE
+COPIA_UTM = "utm_source=" + SITIO_COPIA
 # Claves del encabezado del sitio que no significan nada para dev.to. Si alguna
 # se filtra, el archivo publicado declara un vocabulario que su lector no lee.
 CLAVES_AJENAS = ("lede", "fecha", "date", "fuente", "cola_slug", "lang")
@@ -87,6 +100,15 @@ def tags_legales(tags) -> list:
     return salida[:MAX_TAGS]
 
 
+def reetiquetar(cuerpo: str) -> str:
+    """El unico cambio textual al cuerpo: el `utm_source` de la superficie.
+
+    Sustituye un token y nada mas. No toca vallas, tablas, cifras ni vallas de
+    codigo, que es lo que el defecto documentado arriba perdia.
+    """
+    return cuerpo.replace(FUENTE_UTM, COPIA_UTM)
+
+
 def proyectar(meta: dict) -> str:
     """El encabezado de dev.to mas el cuerpo intacto del articulo."""
     if meta["lang"] != "en":
@@ -103,7 +125,7 @@ def proyectar(meta: dict) -> str:
         "canonical_url: %s" % escalar(canonical(meta["slug"])),
         "---",
     ]
-    cuerpo = meta["cuerpo"].lstrip("\n").rstrip("\n")
+    cuerpo = reetiquetar(meta["cuerpo"].lstrip("\n").rstrip("\n"))
     return "\n".join(encabezado) + "\n\n" + cuerpo + "\n"
 
 
