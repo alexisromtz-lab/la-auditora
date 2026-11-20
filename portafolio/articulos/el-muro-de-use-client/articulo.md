@@ -162,6 +162,6 @@ curl -sL https://EL-DOMINIO/ | grep -o '<title>[^<]*</title>'
 
 Si ese título es también el de las páginas internas, el problema no está en el texto: está en dónde vive la declaración. Y arreglar el texto no lo toca.
 
-- El instrumento con el que se mide esto: https://alexisromtz-lab.github.io/auditor-toolkit/
-- Otras mediciones publicadas: https://alexisromtz-lab.github.io/la-auditora/
+- El instrumento con el que se mide esto: [https://alexisromtz-lab.github.io/auditor-toolkit/](https://alexisromtz-lab.github.io/auditor-toolkit/)
+- Otras mediciones publicadas: [https://alexisromtz-lab.github.io/la-auditora/](https://alexisromtz-lab.github.io/la-auditora/)
 - [El sitio donde esto se aplicó, medido tras desplegar](https://arquitectocuantico.com/?utm_source=la-auditora&utm_medium=articulo&utm_campaign=muro-use-client)

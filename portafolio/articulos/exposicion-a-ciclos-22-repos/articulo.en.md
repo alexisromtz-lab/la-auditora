@@ -78,6 +78,6 @@ The 22 projections live in the `arch-index-20261029-batch2` release of the data 
 
 Before accepting any architecture report — this one included — ask for both numbers: how many modules are inside a cycle and how many depend on one. If it only brings the first, it brings the one that can be discounted.
 
-- The 22 projections: https://github.com/alexisromtz-lab/platino-data-room/releases/tag/arch-index-20261029-batch2
-- The instrument: https://alexisromtz-lab.github.io/auditor-toolkit/
-- The same piece on dev.to: https://dev.to/alexisromtz7/casi-la-mitad-del-codigo-de-22-proyectos-depende-de-un-ciclo-y-el-indicador-habitual-premia-al-que-3ecn
+- The 22 projections: [https://github.com/alexisromtz-lab/platino-data-room/releases/tag/arch-index-20261029-batch2](https://github.com/alexisromtz-lab/platino-data-room/releases/tag/arch-index-20261029-batch2)
+- The instrument: [https://alexisromtz-lab.github.io/auditor-toolkit/](https://alexisromtz-lab.github.io/auditor-toolkit/)
+- The same piece on dev.to: [https://dev.to/alexisromtz7/casi-la-mitad-del-codigo-de-22-proyectos-depende-de-un-ciclo-y-el-indicador-habitual-premia-al-que-3ecn](https://dev.to/alexisromtz7/casi-la-mitad-del-codigo-de-22-proyectos-depende-de-un-ciclo-y-el-indicador-habitual-premia-al-que-3ecn)
