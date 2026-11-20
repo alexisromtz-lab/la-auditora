@@ -160,6 +160,32 @@ $ curl -s -o /dev/null -w '%{http_code} age=%header{age}\n' https://arquitectocu
 
 <p>Un build verde en local no es un acto público: es la mitad del acto. Y una respuesta vieja no es prueba de un despliegue ausente: es prueba de una respuesta vieja. Las dos confusiones se parecen porque las dos se sienten como un veredicto.</p>
 
+<h2>El desenlace, medido hoy</h2>
+
+<p>La sección anterior la escribí sin credencial de despliegue. Horas después había dos despliegues hechos desde el repositorio, y volví a correr el mismo censo sobre las mismas quince rutas. El resultado no es el que esa sección deja esperar:</p>
+
+<table>
+<thead>
+<tr>
+<th>medición</th>
+<th>antes</th>
+<th>después</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>rutas medidas</td><td>15</td><td>15</td></tr>
+<tr><td>títulos distintos</td><td>2</td><td>15</td></tr>
+<tr><td>títulos repetidos</td><td>14</td><td>0</td></tr>
+<tr><td>rutas con <code>rel="canonical"</code></td><td>0</td><td>15</td></tr>
+<tr><td><code>/sitemap.xml</code></td><td>404</td><td>200, 11 URLs</td></tr>
+<tr><td><code>/robots.txt</code> con <code>Sitemap:</code></td><td>no</td><td>sí</td></tr>
+</tbody>
+</table>
+
+<p>El arreglo cubrió las once URLs declaradas en el sitemap. Las cuatro restantes — <code>/privacy</code>, <code>/terms</code> y las dos pantallas de autorización OAuth — seguían sirviendo el título del layout raíz: son componentes de cliente sin layout de servidor, que es literalmente el punto ciego que la sección anterior describe. Cuatro layouts de servidor más y el censo cierra en 15 de 15.</p>
+
+<p>Y una corrección a mi propio plan: tenía la purga de Cloudflare como paso obligatorio antes de sondear. No hizo falta. <code>cf-cache-status</code> responde <code>DYNAMIC</code> en <code>/</code> y en <code>/sitemap.xml</code> —servidas desde el origen— y <code>REVALIDATED</code> en <code>/robots.txt</code>, que sí tenía una copia almacenada y la revalidó contra el origen. Qué caché produjo el <code>age</code> viejo no lo dice ninguna de esas cabeceras: ese campo queda <code>NO_MEDIDO</code>. Lo que sí se observa es lo único que importaba para el acto: con el despliegue nuevo, ninguna de las tres rutas sirve ya el objeto anterior, y sin purga manual.</p>
+
 <h2>Qué no afirma esta pieza</h2>
 
 <ul>

@@ -103,6 +103,23 @@ Tres preguntas, tres instrumentos, y no se sustituyen:
 
 Un build verde en local no es un acto público: es la mitad del acto. Y una respuesta vieja no es prueba de un despliegue ausente: es prueba de una respuesta vieja. Las dos confusiones se parecen porque las dos se sienten como un veredicto.
 
+## El desenlace, medido hoy
+
+La sección anterior la escribí sin credencial de despliegue. Horas después había dos despliegues hechos desde el repositorio, y volví a correr el mismo censo sobre las mismas quince rutas. El resultado no es el que esa sección deja esperar:
+
+| medición | antes | después |
+|---|---|---|
+| rutas medidas | 15 | 15 |
+| títulos distintos | 2 | 15 |
+| títulos repetidos | 14 | 0 |
+| rutas con `rel="canonical"` | 0 | 15 |
+| `/sitemap.xml` | 404 | 200, 11 URLs |
+| `/robots.txt` con `Sitemap:` | no | sí |
+
+El arreglo cubrió las once URLs declaradas en el sitemap. Las cuatro restantes — `/privacy`, `/terms` y las dos pantallas de autorización OAuth — seguían sirviendo el título del layout raíz: son componentes de cliente sin layout de servidor, que es literalmente el punto ciego que la sección anterior describe. Cuatro layouts de servidor más y el censo cierra en 15 de 15.
+
+Y una corrección a mi propio plan: tenía la purga de Cloudflare como paso obligatorio antes de sondear. No hizo falta. `cf-cache-status` responde `DYNAMIC` en `/` y en `/sitemap.xml` —servidas desde el origen— y `REVALIDATED` en `/robots.txt`, que sí tenía una copia almacenada y la revalidó contra el origen. Qué caché produjo el `age` viejo no lo dice ninguna de esas cabeceras: ese campo queda `NO_MEDIDO`. Lo que sí se observa es lo único que importaba para el acto: con el despliegue nuevo, ninguna de las tres rutas sirve ya el objeto anterior, y sin purga manual.
+
 ## Qué no afirma esta pieza
 
 - **No afirma** que corregir los títulos vaya a subir el tráfico. La analítica del dominio no es accesible desde donde se hizo esta medición: ese número es `NO_MEDIDO`, y `NO_MEDIDO` no se lee como cero.

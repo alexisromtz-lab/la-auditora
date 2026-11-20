@@ -104,6 +104,23 @@ Three questions, three instruments, and none of them substitutes for another:
 
 A green local build is not a public act: it is half the act. And a stale response is not proof of a missing deployment: it is proof of a stale response. The two confusions look alike because both feel like a verdict.
 
+## The outcome, measured today
+
+I wrote the previous section without a deploy credential. Hours later there were two deployments made from the repository, and I ran the same census again over the same fifteen routes. The result is not the one that section leads you to expect:
+
+| measurement | before | after |
+|---|---|---|
+| routes measured | 15 | 15 |
+| distinct titles | 2 | 15 |
+| repeated titles | 14 | 0 |
+| routes with `rel="canonical"` | 0 | 15 |
+| `/sitemap.xml` | 404 | 200, 11 URLs |
+| `/robots.txt` with `Sitemap:` | no | yes |
+
+The fix covered the eleven URLs declared in the sitemap. The four remaining — `/privacy`, `/terms` and the two OAuth authorisation screens — still served the root layout title: they are client components with no server layout, which is literally the blind spot the previous section describes. Four more server layouts and the census closes at 15 of 15.
+
+And a correction to my own plan: I had the Cloudflare purge as a mandatory step before probing. It was not needed. `cf-cache-status` answers `DYNAMIC` on `/` and on `/sitemap.xml` — served from the origin — and `REVALIDATED` on `/robots.txt`, which did have a stored copy and revalidated it against the origin. Which cache produced the old `age` is something none of those headers state: that field stays `NO_MEDIDO`. What is observed is the only thing that mattered for the act: with the new deployment, none of the three routes serves the previous object any more, and without a manual purge.
+
 ## What this piece does not claim
 
 - **It does not claim** that fixing the titles will raise traffic. The domain's analytics are not reachable from where this measurement was taken: that number is `NO_MEDIDO` (not measured), and `NO_MEDIDO` does not read as zero.
