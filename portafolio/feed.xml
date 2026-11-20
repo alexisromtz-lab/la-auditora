@@ -20,6 +20,19 @@
     <category term="opensource"/>
     <author><name>Jose Alexis Román Martínez</name></author>
   </entry>
+  <entry xml:lang="en">
+    <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/el-muro-de-use-client/</id>
+    <title>Fourteen of fifteen URLs serve the same title, and the cause is a three-word directive</title>
+    <link rel="alternate" type="text/html" href="https://alexisromtz-lab.github.io/la-auditora/portafolio/articulos/en/el-muro-de-use-client/"/>
+    <published>2026-11-20T00:00:00Z</published>
+    <updated>2026-11-20T00:00:00Z</updated>
+    <summary>Across 15 live URLs of a Next.js site, 14 serve literally the same title and none declares a canonical. The only one with a title of its own is the only one whose component does not start with &quot;use client&quot;.</summary>
+    <category term="nextjs"/>
+    <category term="react"/>
+    <category term="seo"/>
+    <category term="architecture"/>
+    <author><name>Jose Alexis Román Martínez</name></author>
+  </entry>
   <entry xml:lang="es">
     <id>https://alexisromtz-lab.github.io/la-auditora/portafolio/auditoria-003-gvisor/</id>
     <title>Un solo workflow interpola el valor de un secreto dentro de un bloque `run:`; el instrumento lo clasifica CRITICA y el mecanismo solo sostiene higiene latente</title>
