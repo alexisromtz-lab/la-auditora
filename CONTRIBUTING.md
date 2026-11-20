@@ -139,9 +139,16 @@ A translated figure is not a translation: it is a second measurement that nobody
 
 ### The round trip to the network loses structure, and that is a measurable defect
 
-`portafolio/articulos/<slug>/devto.md` is the dev.to projection: the English body, untouched, under
-the header dev.to actually reads (`description`, `published`, `canonical_url`). `tools/devto.py`
-writes it and `--check` in CI refuses a hand-edited copy.
+`portafolio/articulos/<slug>/devto.md` is the dev.to projection: the English body, untouched except
+one token, under the header dev.to actually reads (`description`, `published`, `canonical_url`).
+`tools/devto.py` writes it and `--check` in CI refuses a hand-edited copy.
+
+The one token is `utm_source`. One body is served by two sites, and the source of a link has to name
+the site the reader actually used: if the copy kept the original's token, the attribution would point
+at a surface the reader never visited. `proyectar()` rewrites `utm_source=la-auditora` to
+`utm_source=devto` and nothing else — a token substitution, not a structure edit, so it cannot open
+or close a fence. `tests/test_devto.py` pins both halves: the copy differs from the source only in
+that token, and the fenced code block survives.
 
 The reason it exists is a publication that came out wrong: the body travelled wrapped in a
 ` ```text ` fence "so it could be copied", the outer fence closed at the first inner fence, and the
