@@ -160,6 +160,32 @@ $ curl -s -o /dev/null -w '%{http_code} age=%header{age}\n' https://arquitectocu
 
 <p>A green local build is not a public act: it is half the act. And a stale response is not proof of a missing deployment: it is proof of a stale response. The two confusions look alike because both feel like a verdict.</p>
 
+<h2>The outcome, measured today</h2>
+
+<p>I wrote the previous section without a deploy credential. Hours later there were two deployments made from the repository, and I ran the same census again over the same fifteen routes. The result is not the one that section leads you to expect:</p>
+
+<table>
+<thead>
+<tr>
+<th>measurement</th>
+<th>before</th>
+<th>after</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>routes measured</td><td>15</td><td>15</td></tr>
+<tr><td>distinct titles</td><td>2</td><td>15</td></tr>
+<tr><td>repeated titles</td><td>14</td><td>0</td></tr>
+<tr><td>routes with <code>rel="canonical"</code></td><td>0</td><td>15</td></tr>
+<tr><td><code>/sitemap.xml</code></td><td>404</td><td>200, 11 URLs</td></tr>
+<tr><td><code>/robots.txt</code> with <code>Sitemap:</code></td><td>no</td><td>yes</td></tr>
+</tbody>
+</table>
+
+<p>The fix covered the eleven URLs declared in the sitemap. The four remaining — <code>/privacy</code>, <code>/terms</code> and the two OAuth authorisation screens — still served the root layout title: they are client components with no server layout, which is literally the blind spot the previous section describes. Four more server layouts and the census closes at 15 of 15.</p>
+
+<p>And a correction to my own plan: I had the Cloudflare purge as a mandatory step before probing. It was not needed. <code>cf-cache-status</code> answers <code>DYNAMIC</code> on <code>/</code> and on <code>/sitemap.xml</code>, and <code>REVALIDATED</code> on <code>/robots.txt</code>: Cloudflare was not holding a copy of those routes. The cache serving the old <code>age</code> was Vercel's, and a new deployment invalidates it by itself. One step too many, measured before running it.</p>
+
 <h2>What this piece does not claim</h2>
 
 <ul>
